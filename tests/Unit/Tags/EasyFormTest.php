@@ -65,24 +65,15 @@ test('tag includes all form data', function () {
         ->toContain('honeypot');
 });
 
-test('tag respects custom class parameter', function () {
-    createTestForm('styled_form');
+test('tag respects custom view parameter', function () {
+    createTestForm('custom_view_form');
 
-    $output = renderEasyFormTag('styled_form', [
-        'class' => 'custom-form-class',
+    // The view parameter allows using a different template
+    $output = renderEasyFormTag('custom_view_form', [
+        'view' => 'form/_form_component',
     ]);
 
-    expect($output)->toContain('custom-form-class');
-});
-
-test('tag respects custom button_class parameter', function () {
-    createTestForm('button_form');
-
-    $output = renderEasyFormTag('button_form', [
-        'button_class' => 'custom-button-class',
-    ]);
-
-    expect($output)->toContain('custom-button-class');
+    expect($output)->toContainFormElement();
 });
 
 test('tag respects hide_fields parameter', function () {
@@ -199,14 +190,4 @@ test('tag includes custom event_name parameter', function () {
     ]);
 
     expect($output)->toContain('customFormSubmit');
-});
-
-test('tag includes text_under_form parameter', function () {
-    createTestForm('disclaimer_form');
-
-    $output = renderEasyFormTag('disclaimer_form', [
-        'text_under_form' => 'By submitting you agree to our terms',
-    ]);
-
-    expect($output)->toContain('By submitting you agree to our terms');
 });

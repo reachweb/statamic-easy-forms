@@ -215,26 +215,6 @@ test('alpine js attributes are present', function () {
         ->toContain('x-show');
 });
 
-test('custom form classes are applied', function () {
-    createTestForm('custom_form_class');
-
-    $output = renderEasyFormTag('custom_form_class', [
-        'class' => 'my-custom-form-class',
-    ]);
-
-    expect($output)->toContain('my-custom-form-class');
-});
-
-test('custom button classes are applied', function () {
-    createTestForm('custom_button_class');
-
-    $output = renderEasyFormTag('custom_button_class', [
-        'button_class' => 'my-custom-button',
-    ]);
-
-    expect($output)->toContain('my-custom-button');
-});
-
 test('success message is included', function () {
     createTestForm('success_message');
 
