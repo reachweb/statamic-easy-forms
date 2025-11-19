@@ -1,0 +1,37 @@
+{
+    "name": "reachweb/statamic-easy-forms",
+    "autoload": {
+        "psr-4": {
+            "Reachweb\\StatamicEasyForms\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Reachweb\\StatamicEasyForms\\Tests\\": "tests"
+        }
+    },
+    "require": {
+        "statamic/cms": "^5.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0"
+    },
+    "config": {
+        "allow-plugins": {
+            "pixelfear/composer-dist-plugin": true
+        }
+    },
+    "extra": {
+        "statamic": {
+            "name": "Statamic Easy Forms",
+            "description": "Statamic Easy Forms addon"
+        },
+        "laravel": {
+            "providers": [
+                "Reachweb\\StatamicEasyForms\\ServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
