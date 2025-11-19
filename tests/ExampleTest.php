@@ -1,6 +1,6 @@
 <?php
 
-namespace Reachweb\StatamicEasyForms\Tests;
+namespace Reach\StatamicEasyForms\Tests;
 
 class ExampleTest extends TestCase
 {
