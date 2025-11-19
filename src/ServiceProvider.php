@@ -11,8 +11,19 @@ class ServiceProvider extends AddonServiceProvider
         NeededProperties::class,
     ];
 
+    protected $scripts = [
+        __DIR__.'/../dist/js/easy-forms.js',
+    ];
+
+    protected $stylesheets = [
+        __DIR__.'/../dist/css/easy-forms.css',
+    ];
+
     public function bootAddon()
     {
-        //
+        // Publish assets for production use
+        $this->publishes([
+            __DIR__.'/../dist' => public_path('vendor/easy-forms'),
+        ], 'easy-forms-assets');
     }
 }
