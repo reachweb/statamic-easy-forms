@@ -2,15 +2,10 @@
 
 namespace Reach\StatamicEasyForms;
 
-use Reach\StatamicEasyForms\Modifiers\NeededProperties;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
-    protected $modifiers = [
-        NeededProperties::class,
-    ];
-
     protected $scripts = [
         __DIR__.'/../dist/js/easy-forms.js',
     ];
