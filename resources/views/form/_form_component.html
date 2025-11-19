@@ -1,4 +1,4 @@
-{{ form:create in="{ form_handle:handle }" x-data="formHandler()" x-ref="form" x-on:submit.prevent="formSubmit" x-on:fields-changed="updateSubmitData($event.detail)" data-csrf-token="{{ csrf_token }}" }}
+{{ form:create in="{ form_handle:handle }" x-data="formHandler('{{ event_name }}')" x-ref="form" x-on:submit.prevent="formSubmit" x-on:fields-changed="updateSubmitData($event.detail)" data-csrf-token="{{ csrf_token }}" class="{{ form_class }}" }}
 <div
     class="grid grid-cols-12 gap-x-6"
     x-data="formFields({{ fields | needed_properties | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"

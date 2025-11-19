@@ -14,17 +14,27 @@ class EasyForm extends Tags
     /**
      * The {{ easyform }} tag.
      *
-     * Returns form data without rendering HTML, ready for Alpine.js/JSON usage.
+     * Renders a complete form with all fields automatically.
+     *
      * Usage: {{ easyform handle="contact" }}
      *
-     * @return array
+     * Available parameters:
+     * - handle (required): The form handle
+     * - class: Custom CSS classes for the form wrapper
+     * - button_class: Custom CSS classes for the submit button
+     * - hide_fields: Array of field handles to hide (e.g., hide_fields="field1|field2")
+     * - prepopulated_data: Array of field values to prepopulate
+     * - text_under_form: Text or HTML to display below the form
+     * - event_name: Custom analytics event name (default: "formSubmitted")
+     *
+     * @return string Rendered HTML
      */
-    public function index()
+    public function index(): string
     {
         $handle = $this->params->get('handle');
 
         if (!$handle) {
-            throw new \Exception('A form handle is required on get_form tag.');
+            throw new \Exception('A form handle is required for the easyform tag.');
         }
 
         /** @var \Statamic\Forms\Form $form */
@@ -40,14 +50,45 @@ class EasyForm extends Tags
             ->values()
             ->all();
 
-        return [
+        // Prepare data for the view
+        $data = [
             'handle' => $form->handle(),
             'title' => $form->title(),
             'fields' => $processedFields,
             'honeypot' => $form->honeypot(),
             'action' => $form->actionUrl(),
             'method' => 'POST',
+
+            // Tag parameters
+            'form_class' => $this->params->get('class', ''),
+            'button_class' => $this->params->get('button_class', ''),
+            'hide_fields' => $this->parseHideFields($this->params->get('hide_fields', '')),
+            'prepopulated_data' => $this->params->get('prepopulated_data', []),
+            'text_under_form' => $this->params->get('text_under_form', ''),
+            'event_name' => $this->params->get('event_name', 'formSubmitted'),
         ];
+
+        return view('statamic-easy-forms::form/_form_component', $data)->render();
+    }
+
+    /**
+     * Parse hide_fields parameter into an array.
+     *
+     * @param string|array $hideFields
+     * @return array
+     */
+    protected function parseHideFields($hideFields): array
+    {
+        if (is_array($hideFields)) {
+            return $hideFields;
+        }
+
+        if (empty($hideFields)) {
+            return [];
+        }
+
+        // Support pipe-separated list: "field1|field2|field3"
+        return array_filter(explode('|', $hideFields));
     }
 
     /**
