@@ -1,6 +1,6 @@
 <?php
 
-namespace Reach\StatamicEasyForms;
+namespace Reach\StatamicEasyForms\Tags;
 
 use Statamic\Facades\Dictionary;
 use Statamic\Facades\Form;
