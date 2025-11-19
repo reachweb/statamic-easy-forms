@@ -20,12 +20,13 @@ class EasyForm extends Tags
      *
      * Available parameters:
      * - handle (required): The form handle
-     * - class: Custom CSS classes for the form wrapper
-     * - button_class: Custom CSS classes for the submit button
+     * - view: Custom view template to use (default: "form/_form_component")
      * - hide_fields: Array of field handles to hide (e.g., hide_fields="field1|field2")
      * - prepopulated_data: Array of field values to prepopulate
-     * - text_under_form: Text or HTML to display below the form
      * - event_name: Custom analytics event name (default: "formSubmitted")
+     *
+     * Example with custom view:
+     * {{ easyform handle="contact" view="forms/custom-contact" }}
      *
      * @return string Rendered HTML
      */
@@ -60,15 +61,15 @@ class EasyForm extends Tags
             'method' => 'POST',
 
             // Tag parameters
-            'form_class' => $this->params->get('class', ''),
-            'button_class' => $this->params->get('button_class', ''),
             'hide_fields' => $this->parseHideFields($this->params->get('hide_fields', '')),
             'prepopulated_data' => $this->params->get('prepopulated_data', []),
-            'text_under_form' => $this->params->get('text_under_form', ''),
             'event_name' => $this->params->get('event_name', 'formSubmitted'),
         ];
 
-        return view('statamic-easy-forms::form/_form_component', $data)->render();
+        // Allow custom view template
+        $view = $this->params->get('view', 'form/_form_component');
+
+        return view('statamic-easy-forms::' . $view, $data)->render();
     }
 
     /**
