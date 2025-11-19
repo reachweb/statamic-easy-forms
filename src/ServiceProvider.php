@@ -1,6 +1,6 @@
 <?php
 
-namespace Reachweb\StatamicEasyForms;
+namespace Reach\StatamicEasyForms;
 
 use Statamic\Providers\AddonServiceProvider;
 

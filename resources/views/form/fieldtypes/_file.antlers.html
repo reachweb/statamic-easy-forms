@@ -1,0 +1,136 @@
+<div
+    x-data="{
+        files: [],
+        isDragging: false,
+        maxFiles: {{ max_files ?? 1 }},
+
+        init() {
+            // Set up accessible label association
+            this.$nextTick(() => {
+                if (this.$refs.input) {
+                    this.$refs.input.setAttribute('aria-describedby', '{{ handle }}-formats')
+                }
+            })
+        },
+
+        handleFiles(fileList) {
+            const newFiles = Array.from(fileList)
+
+            // Validate file count
+            if (this.maxFiles === 1) {
+                this.files = [newFiles[0]].filter(Boolean)
+            } else {
+                const totalFiles = this.files.length + newFiles.length
+                if (totalFiles > this.maxFiles) {
+                    alert(`Maximum ${this.maxFiles} file(s) allowed`)
+                    return
+                }
+                this.files = [...this.files, ...newFiles]
+            }
+
+            this.updateFormData()
+        },
+
+        updateFormData() {
+            if (this.maxFiles === 1) {
+                submitFields['{{ handle }}'] = this.files[0] || null
+            } else {
+                submitFields['{{ handle }}'] = this.files.length > 0 ? this.files : null
+            }
+        },
+
+        removeFile(index) {
+            this.files.splice(index, 1)
+            this.updateFormData()
+        },
+
+        formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes'
+            const k = 1024
+            const sizes = ['Bytes', 'KB', 'MB']
+            const i = Math.floor(Math.log(bytes) / Math.log(k))
+            return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i]
+        }
+    }"
+    class="w-full"
+>
+    <!-- Drag & Drop Zone -->
+    <div
+        class="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-gray-700 transition-colors duration-200"
+        :class="isDragging ? 'border-form-main bg-form-main/5' : 'border-gray-300 bg-gray-50'"
+        @dragover.prevent="isDragging = true"
+        @dragleave.prevent="isDragging = false"
+        @drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
+        x-show="files.length === 0 || maxFiles > 1"
+    >
+        <!-- Upload Icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-12 h-12 opacity-75 text-gray-400">
+            <path fill-rule="evenodd" d="M10.5 3.75a6 6 0 0 0-5.98 6.496A5.25 5.25 0 0 0 6.75 20.25H18a4.5 4.5 0 0 0 2.206-8.423 3.75 3.75 0 0 0-4.133-4.303A6.001 6.001 0 0 0 10.5 3.75Zm2.03 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v4.94a.75.75 0 0 0 1.5 0v-4.94l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"/>
+        </svg>
+
+        <!-- Upload Text -->
+        <div class="text-center">
+            <label
+                for="{{ handle }}"
+                class="font-medium text-form-main hover:text-form-main/80 cursor-pointer focus-within:underline transition-colors duration-200"
+            >
+                <input
+                    id="{{ handle }}"
+                    name="{{ handle }}"
+                    type="file"
+                    class="sr-only"
+                    x-ref="input"
+                    {{ if max_files > 1 }}multiple{{ /if }}
+                    @change="handleFiles($event.target.files)"
+                    {{ if instructions }}aria-describedby="{{ handle }}-formats"{{ /if }}
+                />
+                {{ "Browse" | trans }}
+            </label>
+            <span> {{ "or drag and drop here" | trans }}</span>
+        </div>
+
+        <!-- File Format Instructions -->
+        {{ if instructions }}
+        <small id="{{ handle }}-formats" class="text-xs text-gray-600">
+            {{ instructions }}
+        </small>
+        {{ /if }}
+    </div>
+
+    <!-- Selected Files List -->
+    <div x-show="files.length > 0" class="mt-4 space-y-2" x-transition.opacity>
+        <template x-for="(file, index) in files" :key="index">
+            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:border-form-main/30 transition-colors duration-200">
+                <div class="flex items-center space-x-3 flex-1 min-w-0">
+                    <!-- File Icon -->
+                    <svg class="h-5 w-5 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                    </svg>
+
+                    <!-- File Info -->
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm font-medium text-gray-900 truncate" x-text="file.name"></p>
+                        <p class="text-xs text-gray-500" x-text="formatFileSize(file.size)"></p>
+                    </div>
+                </div>
+
+                <!-- Remove Button -->
+                <button
+                    type="button"
+                    @click="removeFile(index)"
+                    class="ml-3 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded p-1 transition-colors duration-200"
+                    :aria-label="'Remove ' + file.name"
+                >
+                    <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+        </template>
+
+        <!-- File Counter (for multiple files) -->
+        <div x-show="maxFiles > 1" class="mt-2 text-sm text-gray-600">
+            <span x-text="files.length"></span> {{ "of" | trans }} <span x-text="maxFiles"></span> {{ "max files" | trans }}
+        </div>
+    </div>
+</div>

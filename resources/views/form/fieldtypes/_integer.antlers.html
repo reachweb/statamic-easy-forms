@@ -1,0 +1,10 @@
+<input 
+    class="form-input bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-form-main block w-full p-2.5" 
+    id="{{ handle }}" 
+    name="{{ handle }}"
+    type="number" 
+    inputmode="numeric"
+    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    autocomplete="off"
+    x-model="submitFields['{{ handle }}']"
+>

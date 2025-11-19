@@ -1,0 +1,74 @@
+<div 
+    x-model="submitFields['{{ handle }}']"
+    x-modelable="selectedDate"
+    x-data="{
+        selectedDate: '',
+        calendar: null,
+
+        init() {
+            const minDate = new Date().toISOString().split('T')[0];
+
+            this.calendar = new window.calendar(this.$refs.dateInput, {
+                type: 'default',
+                inputMode: true,
+                dateMin: minDate,
+                selectionDatesMode: {{ if prepend === 'range'}}'multiple-ranged'{{ else }}'single'{{ /if }},
+                selectedTheme: 'light',
+                displayDatesOutside: true,
+                enableJumpToSelectedDate: true,
+                positionToInput: 'auto',
+                selectedWeekends: [],
+                
+                onChangeToInput: (self, event) => {
+                    let selectedDates = self.context.selectedDates;
+
+                    if (!selectedDates || selectedDates.length === 0) return;
+
+                    if ('{{ prepend ?? "" }}' === 'range' && selectedDates.length === 2) {
+                        this.selectedDate = selectedDates[0] + ' - ' + selectedDates[1];
+                        this.$refs.dateInput.value = selectedDates[0] + ' - ' + selectedDates[1];
+                        self.hide();
+                    } else if ('{{ prepend ?? "" }}' !== 'range' && selectedDates[0]) {
+                        this.selectedDate = selectedDates[0];
+                        this.$refs.dateInput.value = selectedDates[0];
+                        self.hide();
+                    }
+                }
+            });
+
+            this.calendar.init();
+        },                    
+
+        resetDate() {
+            this.selectedDate = '';
+            this.$refs.dateInput.value = '';
+            this.calendar.set({ selectedDates: [] });
+            this.calendar.update({
+                dates: false,
+            });
+        },
+    }"
+    class="relative w-full"
+>
+    <div class="absolute inset-y-0 start-0 ps-2.5 flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+        </svg>
+    </div>
+    <input 
+        x-ref="dateInput"
+        type="text"
+        placeholder="{{ placeholder ?? "Please select" | trans }}"
+        class="form-input bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:border-form-main focus:ring-0 focus:outline-none block w-full py-2.5 px-10"
+    />
+    <div 
+        x-show="selectedDate"
+        x-on:click="resetDate()"
+        x-cloak
+        class="absolute inset-y-0 end-0 flex z-1 items-center pe-2.5 cursor-pointer text-form-main"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+        </svg>
+    </div>
+</div>

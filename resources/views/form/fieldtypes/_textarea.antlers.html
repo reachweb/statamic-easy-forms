@@ -1,0 +1,9 @@
+<textarea 
+    class="form-textarea min-h-32 block p-2.5 w-full text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:border-form-main focus:ring-0 focus:outline-none" 
+    id="{{ handle }}" 
+    name="{{ handle }}"
+    placeholder="{{ placeholder ?? '' | trans }}"
+    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    autocomplete="off"
+    x-model="submitFields['{{ handle }}']">
+</textarea>
