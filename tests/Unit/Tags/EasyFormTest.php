@@ -34,10 +34,10 @@ test('tag renders form successfully with valid handle', function () {
 });
 
 test('tag throws exception with missing handle', function () {
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $tag->setContext([]);
     $tag->setParameters([]);
-    
+
     $tag->index();
 })->throws(Exception::class, 'A form handle is required');
 
@@ -155,7 +155,7 @@ test('tag handles hidden fields properly', function () {
 });
 
 test('parseHideFields handles pipe-separated string', function () {
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('parseHideFields');
     $method->setAccessible(true);
@@ -166,7 +166,7 @@ test('parseHideFields handles pipe-separated string', function () {
 });
 
 test('parseHideFields handles array input', function () {
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('parseHideFields');
     $method->setAccessible(true);
@@ -177,7 +177,7 @@ test('parseHideFields handles array input', function () {
 });
 
 test('parseHideFields handles empty string', function () {
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('parseHideFields');
     $method->setAccessible(true);

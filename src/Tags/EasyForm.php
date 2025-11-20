@@ -34,14 +34,14 @@ class EasyForm extends Tags
     {
         $handle = $this->params->get('handle');
 
-        if (!$handle) {
+        if (! $handle) {
             throw new \Exception('A form handle is required for the easyform tag.');
         }
 
         /** @var \Statamic\Forms\Form $form */
         $form = Form::find($handle);
 
-        if (!$form) {
+        if (! $form) {
             throw new \Exception("Form with handle [$handle] cannot be found.");
         }
 
@@ -69,7 +69,7 @@ class EasyForm extends Tags
         // Allow custom view template
         $view = $this->params->get('view', 'form/_form_component');
 
-        return view('statamic-easy-forms::' . $view, $data)
+        return view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()
             ->render();
     }
@@ -77,8 +77,7 @@ class EasyForm extends Tags
     /**
      * Parse hide_fields parameter into an array.
      *
-     * @param string|array $hideFields
-     * @return array
+     * @param  string|array  $hideFields
      */
     protected function parseHideFields($hideFields): array
     {
@@ -97,7 +96,7 @@ class EasyForm extends Tags
     /**
      * Process a field to extract needed properties and add optional flag.
      *
-     * @param \Statamic\Fields\Field $field
+     * @param  \Statamic\Fields\Field  $field
      * @return array
      */
     protected function processField($field)
@@ -110,8 +109,7 @@ class EasyForm extends Tags
             ->all();
 
         // Inject phone codes
-        if ($field->get('input_type') === 'tel' && $field->get('improved_fieldtypes') === true)
-        {
+        if ($field->get('input_type') === 'tel' && $field->get('improved_fieldtypes') === true) {
             $configDefaults['options'] = $this->getDictionaryOptions('country_phone_codes');
         }
 
@@ -132,14 +130,14 @@ class EasyForm extends Tags
     /**
      * Check if a field is optional (not required).
      *
-     * @param \Statamic\Fields\Field $field
+     * @param  \Statamic\Fields\Field  $field
      * @return bool
      */
     protected function isFieldOptional($field)
     {
         $validate = $field->get('validate');
 
-        if (!$validate) {
+        if (! $validate) {
             return true;
         }
 
@@ -183,7 +181,7 @@ class EasyForm extends Tags
     /**
      * Get dictionary options.
      *
-     * @param string|array $dictionary
+     * @param  string|array  $dictionary
      * @return array
      */
     protected function getDictionaryOptions($dictionary)

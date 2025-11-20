@@ -71,9 +71,8 @@ expect()->extend('toContainField', function (string $fieldHandle) {
 /**
  * Create a test form with the given handle and fields.
  *
- * @param string $handle The form handle
- * @param array $fields Array of field definitions
- * @return \Statamic\Forms\Form
+ * @param  string  $handle  The form handle
+ * @param  array  $fields  Array of field definitions
  */
 function createTestForm(string $handle = 'test_form', array $fields = []): \Statamic\Forms\Form
 {
@@ -88,7 +87,7 @@ function createTestForm(string $handle = 'test_form', array $fields = []): \Stat
 
     $form->save();
 
-    if (!empty($fields)) {
+    if (! empty($fields)) {
         $contents = [
             'tabs' => [
                 'main' => [
@@ -113,10 +112,9 @@ function createTestForm(string $handle = 'test_form', array $fields = []): \Stat
 /**
  * Create a field definition for testing.
  *
- * @param string $handle Field handle
- * @param string $type Field type
- * @param array $config Additional field configuration
- * @return array
+ * @param  string  $handle  Field handle
+ * @param  string  $type  Field type
+ * @param  array  $config  Additional field configuration
  */
 function createFieldDefinition(string $handle, string $type = 'text', array $config = []): array
 {
@@ -132,13 +130,12 @@ function createFieldDefinition(string $handle, string $type = 'text', array $con
 /**
  * Get the rendered output from the easyform tag.
  *
- * @param string $handle Form handle
- * @param array $params Additional tag parameters
- * @return string
+ * @param  string  $handle  Form handle
+ * @param  array  $params  Additional tag parameters
  */
 function renderEasyFormTag(string $handle, array $params = []): string
 {
-    $tag = new \Reach\StatamicEasyForms\Tags\EasyForm();
+    $tag = new \Reach\StatamicEasyForms\Tags\EasyForm;
     $tag->setContext([]);
     $tag->setParameters(array_merge(['handle' => $handle], $params));
 

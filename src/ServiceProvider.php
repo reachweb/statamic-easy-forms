@@ -2,8 +2,8 @@
 
 namespace Reach\StatamicEasyForms;
 
-use Statamic\Providers\AddonServiceProvider;
 use Statamic\Fieldtypes\Text;
+use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
@@ -18,7 +18,7 @@ class ServiceProvider extends AddonServiceProvider
     public function bootAddon()
     {
         $this->addConfigOptions();
-        
+
         // Load views from the resources/views directory
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-easy-forms');
 
@@ -42,7 +42,7 @@ class ServiceProvider extends AddonServiceProvider
             'improved_fieldtypes' => [
                 'type' => 'toggle',
                 'display' => 'Enable Improved Fieldtypes',
-                'description' => 'Enable dictionary for supported input types (eg. date, tel)'
+                'description' => 'Enable dictionary for supported input types (eg. date, tel)',
             ],
         ]);
     }

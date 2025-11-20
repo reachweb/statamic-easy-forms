@@ -1,7 +1,6 @@
 <?php
 
 use Reach\StatamicEasyForms\Tags\EasyForm;
-use Statamic\Fields\Field;
 use Statamic\Facades\Blueprint;
 
 test('processField extracts correct field data', function () {
@@ -24,7 +23,7 @@ test('processField extracts correct field data', function () {
 
     $field = $blueprint->fields()->all()['name'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('processField');
     $method->setAccessible(true);
@@ -59,7 +58,7 @@ test('isFieldOptional correctly detects required fields', function () {
 
     $field = $blueprint->fields()->all()['required_field'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -88,7 +87,7 @@ test('isFieldOptional handles required validation rule', function () {
 
     $field = $blueprint->fields()->all()['test'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -115,7 +114,7 @@ test('isFieldOptional handles accepted validation rule', function () {
 
     $field = $blueprint->fields()->all()['terms'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -142,7 +141,7 @@ test('isFieldOptional handles required_if validation rule', function () {
 
     $field = $blueprint->fields()->all()['conditional'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -168,7 +167,7 @@ test('field with no validation is marked as optional', function () {
 
     $field = $blueprint->fields()->all()['optional'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -195,7 +194,7 @@ test('field with non-required validation is optional', function () {
 
     $field = $blueprint->fields()->all()['email'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('isFieldOptional');
     $method->setAccessible(true);
@@ -222,7 +221,7 @@ test('field default values are applied', function () {
 
     $field = $blueprint->fields()->all()['country'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('processField');
     $method->setAccessible(true);
@@ -252,7 +251,7 @@ test('processField handles string validation rules', function () {
 
     $field = $blueprint->fields()->all()['test'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('processField');
     $method->setAccessible(true);
@@ -283,7 +282,7 @@ test('processField handles array validation rules', function () {
 
     $field = $blueprint->fields()->all()['test'];
 
-    $tag = new EasyForm();
+    $tag = new EasyForm;
     $reflection = new ReflectionClass($tag);
     $method = $reflection->getMethod('processField');
     $method->setAccessible(true);
