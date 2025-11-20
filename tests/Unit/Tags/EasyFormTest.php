@@ -35,9 +35,9 @@ test('tag renders form successfully with valid handle', function () {
 
 test('tag throws exception with missing handle', function () {
     $tag = new EasyForm();
-    $tag->setParameters([]);
     $tag->setContext([]);
-
+    $tag->setParameters([]);
+    
     $tag->index();
 })->throws(Exception::class, 'A form handle is required');
 

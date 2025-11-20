@@ -118,11 +118,6 @@ class EasyForm extends Tags
             $field->fieldtype()->extraRenderableFieldData()
         );
 
-        // For dictionary fields, get the dictionary items with full data (value, label, code, etc.)
-        // if ($field->type() === 'dictionary' && isset($fieldData['dictionary'])) {
-        //     $fieldData['options'] = $this->getDictionaryOptions($fieldData['dictionary']);
-        // }
-
         return $fieldData;
     }
 

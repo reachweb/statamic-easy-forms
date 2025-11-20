@@ -132,8 +132,8 @@ function createFieldDefinition(string $handle, string $type = 'text', array $con
 function renderEasyFormTag(string $handle, array $params = []): string
 {
     $tag = new \Reach\StatamicEasyForms\Tags\EasyForm();
-    $tag->setParameters(array_merge(['handle' => $handle], $params));
     $tag->setContext([]);
+    $tag->setParameters(array_merge(['handle' => $handle], $params));    
 
     return $tag->index();
 }
