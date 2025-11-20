@@ -19,7 +19,10 @@
         
         // Range limit
         maxRange: {{ max_range ?? 'null' }},
-        
+
+        // Close after selection (inverted logic - default is to close)
+        dontCloseAfterSelection: {{ dont_close_after_selection ? 'true' : 'false' }},
+
         // --- Internal State ---
         dateFrom: null,
         dateTo: null,
@@ -204,7 +207,9 @@
             if (this.mode === 'single') {
                 this.dateFrom = selectedDateObj;
                 this.updateValue();
-                this.showDatepicker = false;
+                if (!this.dontCloseAfterSelection) {
+                    this.showDatepicker = false;
+                }
             } else {
                 if (!this.dateFrom || (this.dateFrom && this.dateTo)) {
                     // Start Selection
@@ -220,7 +225,7 @@
                             if (diffDays >= this.maxRange) {
                                 this.dateFrom = selectedDateObj;
                                 this.dateTo = null;
-                                return; 
+                                return;
                             }
                         }
                         this.dateTo = this.dateFrom;
@@ -229,7 +234,9 @@
                         this.dateTo = selectedDateObj;
                     }
                     this.updateValue();
-                    this.showDatepicker = false;
+                    if (!this.dontCloseAfterSelection) {
+                        this.showDatepicker = false;
+                    }
                     this.hoverDate = null;
                 }
             }
@@ -393,21 +400,19 @@
                         class="aspect-square w-full flex items-center justify-center text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
                         x-bind:class="{
                             'text-gray-300 cursor-not-allowed opacity-50': !isAllowed(date),
-                            // Single Date Mode or Start without End
-                            'bg-blue-600 text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd),
-                            
+
+                            // Single Date Mode or Exact Match Start & End (e.g. 1 day range) or Start without End
+                            'bg-blue-600 text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd) || (mode === 'range' && isVisualStart(date) && isEnd(date)),
+
                             // Range Start (Rounded Left only)
                             'bg-blue-600 text-white rounded-l-full rounded-r-none': mode === 'range' && isVisualStart(date) && effectiveEnd && !isEnd(date),
-                            
+
                             // Range End (Rounded Right only)
                             'bg-blue-600 text-white rounded-r-full rounded-l-none': mode === 'range' && isEnd(date) && isVisualStart(date) === false,
 
-                            // Exact Match Start & End (e.g. 1 day range)
-                            'bg-blue-600 text-white rounded-full': mode === 'range' && isVisualStart(date) && isEnd(date),
-                            
                             // In Range (Square)
                             'bg-blue-100 text-blue-800 rounded-none': isInRange(date),
-                            
+
                             // Hover states for unselected
                             'hover:bg-blue-100 text-gray-700 rounded-full': !isVisualStart(date) && !isEnd(date) && !isInRange(date) && isAllowed(date)
                         }"

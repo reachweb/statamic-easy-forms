@@ -544,3 +544,40 @@ test('date field includes click outside to close', function () {
 
     expect($output)->toContain('x-on:click.outside');
 });
+
+test('date field with dont_close_after_selection enabled renders correctly', function () {
+    createTestForm('date_dont_close_test', [
+        [
+            'handle' => 'date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Date',
+                'dont_close_after_selection' => true,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_dont_close_test');
+
+    expect($output)->toContain('dontCloseAfterSelection: true');
+});
+
+test('date field without dont_close_after_selection defaults to false', function () {
+    createTestForm('date_default_close_test', [
+        [
+            'handle' => 'date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Date',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_default_close_test');
+
+    expect($output)->toContain('dontCloseAfterSelection: false');
+});

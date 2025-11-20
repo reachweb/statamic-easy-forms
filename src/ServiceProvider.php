@@ -48,9 +48,9 @@ class ServiceProvider extends AddonServiceProvider
                 'display' => 'Enable Improved Fields',
                 'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
             ],
-            'date_config' => [
+            'datepicker_config' => [
                 'type' => 'section',
-                'display' => 'Date config',
+                'display' => 'Datepicker config',
                 'if' => [
                     'input_type' => 'is date'
                 ]
@@ -108,6 +108,14 @@ class ServiceProvider extends AddonServiceProvider
                 ],
                 'unless' => [
                     'max_date_today' => 'not null'
+                ]
+            ],
+            'dont_close_after_selection' => [
+                'type' => 'toggle',
+                'display' => 'Don\'t close after selection',
+                'instructions' => 'Do not close the datepicker after the user selects a date',
+                'if' => [
+                    'input_type' => 'is date'
                 ]
             ],
         ]);
