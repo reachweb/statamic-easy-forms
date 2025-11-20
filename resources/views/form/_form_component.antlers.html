@@ -1,10 +1,25 @@
-{{ form:create in="{ form_handle:handle }" x-data="formHandler()" x-ref="form" x-on:submit.prevent="formSubmit" x-on:fields-changed="updateSubmitData($event.detail)" data-csrf-token="{{ csrf_token }}" }}
-<div
-    class="grid grid-cols-12 gap-x-6"
-    x-data="formFields({{ fields | needed_properties | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
-    x-show="! successMessage"
-    x-transition.opacity
+<form
+    method="{{ method }}"
+    action="{{ action }}"
+    x-data="formHandler('{{ event_name }}')"
+    x-ref="form"
+    x-on:submit.prevent="formSubmit"
+    x-on:fields-changed="updateSubmitData($event.detail)"
+    data-csrf-token="{{ csrf_token }}"
 >
+    {{ csrf_field }}
+
+    {{# Honeypot field #}}
+    {{ if honeypot }}
+    <input type="text" name="{{ honeypot }}" class="hidden" tabindex="-1" autocomplete="off">
+    {{ /if }}
+
+    <div
+        class="grid grid-cols-12 gap-x-6"
+        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
+        x-show="! successMessage"
+        x-transition.opacity
+    >
     {{ fields }}
     <div
         class="py-2 lg:py-3 {{ if honeypot === handle || input_type === 'hidden' }}hidden{{ /if }}
@@ -16,7 +31,7 @@
             <label class="uppercase block font-semibold text-sm text-gray-900" for="{{ handle }}">
                 {{ display }}
             </label>
-            {{ if ! validate || validate | not_required }}
+            {{ if optional }}
             <span class="ml-2 text-sm">
                 ({{ "Optional" | trans }})
             </span>
@@ -33,91 +48,91 @@
         {{# Simple text input #}}
         {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') }}
         <div>
-            {{ partial:form/fieldtypes/text }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/text }}
         </div>
         {{ /if }}
 
         {{# Date #}}
         {{ if input_type == 'date' && type == 'text' }}
         <div>
-            {{ partial:form/fieldtypes/date }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/date }}
         </div>
         {{ /if }}
 
         {{# Time #}}
         {{ if input_type == 'time' && type == 'text' }}
         <div>
-            {{ partial:form/fieldtypes/time }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/time }}
         </div>
         {{ /if }}
 
         {{# Integer #}}
         {{ if type == 'integer' }}
         <div>
-            {{ partial:form/fieldtypes/integer }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
         </div>
         {{ /if }}
 
         {{# Radio #}}
         {{ if type == 'radio' }}
         <div>
-            {{ partial:form/fieldtypes/radio }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/radio }}
         </div>
         {{ /if }}
 
         {{# Checkboxes #}}
         {{ if type == 'checkboxes' }}
         <div>
-            {{ partial:form/fieldtypes/checkboxes }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/checkboxes }}
         </div>
         {{ /if }}
 
         {{# Select #}}
         {{ if type == 'select' }}
         <div>
-            {{ partial:form/fieldtypes/select }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/select }}
         </div>
         {{ /if }}
 
         {{# Textarea #}}
         {{ if type == 'textarea' }}
         <div>
-            {{ partial:form/fieldtypes/textarea }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/textarea }}
         </div>
         {{ /if }}
 
         {{# File Upload / Assets #}}
         {{ if type == 'assets' }}
         <div>
-            {{ partial:form/fieldtypes/file }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/file }}
         </div>
         {{ /if }}
 
         {{# Dictionary #}}
         {{ if type == 'dictionary' && dictionary !== 'country_phone_codes' }}
         <div>
-            {{ partial:form/fieldtypes/dictionary }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/dictionary }}
         </div>
         {{ /if }}
 
         {{# Phone codes dictionary #}}
         {{ if type == 'dictionary' && dictionary == 'country_phone_codes' }}
         <div>
-            {{ partial:form/fieldtypes/telephone }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
         </div>
         {{ /if }}
 
         {{# Toggle #}}
         {{ if type == 'toggle' }}
         <div>
-            {{ partial:form/fieldtypes/toggle }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/toggle }}
         </div>
         {{ /if }}
 
         {{# Spacer #}}
         {{ if type == 'spacer' }}
         <div>
-            {{ partial:form/fieldtypes/spacer }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/spacer }}
         </div>
         {{ /if }}
 
@@ -130,29 +145,27 @@
         <div class="mt-1 text-red-600" x-show="'{{ handle }}' in errors" x-text="errors['{{ handle }}']" x-transition></div>
     </div>
     {{ /fields }}
-</div>
-<div class="w-full" x-show="! successMessage">
-    <div class="my-1 text-center text-red-600" x-show="fatalError" x-cloak>There is a technical problem with our form. Please contact us using email.</div>
-</div>
-<div class="w-full py-4">
-    <button
-        class="relative w-full px-6 py-3.5 text-white focus:ring-4 focus:outline-none uppercase font-black rounded-md
-        text-lg xl:text-xl focus:ring-form-main/8 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer
-        hover:bg-form-main/80 {{ button_class ?? 'bg-form-main' }}"
-        x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
-        type="submit"
-        x-bind:disabled="disableSubmit"
-        x-show="! successMessage"
-    >
-        <span class="text-lg xl:text-xl uppercase">{{ "Submit" | trans }}</span>
-    </button>
-</div>
-{{ if text_under_form }}
-<div class="text-center text-gray-800 [&_a]:underline [&_a]:text-main [&_a]:font-bold">
-    {{ text_under_form }}
-</div>
-{{ /if }}
-<div class="text-2xl text-center my-4" x-show="successMessage" x-transition.opacity x-cloak>
-    {{ "Thank you for your message! We will get back to you shortly!" | trans }}
-</div>
-{{ /form:create }}
+    </div>
+
+    <div class="w-full" x-show="! successMessage">
+        <div class="my-1 text-center text-red-600" x-show="fatalError" x-cloak>
+            There is a technical problem with our form. Please contact us using email.
+        </div>
+    </div>
+
+    <div class="w-full py-4">
+        <button
+            class="relative w-full px-6 py-3.5 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none uppercase font-black rounded-md text-lg xl:text-xl focus:ring-blue-600/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
+            type="submit"
+            x-bind:disabled="disableSubmit"
+            x-show="! successMessage"
+        >
+            <span class="text-lg xl:text-xl uppercase">{{ "Submit" | trans }}</span>
+        </button>
+    </div>
+
+    <div class="text-2xl text-center my-4" x-show="successMessage" x-transition.opacity x-cloak>
+        {{ "Thank you for your message! We will get back to you shortly!" | trans }}
+    </div>
+</form>

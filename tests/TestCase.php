@@ -1,8 +1,8 @@
 <?php
 
-namespace Reachweb\StatamicEasyForms\Tests;
+namespace Reach\StatamicEasyForms\Tests;
 
-use Reachweb\StatamicEasyForms\ServiceProvider;
+use Reach\StatamicEasyForms\ServiceProvider;
 use Statamic\Testing\AddonTestCase;
 
 abstract class TestCase extends AddonTestCase
