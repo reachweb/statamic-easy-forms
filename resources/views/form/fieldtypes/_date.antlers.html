@@ -3,72 +3,266 @@
     x-modelable="selectedDate"
     x-data="{
         selectedDate: '',
-        calendar: null,
+        showDatepicker: false,
+        showYearPicker: false,
+        
+        // Config
+        mode: '{{ if prepend === 'range'}}range{{ else }}single{{ /if }}',
+        minDateStr: '{{ min_date ?? "" }}',
+        maxDateStr: '{{ max_date ?? "" }}',
+        
+        // Internal State
+        dateFrom: null,
+        dateTo: null,
+        month: '',
+        year: '',
+        no_of_days: [],
+        blankdays: [],
+        years: [],
+        DAYS: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+        MONTH_NAMES: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
 
         init() {
-            const minDate = new Date().toISOString().split('T')[0];
-
-            this.calendar = new window.calendar(this.$refs.dateInput, {
-                type: 'default',
-                inputMode: true,
-                dateMin: minDate,
-                selectionDatesMode: {{ if prepend === 'range'}}'multiple-ranged'{{ else }}'single'{{ /if }},
-                selectedTheme: 'light',
-                displayDatesOutside: true,
-                enableJumpToSelectedDate: true,
-                positionToInput: 'auto',
-                selectedWeekends: [],
-                
-                onChangeToInput: (self, event) => {
-                    let selectedDates = self.context.selectedDates;
-
-                    if (!selectedDates || selectedDates.length === 0) return;
-
-                    if ('{{ prepend ?? "" }}' === 'range' && selectedDates.length === 2) {
-                        this.selectedDate = selectedDates[0] + ' - ' + selectedDates[1];
-                        this.$refs.dateInput.value = selectedDates[0] + ' - ' + selectedDates[1];
-                        self.hide();
-                    } else if ('{{ prepend ?? "" }}' !== 'range' && selectedDates[0]) {
-                        this.selectedDate = selectedDates[0];
-                        this.$refs.dateInput.value = selectedDates[0];
-                        self.hide();
-                    }
+            let today = new Date();
+            this.month = today.getMonth();
+            this.year = today.getFullYear();
+            
+            if(this.minDateStr) {
+                let minD = new Date(this.minDateStr);
+                if(minD > today) {
+                    this.month = minD.getMonth();
+                    this.year = minD.getFullYear();
                 }
-            });
+            }
 
-            this.calendar.init();
-        },                    
+            this.generateDays();
+            this.generateYears();
+        },
+
+        // --- Logic ---
+
+        isAllowed(date) {
+            const d = new Date(this.year, this.month, date);
+            d.setHours(0,0,0,0);
+
+            if (this.minDateStr) {
+                const min = new Date(this.minDateStr);
+                min.setHours(0,0,0,0);
+                if (d < min) return false;
+            }
+            if (this.maxDateStr) {
+                const max = new Date(this.maxDateStr);
+                max.setHours(0,0,0,0);
+                if (d > max) return false;
+            }
+            return true;
+        },
+
+        isSelected(date) {
+            if (!this.dateFrom) return false;
+            const d = new Date(this.year, this.month, date);
+            
+            if (this.mode === 'single') {
+                 return d.toDateString() === this.dateFrom.toDateString();
+            }
+            if (this.dateFrom.getTime() === d.getTime()) return true;
+            if (this.dateTo && this.dateTo.getTime() === d.getTime()) return true;
+            return false;
+        },
+
+        isInRange(date) {
+            if (this.mode === 'single' || !this.dateFrom || !this.dateTo) return false;
+            const d = new Date(this.year, this.month, date);
+            return d > this.dateFrom && d < this.dateTo;
+        },
+
+        // Accessibility Helper: Returns '12 November 2024' for screen readers
+        getAriaLabel(date) {
+            return date + ' ' + this.MONTH_NAMES[this.month] + ' ' + this.year;
+        },
+
+        selectDate(date) {
+            if (!this.isAllowed(date)) return;
+
+            let selectedDateObj = new Date(this.year, this.month, date);
+
+            if (this.mode === 'single') {
+                this.dateFrom = selectedDateObj;
+                this.updateValue();
+                this.showDatepicker = false;
+            } else {
+                if (!this.dateFrom || (this.dateFrom && this.dateTo)) {
+                    this.dateFrom = selectedDateObj;
+                    this.dateTo = null;
+                } else {
+                    if (selectedDateObj < this.dateFrom) {
+                        this.dateTo = this.dateFrom;
+                        this.dateFrom = selectedDateObj;
+                    } else {
+                        this.dateTo = selectedDateObj;
+                    }
+                    this.updateValue();
+                    this.showDatepicker = false;
+                }
+            }
+        },
+
+        updateValue() {
+            const formatDate = (d) => {
+                return d.getFullYear() + '-' + ('0'+ (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+            };
+
+            if (this.mode === 'single' && this.dateFrom) {
+                this.selectedDate = formatDate(this.dateFrom);
+            } else if (this.mode === 'range' && this.dateFrom && this.dateTo) {
+                this.selectedDate = formatDate(this.dateFrom) + ' - ' + formatDate(this.dateTo);
+            }
+        },
 
         resetDate() {
+            this.dateFrom = null;
+            this.dateTo = null;
             this.selectedDate = '';
-            this.$refs.dateInput.value = '';
-            this.calendar.set({ selectedDates: [] });
-            this.calendar.update({
-                dates: false,
-            });
         },
+
+        changeMonth(step) {
+            this.month += step;
+            if (this.month < 0) { this.month = 11; this.year--; }
+            if (this.month > 11) { this.month = 0; this.year++; }
+            this.generateDays();
+        },
+
+        selectYear(newYear) {
+            this.year = newYear;
+            this.showYearPicker = false;
+            this.generateDays();
+        },
+
+        generateDays() {
+            let daysInMonth = new Date(this.year, this.month + 1, 0).getDate();
+            let dayOfWeek = new Date(this.year, this.month).getDay();
+            this.blankdays = Array.from({length: dayOfWeek}, (_, i) => i + 1);
+            this.no_of_days = Array.from({length: daysInMonth}, (_, i) => i + 1);
+        },
+
+        generateYears() {
+            let currentYear = new Date().getFullYear();
+            for (let i = currentYear - 50; i <= currentYear + 10; i++) {
+                this.years.push(i);
+            }
+        }
     }"
     class="relative w-full"
+    x-on:click.outside="showDatepicker = false"
+    x-on:keydown.escape="showDatepicker = false"
 >
-    <div class="absolute inset-y-0 start-0 ps-2.5 flex items-center">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
-        </svg>
+    <div class="relative">
+        <div class="absolute inset-y-0 start-0 ps-2.5 flex items-center pointer-events-none" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-500">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+            </svg>
+        </div>
+
+        <input 
+            x-ref="dateInput"
+            type="text"
+            readonly
+            x-model="selectedDate"
+            x-on:click="showDatepicker = !showDatepicker"
+            x-on:keydown.enter="showDatepicker = !showDatepicker"
+            x-bind:aria-expanded="showDatepicker"
+            aria-haspopup="dialog"
+            aria-label="Choose date"
+            placeholder="{{ placeholder ?? "Please select" | trans }}"
+            class="form-input cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:border-form-main focus:ring-2 focus:ring-form-main focus:outline-none block w-full py-2.5 px-10"
+        />
+
+        <button
+            type="button"
+            x-show="selectedDate"
+            x-on:click="resetDate()"
+            x-cloak
+            aria-label="Clear date"
+            class="absolute inset-y-0 end-0 flex z-10 items-center pe-2.5 cursor-pointer text-form-main hover:text-gray-700 focus:outline-none focus:text-gray-900"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
+            </svg>
+        </button>
     </div>
-    <input 
-        x-ref="dateInput"
-        type="text"
-        placeholder="{{ placeholder ?? "Please select" | trans }}"
-        class="form-input bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:border-form-main focus:ring-0 focus:outline-none block w-full py-2.5 px-10"
-    />
+
     <div 
-        x-show="selectedDate"
-        x-on:click="resetDate()"
+        x-show="showDatepicker"
+        x-transition
         x-cloak
-        class="absolute inset-y-0 end-0 flex z-1 items-center pe-2.5 cursor-pointer text-form-main"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Calendar"
+        class="absolute top-full mt-1 left-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-72"
     >
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
-            <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
-        </svg>
+        <div class="flex justify-between items-center mb-4">
+            <div>
+                <span x-text="MONTH_NAMES[month]" class="text-base font-bold text-gray-800"></span>
+                <button 
+                    type="button"
+                    x-text="year" 
+                    x-on:click="showYearPicker = !showYearPicker"
+                    aria-label="Select year"
+                    class="ml-1 text-base text-gray-600 font-normal cursor-pointer hover:text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1">
+                </button>
+            </div>
+            <div>
+                <button type="button" aria-label="Previous month" class="p-1 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" x-on:click="changeMonth(-1)" x-bind:disabled="showYearPicker">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <button type="button" aria-label="Next month" class="p-1 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" x-on:click="changeMonth(1)" x-bind:disabled="showYearPicker">
+                    <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+            </div>
+        </div>
+
+        <div x-show="showYearPicker" class="h-64 overflow-y-auto grid grid-cols-4 gap-2">
+            <template x-for="y in years" x-bind:key="y">
+                <button 
+                    type="button"
+                    x-on:click="selectYear(y)" 
+                    x-text="y" 
+                    class="text-center text-sm py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                    x-bind:class="{'bg-blue-500 text-white': year == y}"
+                ></button>
+            </template>
+        </div>
+
+        <div x-show="!showYearPicker">
+            <div class="grid grid-cols-7 mb-2">
+                <template x-for="day in DAYS" x-bind:key="day">	
+                    <div class="text-center text-xs font-medium text-gray-500" x-text="day"></div>
+                </template>
+            </div>
+
+            <div class="grid grid-cols-7 gap-1">
+                <template x-for="blank in blankdays">
+                    <div class="p-1"></div>
+                </template>	
+                
+                <template x-for="date in no_of_days" x-bind:key="date">	
+                    <button
+                        type="button"
+                        x-on:click="selectDate(date)"
+                        x-text="date"
+                        x-bind:disabled="!isAllowed(date)"
+                        x-bind:aria-label="getAriaLabel(date)"
+                        x-bind:aria-selected="isSelected(date)"
+                        class="aspect-square w-full flex items-center justify-center text-sm rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
+                        x-bind:class="{
+                            'text-gray-300 cursor-not-allowed opacity-50': !isAllowed(date),
+                            'bg-blue-600 text-white': isSelected(date),
+                            'bg-blue-100 text-blue-800 rounded-none': isInRange(date),
+                            'hover:bg-blue-100 text-gray-700': !isSelected(date) && !isInRange(date) && isAllowed(date)
+                        }"
+                    ></button>
+                </template>
+            </div>
+        </div>
     </div>
 </div>
