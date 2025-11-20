@@ -6,7 +6,7 @@
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"
     data-csrf-token="{{ csrf_token }}"
-    aria-label="{{ 'Contact Form' | trans }}"
+    aria-label="{{ title }}"
 >
     {{# Honeypot field #}}
     {{ if honeypot }}
