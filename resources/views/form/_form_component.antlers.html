@@ -7,28 +7,26 @@
     x-on:fields-changed="updateSubmitData($event.detail)"
     data-csrf-token="{{ csrf_token }}"
 >
-    {{ csrf_field }}
-
     {{# Honeypot field #}}
     {{ if honeypot }}
     <input type="text" name="{{ honeypot }}" class="hidden" tabindex="-1" autocomplete="off">
     {{ /if }}
 
     <div
-        class="grid grid-cols-12 gap-x-6"
+        class="grid grid-cols-12 gap-6"
         x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
         x-show="! successMessage"
         x-transition.opacity
     >
     {{ fields }}
     <div
-        class="py-2 lg:py-3 {{ if honeypot === handle || input_type === 'hidden' }}hidden{{ /if }}
+        class="{{ if honeypot === handle || input_type === 'hidden' }}hidden{{ /if }}
         {{ if width === 50 }}col-span-12 md:col-span-6{{ elseif width === 33 }}col-span-12 md:col-span-4{{ elseif width === 25 }}col-span-12 md:col-span-3{{ else }}col-span-12{{ /if }}"
         x-show="shouldShowField('{{ handle }}')"
     >
         {{ unless type === 'toggle' || type === 'spacer' }}
         <div class="flex items-center mb-2">
-            <label class="uppercase block font-semibold text-ef text-ef-label" for="{{ handle }}">
+            <label class="block font-semibold text-ef text-ef-label" for="{{ handle }}">
                 {{ display }}
             </label>
             {{ if optional }}
@@ -81,9 +79,16 @@
         {{ /if }}
 
         {{# Radio #}}
-        {{ if type == 'radio' }}
+        {{ if type == 'radio' && !improved_field }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/radio }}
+        </div>
+        {{ /if }}
+
+        {{# Radio Improved #}}
+        {{ if type == 'radio' && improved_field }}
+        <div>
+            {{ partial:statamic-easy-forms::form/fieldtypes/radio_improved }}
         </div>
         {{ /if }}
 

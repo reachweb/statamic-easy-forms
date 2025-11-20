@@ -3,6 +3,7 @@
 namespace Reach\StatamicEasyForms;
 
 use Statamic\Fieldtypes\Text;
+use Statamic\Fieldtypes\Radio;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
@@ -117,6 +118,18 @@ class ServiceProvider extends AddonServiceProvider
                 'if' => [
                     'input_type' => 'is date',
                 ],
+            ],
+        ]);
+
+        Radio::appendConfigFields([
+            'easy_forms' => [
+                'type' => 'section',
+                'display' => 'Easy Forms',
+            ],
+            'improved_field' => [
+                'type' => 'toggle',
+                'display' => 'Enable Improved Fields',
+                'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
             ],
         ]);
     }
