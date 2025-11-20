@@ -22,17 +22,17 @@ jobs:
             framework: "^11.0"
             testbench: "^9.0"
           - php: 8.4
-            laravel: 11.*
+            laravel: 12.*
             statamic: 5.*
             os: ubuntu-latest
-            framework: "^11.0"
-            testbench: "^9.0"
+            framework: "^12.0"
+            testbench: "^10.0"
           - php: 8.5
-            laravel: 11.*
+            laravel: 12.*
             statamic: 5.*
             os: ubuntu-latest
-            framework: "^11.0"
-            testbench: "^9.0"
+            framework: "^12.0"
+            testbench: "^10.0"
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - S${{ matrix.statamic }} - ${{ matrix.os }}
 
