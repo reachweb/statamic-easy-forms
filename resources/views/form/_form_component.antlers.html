@@ -100,9 +100,16 @@
         {{ /if }}
 
         {{# Select #}}
-        {{ if type == 'select' }}
+        {{ if type == 'select' && !improved_field }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/select }}
+        </div>
+        {{ /if }}
+
+        {{# Select Improved #}}
+        {{ if type == 'select' && improved_field }}
+        <div>
+            {{ partial:statamic-easy-forms::form/fieldtypes/select_improved }}
         </div>
         {{ /if }}
 

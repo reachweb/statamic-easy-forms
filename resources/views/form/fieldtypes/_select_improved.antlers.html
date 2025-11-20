@@ -1,0 +1,273 @@
+<div
+    x-data="{
+        allOptions: {{ options | to_json | entities ?? '[]' }},
+        options: [],
+        isOpen: false,
+        openedWithKeyboard: false,
+        openUpwards: false,
+        selectedOptions: [],
+        selectedLabels: [],
+        setLabelText() {
+            const count = this.selectedOptions.length;
+            if (count === 0) return '{{ placeholder ?? 'Please select' | trans }}';
+            return this.selectedLabels.join(', ');
+        },
+        handleOptionToggle(option) {
+            {{ if multiple }}
+                if (option.checked) {
+                    if ({{ max_items ?? 'null' }} && this.selectedOptions.length >= {{ max_items ?? 'Infinity' }}) {
+                        option.checked = false;
+                        return;
+                    }
+                    this.selectedOptions.push(option.value)
+                } else {
+                    this.selectedOptions = this.selectedOptions.filter(
+                        (opt) => opt !== option.value,
+                    )
+                }
+            {{ else }}
+                if (option.checked) {
+                    this.selectedOptions = [option.value];
+                    this.isOpen = false;
+                } else {
+                    this.selectedOptions = [];
+                }
+            {{ /if }}
+        },
+        selectOption(optionKey) {
+            this.selectedOptions = [optionKey];
+            this.isOpen = false;
+        },
+        getFilteredOptions(query) {
+            if (!query) {
+                this.options = this.allOptions;
+                this.$refs.noResultsMessage?.classList.add('hidden');
+                return;
+            }
+
+            this.options = this.allOptions.filter((option) =>
+                (option.value || option.key).toLowerCase().includes(query.toLowerCase())
+            )
+
+            if (this.options.length === 0) {
+                this.$refs.noResultsMessage?.classList.remove('hidden')
+            } else {
+                this.$refs.noResultsMessage?.classList.add('hidden')
+            }
+        },
+        updateSelectedLabels() {
+            this.selectedLabels = this.selectedOptions.map(value => {
+                const option = this.allOptions.find(opt => opt.key == value);
+                return option ? (option.value || option.key) : value;
+            });
+            {{ if multiple }}
+                submitFields['{{ handle }}'] = this.selectedOptions;
+            {{ else }}
+                submitFields['{{ handle }}'] = this.selectedOptions[0] || '';
+            {{ /if }}
+        },
+        resetSearch() {
+            if (this.$refs.searchField) {
+                this.$refs.searchField.value = '';
+                this.getFilteredOptions('');
+            }
+        },
+        checkPosition() {
+            this.$nextTick(() => this.openUpwards = (window.innerHeight - this.$refs.dropdownButton.getBoundingClientRect().bottom) < this.$refs.dropdown.getBoundingClientRect().height);
+        },
+        init() {
+            if (!Array.isArray(this.allOptions)) {
+                this.allOptions = Object.entries(this.allOptions).map(([key, value]) => ({ key, value }));
+            } else {
+                this.allOptions = this.allOptions.map(opt => {
+                    if (typeof opt === 'object' && opt !== null) {
+                        return { key: opt.key, value: opt.value || opt.key };
+                    }
+                    return { key: opt, value: opt };
+                });
+            }
+
+            this.options = this.allOptions;
+
+            let initial = [];
+            {{ if old }}
+                initial = {{ old | to_json | entities }};
+            {{ elseif value }}
+                initial = {{ value | to_json | entities }};
+            {{ /if }}
+
+            if (initial) {
+                if (Array.isArray(initial)) {
+                    this.selectedOptions = initial;
+                } else {
+                    this.selectedOptions = [initial];
+                }
+            }
+
+            this.$watch('selectedOptions', () => {
+                this.updateSelectedLabels();
+            });
+            {{ if searchable }}
+                this.$watch('isOpen', (value) => {
+                    if (value) {
+                        this.$nextTick(() => {
+                            this.$refs.searchField?.focus();
+                        });
+                    }
+                });
+                this.$watch('openedWithKeyboard', (value) => {
+                    if (value) {
+                        this.$nextTick(() => {
+                            this.$refs.searchField?.focus();
+                        });
+                    }
+                });
+            {{ /if }}
+            this.updateSelectedLabels();
+        }
+    }"
+    x-init="init()"
+    x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
+    class="w-full flex flex-col relative"
+>
+    <div class="relative w-full">
+        <button
+            type="button"
+            class="inline-flex w-full items-center justify-between whitespace-nowrap bg-ef-input-bg border text-ef-input-text rounded-ef p-2.5 hover:bg-ef-dropdown-hover transition-colors duration-150 focus:outline-none"
+            x-bind:class="isOpen || openedWithKeyboard ? 'border-ef-focus ring-2 ring-ef-focus' : 'border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus'"
+            role="combobox"
+            aria-haspopup="listbox"
+            aria-controls="itemsListbox"
+            x-on:click="isOpen = !isOpen; checkPosition()"
+            x-on:keydown.down.prevent="openedWithKeyboard = true"
+            x-on:keydown.enter.prevent="openedWithKeyboard = true"
+            x-on:keydown.space.prevent="openedWithKeyboard = true"
+            x-bind:aria-label="setLabelText()"
+            x-bind:aria-expanded="isOpen || openedWithKeyboard"
+            x-ref="dropdownButton"
+        >
+            <span
+                class="w-full text-start overflow-hidden text-ellipsis whitespace-nowrap"
+                x-text="setLabelText()"
+            ></span>
+            <div class="flex gap-x-2 items-center">
+                {{ if clearable }}
+                    <svg
+                        x-cloak
+                        x-on:click.stop="selectedOptions = []; resetSearch();"
+                        x-show="selectedOptions.length > 0"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        class="size-5 cursor-pointer text-ef-text-muted hover:text-ef-text"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        aria-label="{{ 'Clear' | trans }}"
+                    >
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                    </svg>
+                {{ /if }}
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                    class="size-5 text-ef-text-muted transition-transform"
+                    x-bind:class="isOpen || openedWithKeyboard ? 'rotate-180' : ''"
+                >
+                    <path
+                        fill-rule="evenodd"
+                        d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                        clip-rule="evenodd"
+                    />
+                </svg>
+            </div>
+        </button>
+
+        <div
+            x-cloak
+            x-show="isOpen || openedWithKeyboard"
+            x-on:click.outside="isOpen = false, openedWithKeyboard = false"
+            x-transition
+            x-ref="dropdown"
+            class="absolute z-30 left-0 w-full bg-ef-input-bg border border-ef-border rounded-ef overflow-hidden shadow-lg"
+            x-bind:class="openUpwards ? 'bottom-full mb-1' : 'top-full mt-1'"
+        >
+            {{ if searchable }}
+                <div class="relative border-b border-ef-border">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                        fill="none"
+                        stroke-width="1.5"
+                        class="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-ef-text-muted"
+                        aria-hidden="true"
+                    >
+                        <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+                        />
+                    </svg>
+                    <input
+                        type="text"
+                        class="w-full bg-ef-input-bg py-2.5 pl-10 pr-4 text-ef-input-text focus:outline-none border-none focus:ring-0"
+                        name="searchField"
+                        aria-label="{{ 'Search options' | trans }}"
+                        x-on:input="getFilteredOptions($el.value)"
+                        x-ref="searchField"
+                        placeholder="{{ 'Search' | trans }}"
+                        autocomplete="off"
+                    />
+                </div>
+            {{ /if }}
+
+            <ul
+                class="flex max-h-64 w-full flex-col overflow-hidden overflow-y-auto py-1.5"
+                role="listbox"
+                x-on:keydown.down.prevent="$focus.wrap().next()"
+                x-on:keydown.up.prevent="$focus.wrap().previous()"
+                x-trap="openedWithKeyboard"
+            >
+                {{ if searchable }}
+                    <li class="hidden px-4 py-2 text-sm text-ef-text-muted" x-ref="noResultsMessage">
+                        <span>{{ 'No results found' | trans }}</span>
+                    </li>
+                {{ /if }}
+
+                <template x-for="option in options" :key="option.key">
+                    <li role="option" class="hover:bg-ef-dropdown-hover cursor-pointer">
+                        {{ if multiple }}
+                            <label
+                                class="flex items-center gap-2 px-4 py-2 text-sm text-ef-text cursor-pointer w-full"
+                                :for="'checkboxOption' + option.key"
+                            >
+                                <div class="relative flex items-center">
+                                    <input
+                                        type="checkbox"
+                                        class="form-checkbox w-4 h-4 text-ef-checkbox-checked bg-ef-checkbox-bg border-ef-checkbox-border rounded focus:ring-2 focus:ring-ef-focus"
+                                        x-on:change="handleOptionToggle($el)"
+                                        x-on:keydown.enter.prevent="$el.checked = !$el.checked; handleOptionToggle($el)"
+                                        :checked="selectedOptions.includes(option.key)"
+                                        :value="option.key"
+                                        :id="'checkboxOption' + option.key"
+                                    />
+                                </div>
+                                <span x-text="option.value || option.key"></span>
+                            </label>
+                        {{ else }}
+                            <div
+                                class="flex items-center px-4 py-2 text-sm text-ef-text cursor-pointer w-full"
+                                x-on:click="selectOption(option.key)"
+                                x-on:keydown.enter.prevent="selectOption(option.key)"
+                                tabindex="0"
+                            >
+                                <span x-text="option.value || option.key"></span>
+                            </div>
+                        {{ /if }}
+                    </li>
+                </template>
+            </ul>
+        </div>
+    </div>
+</div>
