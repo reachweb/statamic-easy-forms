@@ -1,5 +1,5 @@
 node_modules
 vendor
-dist
+dist/.vite
 composer.lock
 .phpunit.result.cache
