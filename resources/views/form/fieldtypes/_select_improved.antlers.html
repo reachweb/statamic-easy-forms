@@ -240,7 +240,7 @@
                         {{ if multiple }}
                             <label
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-ef-text cursor-pointer w-full"
-                                :for="'checkboxOption' + option.key"
+                                :for="'{{ handle }}_checkboxOption_' + option.key"
                             >
                                 <div class="relative flex items-center">
                                     <input
@@ -250,7 +250,7 @@
                                         x-on:keydown.enter.prevent="$el.checked = !$el.checked; handleOptionToggle($el)"
                                         :checked="selectedOptions.includes(option.key)"
                                         :value="option.key"
-                                        :id="'checkboxOption' + option.key"
+                                        :id="'{{ handle }}_checkboxOption_' + option.key"
                                     />
                                 </div>
                                 <span x-text="option.value || option.key"></span>
