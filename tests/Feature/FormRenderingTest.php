@@ -226,13 +226,22 @@ test('success message is included', function () {
 });
 
 test('error message container is included', function () {
-    createTestForm('error_container');
+    createTestForm('error_container', [
+        [
+            'handle' => 'test_field',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Test Field',
+            ],
+        ],
+    ]);
 
     $output = renderEasyFormTag('error_container');
 
+    // Check for both field-level errors and fatal error container
     expect($output)
-        ->toContain('errors')
-        ->toContain('fatalError');
+        ->toContain('errors')  // Field-level error handling
+        ->toContain('fatalError');  // Global error handling
 });
 
 test('submit button has correct attributes', function () {

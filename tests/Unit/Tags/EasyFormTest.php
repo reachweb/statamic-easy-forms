@@ -98,9 +98,14 @@ test('tag respects hide_fields parameter', function () {
         'hide_fields' => 'hidden_field',
     ]);
 
+    // The visible field should be present without the hidden class
+    expect($output)->toContain('visible_field');
+
+    // The hidden field should still be in the output but with x-show Alpine directive
+    // (it will be hidden by Alpine.js on the client side)
     expect($output)
-        ->toContain('visible_field')
-        ->not->toContain('name="hidden_field"');
+        ->toContain('name="hidden_field"')
+        ->toContain('x-show="shouldShowField(\'hidden_field\')"');
 });
 
 test('tag renders with all field types', function () {
