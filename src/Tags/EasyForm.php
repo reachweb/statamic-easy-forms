@@ -102,12 +102,18 @@ class EasyForm extends Tags
      */
     protected function processField($field)
     {
-        // Get config defaults from the fieldtype (includes input_type, prepend, append, etc.)
+        // Get config defaults from the fieldtype (includes prepend, append, etc.)
         $configDefaults = Field::commonFieldOptions()->all()
             ->merge($field->fieldtype()->configFields()->all())
             ->map->get('default')
             ->filter()
             ->all();
+
+        // Inject phone codes
+        if ($field->get('input_type') === 'tel' && $field->get('improved_fieldtypes') === true)
+        {
+            $configDefaults['options'] = $this->getDictionaryOptions('country_phone_codes');
+        }
 
         // Merge config defaults with field data, then add custom data
         $fieldData = array_merge(

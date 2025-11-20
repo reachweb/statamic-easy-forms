@@ -46,7 +46,7 @@
         {{ /if }}
 
         {{# Simple text input #}}
-        {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') }}
+        {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') || (input_type == 'tel' && type == 'text' && !improved_fieldtypes) }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/text }}
         </div>
@@ -115,8 +115,8 @@
         </div>
         {{ /if }}
 
-        {{# Phone codes dictionary #}}
-        {{ if type == 'dictionary' && dictionary == 'country_phone_codes' }}
+        {{# Phone #}}
+        {{ if input_type == 'tel' && type == 'text' && improved_fieldtypes }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
         </div>
