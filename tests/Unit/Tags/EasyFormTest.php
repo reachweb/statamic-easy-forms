@@ -46,7 +46,7 @@ test('tag throws exception with invalid handle', function () {
 })->throws(Exception::class, 'cannot be found');
 
 test('tag includes all form data', function () {
-    $form = createTestForm('test_form', [
+    createTestForm('test_form', [
         [
             'handle' => 'email',
             'field' => [

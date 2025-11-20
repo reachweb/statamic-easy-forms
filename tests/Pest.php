@@ -86,19 +86,26 @@ function createTestForm(string $handle = 'test_form', array $fields = []): \Stat
         ->title($formConfig['title'])
         ->honeypot($formConfig['honeypot']);
 
+    $form->save();
+
     if (!empty($fields)) {
-        $blueprint = \Statamic\Facades\Blueprint::make()->setContents([
-            'sections' => [
+        $contents = [
+            'tabs' => [
                 'main' => [
-                    'fields' => $fields,
+                    'display' => 'Main',
+                    'sections' => [
+                        [
+                            'fields' => $fields,
+                        ],
+                    ],
                 ],
             ],
-        ]);
+        ];
 
-        $form->blueprint($blueprint);
+        $blueprint = \Statamic\Facades\Blueprint::make($handle)->setContents($contents);
+        $blueprint->setNamespace('forms');
+        $blueprint->save();
     }
-
-    $form->save();
 
     return $form;
 }
@@ -133,7 +140,7 @@ function renderEasyFormTag(string $handle, array $params = []): string
 {
     $tag = new \Reach\StatamicEasyForms\Tags\EasyForm();
     $tag->setContext([]);
-    $tag->setParameters(array_merge(['handle' => $handle], $params));    
+    $tag->setParameters(array_merge(['handle' => $handle], $params));
 
     return $tag->index();
 }

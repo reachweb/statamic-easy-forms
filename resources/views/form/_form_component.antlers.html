@@ -31,7 +31,7 @@
             <label class="uppercase block font-semibold text-sm text-gray-900" for="{{ handle }}">
                 {{ display }}
             </label>
-            {{ if ! validate || validate | not_required }}
+            {{ if optional }}
             <span class="ml-2 text-sm">
                 ({{ "Optional" | trans }})
             </span>
@@ -48,91 +48,91 @@
         {{# Simple text input #}}
         {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') }}
         <div>
-            {{ partial:form/fieldtypes/text }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/text }}
         </div>
         {{ /if }}
 
         {{# Date #}}
         {{ if input_type == 'date' && type == 'text' }}
         <div>
-            {{ partial:form/fieldtypes/date }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/date }}
         </div>
         {{ /if }}
 
         {{# Time #}}
         {{ if input_type == 'time' && type == 'text' }}
         <div>
-            {{ partial:form/fieldtypes/time }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/time }}
         </div>
         {{ /if }}
 
         {{# Integer #}}
         {{ if type == 'integer' }}
         <div>
-            {{ partial:form/fieldtypes/integer }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
         </div>
         {{ /if }}
 
         {{# Radio #}}
         {{ if type == 'radio' }}
         <div>
-            {{ partial:form/fieldtypes/radio }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/radio }}
         </div>
         {{ /if }}
 
         {{# Checkboxes #}}
         {{ if type == 'checkboxes' }}
         <div>
-            {{ partial:form/fieldtypes/checkboxes }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/checkboxes }}
         </div>
         {{ /if }}
 
         {{# Select #}}
         {{ if type == 'select' }}
         <div>
-            {{ partial:form/fieldtypes/select }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/select }}
         </div>
         {{ /if }}
 
         {{# Textarea #}}
         {{ if type == 'textarea' }}
         <div>
-            {{ partial:form/fieldtypes/textarea }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/textarea }}
         </div>
         {{ /if }}
 
         {{# File Upload / Assets #}}
         {{ if type == 'assets' }}
         <div>
-            {{ partial:form/fieldtypes/file }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/file }}
         </div>
         {{ /if }}
 
         {{# Dictionary #}}
         {{ if type == 'dictionary' && dictionary !== 'country_phone_codes' }}
         <div>
-            {{ partial:form/fieldtypes/dictionary }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/dictionary }}
         </div>
         {{ /if }}
 
         {{# Phone codes dictionary #}}
         {{ if type == 'dictionary' && dictionary == 'country_phone_codes' }}
         <div>
-            {{ partial:form/fieldtypes/telephone }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
         </div>
         {{ /if }}
 
         {{# Toggle #}}
         {{ if type == 'toggle' }}
         <div>
-            {{ partial:form/fieldtypes/toggle }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/toggle }}
         </div>
         {{ /if }}
 
         {{# Spacer #}}
         {{ if type == 'spacer' }}
         <div>
-            {{ partial:form/fieldtypes/spacer }}
+            {{ partial:statamic-easy-forms::form/fieldtypes/spacer }}
         </div>
         {{ /if }}
 
