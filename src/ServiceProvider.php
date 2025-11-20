@@ -19,6 +19,9 @@ class ServiceProvider extends AddonServiceProvider
         // Load views from the resources/views directory
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-easy-forms');
 
+        // Load translation files
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'statamic-easy-forms');
+
         // Publish views for customization
         $this->publishes([
             __DIR__.'/../resources/views' => resource_path('views/vendor/statamic-easy-forms'),
