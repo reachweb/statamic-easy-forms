@@ -156,6 +156,7 @@ class EasyForm extends Tags
             [
                 'optional' => $this->isFieldOptional($field),
                 'value' => $field->value() ?? $field->defaultValue(),
+                'has_own_instructions' => $field->get('instructions') !== null,
             ],
             $field->fieldtype()->extraRenderableFieldData()
         );
