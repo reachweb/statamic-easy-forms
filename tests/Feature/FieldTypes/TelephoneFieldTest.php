@@ -10,7 +10,7 @@ afterEach(function () {
     Form::all()->each->delete();
 });
 
-test('telephone field with improved_fieldtypes enabled renders telephone partial', function () {
+test('telephone field with improved_field enabled renders telephone partial', function () {
     createTestForm('tel_test', [
         [
             'handle' => 'phone',
@@ -18,7 +18,7 @@ test('telephone field with improved_fieldtypes enabled renders telephone partial
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -32,7 +32,7 @@ test('telephone field with improved_fieldtypes enabled renders telephone partial
         ->toContain('id="phonesList"');
 });
 
-test('telephone field without improved_fieldtypes renders simple tel input', function () {
+test('telephone field without improved_field renders simple tel input', function () {
     createTestForm('tel_simple_test', [
         [
             'handle' => 'phone',
@@ -40,7 +40,7 @@ test('telephone field without improved_fieldtypes renders simple tel input', fun
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => false,
+                'improved_field' => false,
             ],
         ],
     ]);
@@ -61,7 +61,7 @@ test('telephone field includes country phone codes options', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -82,7 +82,7 @@ test('telephone field has dropdown button for country code selection', function 
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -103,7 +103,7 @@ test('telephone field includes search functionality', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -123,7 +123,7 @@ test('telephone field has readonly attribute binding', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -142,7 +142,7 @@ test('telephone field includes init method for pre-filled values', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -161,7 +161,7 @@ test('telephone field includes handleDeletion method', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -181,7 +181,7 @@ test('telephone field includes handleInput method', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -201,7 +201,7 @@ test('telephone field has Alpine model binding', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -219,7 +219,7 @@ test('telephone field with placeholder renders correctly', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -237,7 +237,7 @@ test('telephone field includes checkPosition method for dropdown', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -257,7 +257,7 @@ test('telephone field includes setSelectedOption method', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -277,7 +277,7 @@ test('telephone field includes keyboard navigation', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);
@@ -298,7 +298,7 @@ test('telephone field includes focus trap', function () {
                 'type' => 'text',
                 'input_type' => 'tel',
                 'display' => 'Phone Number',
-                'improved_fieldtypes' => true,
+                'improved_field' => true,
             ],
         ],
     ]);

@@ -39,10 +39,76 @@ class ServiceProvider extends AddonServiceProvider
     public function addConfigOptions()
     {
         Text::appendConfigFields([
-            'improved_fieldtypes' => [
+            'easy_forms' => [
+                'type' => 'section',
+                'display' => 'Easy Forms',
+            ],
+            'improved_field' => [
                 'type' => 'toggle',
-                'display' => 'Enable Improved Fieldtypes',
-                'description' => 'Enable dictionary for supported input types (eg. date, tel)',
+                'display' => 'Enable Improved Fields',
+                'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
+            ],
+            'date_config' => [
+                'type' => 'section',
+                'display' => 'Date config',
+                'if' => [
+                    'input_type' => 'is date'
+                ]
+            ],
+            'date_range' => [
+                'type' => 'toggle',
+                'display' => 'Date range',
+                'instructions' => 'The datepicker will select a date range instead of a single day',
+                'if' => [
+                    'input_type' => 'is date'
+                ]
+            ],
+            'max_range' => [
+                'type' => 'integer',
+                'display' => 'Max range',
+                'instructions' => 'The maximum amount of days allowed when range mode is enabled',
+                'if' => [
+                    'input_type' => 'is date',
+                    'date_range' => 'is true',
+                ]
+            ],
+            'min_date_today' => [
+                'type' => 'integer',
+                'display' => 'Minimum date relative to today',
+                'instructions' => 'Set to 0 for using today as minimum date or an integer to add days',
+                'if' => [
+                    'input_type' => 'is date'
+                ]
+            ],
+            'max_date_today' => [
+                'type' => 'integer',
+                'display' => 'Maximum date relative to today',
+                'instructions' => 'Set to 0 for using today as maximum date or an integer to add days',
+                'if' => [
+                    'input_type' => 'is date'
+                ]
+            ],
+            'min_date' => [
+                'type' => 'date',
+                'display' => 'Minimum date',
+                'instructions' => 'The minimum date allowed in the datepicker',
+                'if' => [
+                    'input_type' => 'is date'
+                ],
+                'unless' => [
+                    'min_date_today' => 'not null'
+                ]
+            ],
+            'max_date' => [
+                'type' => 'date',
+                'display' => 'Maximum date',
+                'instructions' => 'The maximum date allowed in the datepicker',
+                'if' => [
+                    'input_type' => 'is date'
+                ],
+                'unless' => [
+                    'max_date_today' => 'not null'
+                ]
             ],
         ]);
     }

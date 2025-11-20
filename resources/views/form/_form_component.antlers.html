@@ -46,16 +46,23 @@
         {{ /if }}
 
         {{# Simple text input #}}
-        {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') || (input_type == 'tel' && type == 'text' && !improved_fieldtypes) }}
+        {{ if (input_type == 'text' && type == 'text') || (input_type == 'email' && type == 'text') || (input_type == 'tel' && type == 'text' && !improved_field) || (input_type == 'date' && type == 'text' && !improved_field) }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/text }}
         </div>
         {{ /if }}
 
         {{# Date #}}
-        {{ if input_type == 'date' && type == 'text' }}
+        {{ if input_type == 'date' && type == 'text' && improved_field }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/date }}
+        </div>
+        {{ /if }}
+
+        {{# Phone #}}
+        {{ if input_type == 'tel' && type == 'text' && improved_field }}
+        <div>
+            {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
         </div>
         {{ /if }}
 
@@ -112,13 +119,6 @@
         {{ if type == 'dictionary' && dictionary !== 'country_phone_codes' }}
         <div>
             {{ partial:statamic-easy-forms::form/fieldtypes/dictionary }}
-        </div>
-        {{ /if }}
-
-        {{# Phone #}}
-        {{ if input_type == 'tel' && type == 'text' && improved_fieldtypes }}
-        <div>
-            {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
         </div>
         {{ /if }}
 

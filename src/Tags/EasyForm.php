@@ -109,7 +109,7 @@ class EasyForm extends Tags
             ->all();
 
         // Inject phone codes
-        if ($field->get('input_type') === 'tel' && $field->get('improved_fieldtypes') === true) {
+        if ($field->get('input_type') === 'tel' && $field->get('improved_field') === true) {
             $configDefaults['options'] = $this->getDictionaryOptions('country_phone_codes');
         }
 

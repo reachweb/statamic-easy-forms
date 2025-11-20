@@ -6,14 +6,26 @@
         showDatepicker: false,
         showYearPicker: false,
         
-        // Config
-        mode: '{{ if prepend === 'range'}}range{{ else }}single{{ /if }}',
-        minDateStr: '{{ min_date ?? "" }}',
-        maxDateStr: '{{ max_date ?? "" }}',
+        // --- Configuration ---
+        mode: '{{ if date_range }}range{{ else }}single{{ /if }}',
         
-        // Internal State
+        // Static dates (Strings)
+        configMinDateStr: '{{ min_date ?? "" }}',
+        configMaxDateStr: '{{ max_date ?? "" }}',
+        
+        // Relative dates (Integers)
+        configMinDateToday: {{ if min_date_today !== null }}{{ min_date_today }}{{ else }}null{{ /if }},
+        configMaxDateToday: {{ if max_date_today !== null }}{{ max_date_today }}{{ else }}null{{ /if }},
+        
+        // Range limit
+        maxRange: {{ max_range ?? 'null' }},
+        
+        // --- Internal State ---
         dateFrom: null,
         dateTo: null,
+        hoverDate: null,
+        minDateObj: null,
+        maxDateObj: null,
         month: '',
         year: '',
         no_of_days: [],
@@ -24,19 +36,87 @@
 
         init() {
             let today = new Date();
+            today.setHours(0,0,0,0);
+
+            // Calculate Minimum Date
+            if (this.configMinDateToday !== null) {
+                this.minDateObj = new Date(today);
+                let offset = parseInt(this.configMinDateToday);
+                this.minDateObj.setDate(today.getDate() + offset);
+            } else if (this.configMinDateStr) {
+                this.minDateObj = new Date(this.configMinDateStr);
+            }
+            if (this.minDateObj) this.minDateObj.setHours(0,0,0,0);
+
+            // Calculate Maximum Date
+            if (this.configMaxDateToday !== null) {
+                this.maxDateObj = new Date(today);
+                let offset = parseInt(this.configMaxDateToday);
+                this.maxDateObj.setDate(today.getDate() + offset);
+            } else if (this.configMaxDateStr) {
+                this.maxDateObj = new Date(this.configMaxDateStr);
+            }
+            if (this.maxDateObj) this.maxDateObj.setHours(0,0,0,0);
+
+            // Set initial view to Today (default)
             this.month = today.getMonth();
             this.year = today.getFullYear();
             
-            if(this.minDateStr) {
-                let minD = new Date(this.minDateStr);
-                if(minD > today) {
-                    this.month = minD.getMonth();
-                    this.year = minD.getFullYear();
-                }
+            // If minDate is in the future, shift view there
+            if(this.minDateObj && this.minDateObj > today) {
+                this.month = this.minDateObj.getMonth();
+                this.year = this.minDateObj.getFullYear();
             }
 
+            // Parse existing value (Overrides Today/MinDate view if value exists)
+            this.parseSelectedDate();
+
+            // Generate grid
             this.generateDays();
             this.generateYears();
+
+            // Watch for changes to input (e.g. form reset or manual change)
+            this.$watch('selectedDate', () => {
+                this.parseSelectedDate();
+                this.generateDays();
+            });
+        },
+
+        // Restores state from the string value
+        parseSelectedDate() {
+            if (!this.selectedDate) {
+                this.dateFrom = null;
+                this.dateTo = null;
+                return;
+            }
+
+            // Safe parser (avoids timezone shifts)
+            const parse = (str) => {
+                if(!str) return null;
+                const [y, m, d] = str.split('-').map(Number);
+                return new Date(y, m - 1, d);
+            };
+
+            if (this.mode === 'range' && this.selectedDate.includes(' - ')) {
+                const parts = this.selectedDate.split(' - ');
+                this.dateFrom = parse(parts[0]);
+                this.dateTo = parse(parts[1]);
+            } else {
+                this.dateFrom = parse(this.selectedDate);
+            }
+
+            // Sync Calendar View to the selected date
+            if (this.dateFrom) {
+                this.month = this.dateFrom.getMonth();
+                this.year = this.dateFrom.getFullYear();
+            }
+        },
+
+        // --- Helper to determine the effective 'End Date' for styling (Actual or Hover) ---
+        get effectiveEnd() {
+            if (this.dateTo) return this.dateTo;
+            if (this.dateFrom && this.hoverDate) return this.hoverDate;
+            return null;
         },
 
         // --- Logic ---
@@ -45,38 +125,72 @@
             const d = new Date(this.year, this.month, date);
             d.setHours(0,0,0,0);
 
-            if (this.minDateStr) {
-                const min = new Date(this.minDateStr);
-                min.setHours(0,0,0,0);
-                if (d < min) return false;
+            // Global Min/Max
+            if (this.minDateObj && d < this.minDateObj) return false;
+            if (this.maxDateObj && d > this.maxDateObj) return false;
+
+            // Max Range Check (using effective end to show invalid state on hover)
+            if (this.mode === 'range' && this.maxRange && this.dateFrom && !this.dateTo) {
+                const diffTime = Math.abs(d - this.dateFrom);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+                if (diffDays >= this.maxRange) return false;
             }
-            if (this.maxDateStr) {
-                const max = new Date(this.maxDateStr);
-                max.setHours(0,0,0,0);
-                if (d > max) return false;
-            }
+
             return true;
         },
 
-        isSelected(date) {
+        // Check if exact Start Date
+        isStart(date) {
             if (!this.dateFrom) return false;
             const d = new Date(this.year, this.month, date);
+            d.setHours(0,0,0,0);
+            return d.getTime() === this.dateFrom.getTime();
+        },
+
+        // Check if exact End Date (or Hover End)
+        isEnd(date) {
+            const effective = this.effectiveEnd;
+            if (!effective) return false;
             
-            if (this.mode === 'single') {
-                 return d.toDateString() === this.dateFrom.toDateString();
-            }
-            if (this.dateFrom.getTime() === d.getTime()) return true;
-            if (this.dateTo && this.dateTo.getTime() === d.getTime()) return true;
-            return false;
+            const d = new Date(this.year, this.month, date);
+            d.setHours(0,0,0,0);
+            
+            // Handle backwards hover/selection
+            const start = this.dateFrom < effective ? this.dateFrom : effective;
+            const end = this.dateFrom < effective ? effective : this.dateFrom;
+
+            return d.getTime() === end.getTime();
+        },
+
+        // Check if Start (for styling logic, handles swap)
+        isVisualStart(date) {
+            const effective = this.effectiveEnd;
+            if (!this.dateFrom) return false;
+            
+            const d = new Date(this.year, this.month, date);
+            d.setHours(0,0,0,0);
+            
+            if (!effective) return d.getTime() === this.dateFrom.getTime();
+
+            const start = this.dateFrom < effective ? this.dateFrom : effective;
+            return d.getTime() === start.getTime();
         },
 
         isInRange(date) {
-            if (this.mode === 'single' || !this.dateFrom || !this.dateTo) return false;
+            if (this.mode === 'single' || !this.dateFrom) return false;
+            const effective = this.effectiveEnd;
+            if (!effective) return false;
+
             const d = new Date(this.year, this.month, date);
-            return d > this.dateFrom && d < this.dateTo;
+            d.setHours(0,0,0,0);
+
+            // Sort dates to handle backwards selection
+            const start = this.dateFrom < effective ? this.dateFrom : effective;
+            const end = this.dateFrom < effective ? effective : this.dateFrom;
+
+            return d > start && d < end;
         },
 
-        // Accessibility Helper: Returns '12 November 2024' for screen readers
         getAriaLabel(date) {
             return date + ' ' + this.MONTH_NAMES[this.month] + ' ' + this.year;
         },
@@ -85,6 +199,7 @@
             if (!this.isAllowed(date)) return;
 
             let selectedDateObj = new Date(this.year, this.month, date);
+            selectedDateObj.setHours(0,0,0,0);
 
             if (this.mode === 'single') {
                 this.dateFrom = selectedDateObj;
@@ -92,10 +207,22 @@
                 this.showDatepicker = false;
             } else {
                 if (!this.dateFrom || (this.dateFrom && this.dateTo)) {
+                    // Start Selection
                     this.dateFrom = selectedDateObj;
                     this.dateTo = null;
+                    this.hoverDate = null;
                 } else {
+                    // End Selection
                     if (selectedDateObj < this.dateFrom) {
+                        if (this.maxRange) {
+                            const diffTime = Math.abs(selectedDateObj - this.dateFrom);
+                            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                            if (diffDays >= this.maxRange) {
+                                this.dateFrom = selectedDateObj;
+                                this.dateTo = null;
+                                return; 
+                            }
+                        }
                         this.dateTo = this.dateFrom;
                         this.dateFrom = selectedDateObj;
                     } else {
@@ -103,6 +230,7 @@
                     }
                     this.updateValue();
                     this.showDatepicker = false;
+                    this.hoverDate = null;
                 }
             }
         },
@@ -122,6 +250,7 @@
         resetDate() {
             this.dateFrom = null;
             this.dateTo = null;
+            this.hoverDate = null;
             this.selectedDate = '';
         },
 
@@ -149,6 +278,14 @@
             let currentYear = new Date().getFullYear();
             for (let i = currentYear - 50; i <= currentYear + 10; i++) {
                 this.years.push(i);
+            }
+        },
+
+        setHover(date) {
+            if (this.mode === 'range' && this.dateFrom && !this.dateTo) {
+                 let d = new Date(this.year, this.month, date);
+                 d.setHours(0,0,0,0);
+                 this.hoverDate = d;
             }
         }
     }"
@@ -235,30 +372,44 @@
 
         <div x-show="!showYearPicker">
             <div class="grid grid-cols-7 mb-2">
-                <template x-for="day in DAYS" x-bind:key="day">	
+                <template x-for="day in DAYS" x-bind:key="day"> 
                     <div class="text-center text-xs font-medium text-gray-500" x-text="day"></div>
                 </template>
             </div>
 
-            <div class="grid grid-cols-7 gap-1">
+            <div class="grid grid-cols-7 gap-y-1">
                 <template x-for="blank in blankdays">
                     <div class="p-1"></div>
-                </template>	
+                </template> 
                 
-                <template x-for="date in no_of_days" x-bind:key="date">	
+                <template x-for="date in no_of_days" x-bind:key="date"> 
                     <button
                         type="button"
                         x-on:click="selectDate(date)"
+                        x-on:mouseenter="setHover(date)"
                         x-text="date"
                         x-bind:disabled="!isAllowed(date)"
                         x-bind:aria-label="getAriaLabel(date)"
-                        x-bind:aria-selected="isSelected(date)"
-                        class="aspect-square w-full flex items-center justify-center text-sm rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
+                        class="aspect-square w-full flex items-center justify-center text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
                         x-bind:class="{
                             'text-gray-300 cursor-not-allowed opacity-50': !isAllowed(date),
-                            'bg-blue-600 text-white': isSelected(date),
+                            // Single Date Mode or Start without End
+                            'bg-blue-600 text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd),
+                            
+                            // Range Start (Rounded Left only)
+                            'bg-blue-600 text-white rounded-l-full rounded-r-none': mode === 'range' && isVisualStart(date) && effectiveEnd && !isEnd(date),
+                            
+                            // Range End (Rounded Right only)
+                            'bg-blue-600 text-white rounded-r-full rounded-l-none': mode === 'range' && isEnd(date) && isVisualStart(date) === false,
+
+                            // Exact Match Start & End (e.g. 1 day range)
+                            'bg-blue-600 text-white rounded-full': mode === 'range' && isVisualStart(date) && isEnd(date),
+                            
+                            // In Range (Square)
                             'bg-blue-100 text-blue-800 rounded-none': isInRange(date),
-                            'hover:bg-blue-100 text-gray-700': !isSelected(date) && !isInRange(date) && isAllowed(date)
+                            
+                            // Hover states for unselected
+                            'hover:bg-blue-100 text-gray-700 rounded-full': !isVisualStart(date) && !isEnd(date) && !isInRange(date) && isAllowed(date)
                         }"
                     ></button>
                 </template>
