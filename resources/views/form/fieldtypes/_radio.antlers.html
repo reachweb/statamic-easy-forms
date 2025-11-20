@@ -1,8 +1,8 @@
-<div 
+<div
     class="flex flex-col md:flex-row gap-2"
     x-data="{
         selected: null,
-        
+
         init() {
             this.$el.addEventListener('change', (e) => {
                 if (e.target.type === 'radio') {
@@ -10,25 +10,25 @@
                 }
             });
         }
-    }" 
-    x-modelable="selected" 
+    }"
+    x-modelable="selected"
     x-model="submitFields['{{ handle }}']"
     role="radiogroup"
     aria-labelledby="{{ handle }}-label"
     {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >
     {{ foreach:options }}
-        <label 
-            for="{{ handle }}_{{ key }}" 
-            class="flex w-full md:flex-1 items-center justify-center gap-2 py-2.5 px-4 text-center uppercase text-sm font-bold rounded-lg 
-            bg-gray-50 border border-gray-300 mr-0 md:mr-4 last:mr-0 cursor-pointer transition-colors duration-500 
-            has-[:checked]:!bg-form-main has-[:checked]:text-white has-[:focus]:ring-1 has-[:focus]:ring-form-main has-[:focus]:ring-offset-1"
+        <label
+            for="{{ handle }}_{{ key }}"
+            class="flex w-full md:flex-1 items-center justify-center gap-2 py-2.5 px-4 text-center uppercase text-ef font-bold rounded-ef
+            bg-ef-input-bg border border-ef-border mr-0 md:mr-4 last:mr-0 cursor-pointer transition-colors duration-500
+            has-[:checked]:!bg-ef-checkbox-checked has-[:checked]:text-ef-text-white has-[:focus]:ring-1 has-[:focus]:ring-ef-focus has-[:focus]:ring-offset-1"
         >
-            <input 
-                id="{{ handle }}_{{ key }}" 
-                type="radio" 
-                name="{{ handle }}" 
-                value="{{ key }}" 
+            <input
+                id="{{ handle }}_{{ key }}"
+                type="radio"
+                name="{{ handle }}"
+                value="{{ key }}"
                 class="sr-only"
                 x-model="selected"
                 {{ if key == default }}checked{{ /if }}
