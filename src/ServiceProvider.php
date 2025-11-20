@@ -52,16 +52,16 @@ class ServiceProvider extends AddonServiceProvider
                 'type' => 'section',
                 'display' => 'Datepicker config',
                 'if' => [
-                    'input_type' => 'is date'
-                ]
+                    'input_type' => 'is date',
+                ],
             ],
             'date_range' => [
                 'type' => 'toggle',
                 'display' => 'Date range',
                 'instructions' => 'The datepicker will select a date range instead of a single day',
                 'if' => [
-                    'input_type' => 'is date'
-                ]
+                    'input_type' => 'is date',
+                ],
             ],
             'max_range' => [
                 'type' => 'integer',
@@ -70,53 +70,53 @@ class ServiceProvider extends AddonServiceProvider
                 'if' => [
                     'input_type' => 'is date',
                     'date_range' => 'is true',
-                ]
+                ],
             ],
             'min_date_today' => [
                 'type' => 'integer',
                 'display' => 'Minimum date relative to today',
                 'instructions' => 'Set to 0 for using today as minimum date or an integer to add days',
                 'if' => [
-                    'input_type' => 'is date'
-                ]
+                    'input_type' => 'is date',
+                ],
             ],
             'max_date_today' => [
                 'type' => 'integer',
                 'display' => 'Maximum date relative to today',
                 'instructions' => 'Set to 0 for using today as maximum date or an integer to add days',
                 'if' => [
-                    'input_type' => 'is date'
-                ]
+                    'input_type' => 'is date',
+                ],
             ],
             'min_date' => [
                 'type' => 'date',
                 'display' => 'Minimum date',
                 'instructions' => 'The minimum date allowed in the datepicker',
                 'if' => [
-                    'input_type' => 'is date'
+                    'input_type' => 'is date',
                 ],
                 'unless' => [
-                    'min_date_today' => 'not null'
-                ]
+                    'min_date_today' => 'not null',
+                ],
             ],
             'max_date' => [
                 'type' => 'date',
                 'display' => 'Maximum date',
                 'instructions' => 'The maximum date allowed in the datepicker',
                 'if' => [
-                    'input_type' => 'is date'
+                    'input_type' => 'is date',
                 ],
                 'unless' => [
-                    'max_date_today' => 'not null'
-                ]
+                    'max_date_today' => 'not null',
+                ],
             ],
             'dont_close_after_selection' => [
                 'type' => 'toggle',
                 'display' => 'Don\'t close after selection',
                 'instructions' => 'Do not close the datepicker after the user selects a date',
                 'if' => [
-                    'input_type' => 'is date'
-                ]
+                    'input_type' => 'is date',
+                ],
             ],
         ]);
     }
