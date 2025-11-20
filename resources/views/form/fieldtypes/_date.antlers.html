@@ -302,12 +302,12 @@
 >
     <div class="relative">
         <div class="absolute inset-y-0 start-0 ps-2.5 flex items-center pointer-events-none" aria-hidden="true">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-gray-500">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-ef-icon">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
             </svg>
         </div>
 
-        <input 
+        <input
             x-ref="dateInput"
             type="text"
             readonly
@@ -318,7 +318,7 @@
             aria-haspopup="dialog"
             aria-label="Choose date"
             placeholder="{{ placeholder ?? "Please select" | trans }}"
-            class="form-input cursor-pointer bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:border-form-main focus:ring-2 focus:ring-form-main focus:outline-none block w-full py-2.5 px-10"
+            class="form-input cursor-pointer bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full py-2.5 px-10"
         />
 
         <button
@@ -327,7 +327,7 @@
             x-on:click="resetDate()"
             x-cloak
             aria-label="Clear date"
-            class="absolute inset-y-0 end-0 flex z-10 items-center pe-2.5 cursor-pointer text-form-main hover:text-gray-700 focus:outline-none focus:text-gray-900"
+            class="absolute inset-y-0 end-0 flex z-10 items-center pe-2.5 cursor-pointer text-ef-accent hover:text-ef-text-muted focus:outline-none focus:text-ef-text"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
                 <path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M18 6l-12 12" /><path d="M6 6l12 12" />
@@ -335,52 +335,52 @@
         </button>
     </div>
 
-    <div 
+    <div
         x-show="showDatepicker"
         x-transition
         x-cloak
         role="dialog"
         aria-modal="true"
         aria-label="Calendar"
-        class="absolute top-full mt-1 left-0 z-50 bg-white rounded-lg shadow-xl border border-gray-200 p-4 w-72"
+        class="absolute top-full mt-1 left-0 z-50 bg-ef-text-white rounded-ef shadow-xl border border-ef-border p-4 w-72"
     >
         <div class="flex justify-between items-center mb-4">
             <div>
-                <span x-text="MONTH_NAMES[month]" class="text-base font-bold text-gray-800"></span>
-                <button 
+                <span x-text="MONTH_NAMES[month]" class="text-base font-bold text-ef-text"></span>
+                <button
                     type="button"
-                    x-text="year" 
+                    x-text="year"
                     x-on:click="showYearPicker = !showYearPicker"
                     aria-label="Select year"
-                    class="ml-1 text-base text-gray-600 font-normal cursor-pointer hover:text-blue-600 hover:underline focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-1">
+                    class="ml-1 text-base text-ef-text-muted font-normal cursor-pointer hover:text-ef-accent hover:underline focus:outline-none focus:ring-2 focus:ring-ef-focus rounded px-1">
                 </button>
             </div>
             <div>
-                <button type="button" aria-label="Previous month" class="p-1 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" x-on:click="changeMonth(-1)" x-bind:disabled="showYearPicker">
-                    <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                <button type="button" aria-label="Previous month" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(-1)" x-bind:disabled="showYearPicker">
+                    <svg class="h-5 w-5 text-ef-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
-                <button type="button" aria-label="Next month" class="p-1 hover:bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500" x-on:click="changeMonth(1)" x-bind:disabled="showYearPicker">
-                    <svg class="h-5 w-5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                <button type="button" aria-label="Next month" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(1)" x-bind:disabled="showYearPicker">
+                    <svg class="h-5 w-5 text-ef-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>
         </div>
 
         <div x-show="showYearPicker" class="h-64 overflow-y-auto grid grid-cols-4 gap-2">
             <template x-for="y in years" x-bind:key="y">
-                <button 
+                <button
                     type="button"
-                    x-on:click="selectYear(y)" 
-                    x-text="y" 
-                    class="text-center text-sm py-2 rounded hover:bg-blue-100 focus:outline-none focus:ring-2 focus:ring-blue-500" 
-                    x-bind:class="{'bg-blue-500 text-white': year == y}"
+                    x-on:click="selectYear(y)"
+                    x-text="y"
+                    class="text-center text-ef py-2 rounded hover:bg-ef-subtle focus:outline-none focus:ring-2 focus:ring-ef-focus"
+                    x-bind:class="{'bg-ef-accent text-ef-text-white': year == y}"
                 ></button>
             </template>
         </div>
 
         <div x-show="!showYearPicker">
             <div class="grid grid-cols-7 mb-2">
-                <template x-for="day in DAYS" x-bind:key="day"> 
-                    <div class="text-center text-xs font-medium text-gray-500" x-text="day"></div>
+                <template x-for="day in DAYS" x-bind:key="day">
+                    <div class="text-center text-ef-xs font-medium text-ef-text-muted" x-text="day"></div>
                 </template>
             </div>
 
@@ -389,7 +389,7 @@
                     <div class="p-1"></div>
                 </template> 
                 
-                <template x-for="date in no_of_days" x-bind:key="date"> 
+                <template x-for="date in no_of_days" x-bind:key="date">
                     <button
                         type="button"
                         x-on:click="selectDate(date)"
@@ -397,24 +397,24 @@
                         x-text="date"
                         x-bind:disabled="!isAllowed(date)"
                         x-bind:aria-label="getAriaLabel(date)"
-                        class="aspect-square w-full flex items-center justify-center text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-blue-500"
+                        class="aspect-square w-full flex items-center justify-center text-ef transition-colors focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-ef-focus"
                         x-bind:class="{
-                            'text-gray-300 cursor-not-allowed opacity-50': !isAllowed(date),
+                            'text-ef-disabled cursor-not-allowed opacity-50': !isAllowed(date),
 
                             // Single Date Mode or Exact Match Start & End (e.g. 1 day range) or Start without End
-                            'bg-blue-600 text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd) || (mode === 'range' && isVisualStart(date) && isEnd(date)),
+                            'bg-ef-accent text-ef-text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd) || (mode === 'range' && isVisualStart(date) && isEnd(date)),
 
                             // Range Start (Rounded Left only)
-                            'bg-blue-600 text-white rounded-l-full rounded-r-none': mode === 'range' && isVisualStart(date) && effectiveEnd && !isEnd(date),
+                            'bg-ef-accent text-ef-text-white rounded-l-full rounded-r-none': mode === 'range' && isVisualStart(date) && effectiveEnd && !isEnd(date),
 
                             // Range End (Rounded Right only)
-                            'bg-blue-600 text-white rounded-r-full rounded-l-none': mode === 'range' && isEnd(date) && isVisualStart(date) === false,
+                            'bg-ef-accent text-ef-text-white rounded-r-full rounded-l-none': mode === 'range' && isEnd(date) && isVisualStart(date) === false,
 
                             // In Range (Square)
-                            'bg-blue-100 text-blue-800 rounded-none': isInRange(date),
+                            'bg-ef-subtle text-ef-text rounded-none': isInRange(date),
 
                             // Hover states for unselected
-                            'hover:bg-blue-100 text-gray-700 rounded-full': !isVisualStart(date) && !isEnd(date) && !isInRange(date) && isAllowed(date)
+                            'hover:bg-ef-subtle text-ef-text-muted rounded-full': !isVisualStart(date) && !isEnd(date) && !isInRange(date) && isAllowed(date)
                         }"
                     ></button>
                 </template>

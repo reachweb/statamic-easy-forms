@@ -1,0 +1,60 @@
+@theme {
+    /* --- Colors --- */
+    --color-ef-accent: var(--color-sky-700); /* Main accent color */
+    --color-ef-accent-hover: var(--color-sky-800); /* Accent hover state */
+    --color-ef-subtle: color-mix(in oklab, var(--color-gray-900) 5%, transparent); /* Subtle backgrounds */
+
+    --color-ef-text: var(--color-gray-900); /* Main text color */
+    --color-ef-text-muted: var(--color-gray-500); /* Muted/secondary text */
+    --color-ef-text-white: var(--color-white); /* White text for buttons */
+
+    --color-ef-input-bg: var(--color-gray-50); /* Input background */
+    --color-ef-input-text: var(--color-gray-900); /* Input text color */
+    --color-ef-border: var(--color-gray-300); /* Border color */
+    --color-ef-border-hover: var(--color-gray-400); /* Border hover state */
+
+    /* --- State Colors --- */
+    --color-ef-focus: var(--color-ef-accent); /* Focus ring color - uses accent */
+    --color-ef-error: var(--color-red-600); /* Error messages and states */
+    --color-ef-disabled: var(--color-gray-300); /* Disabled state */
+
+    /* --- Button Colors --- */
+    --color-ef-button-bg: var(--color-ef-accent); /* Submit button background - uses accent */
+    --color-ef-button-bg-hover: var(--color-ef-accent-hover); /* Submit button hover - uses accent hover */
+    --color-ef-button-text: var(--color-white); /* Submit button text */
+
+    /* --- Checkbox/Radio/Toggle Colors --- */
+    --color-ef-checkbox-bg: var(--color-gray-50); /* Checkbox/radio background */
+    --color-ef-checkbox-border: var(--color-gray-300); /* Checkbox/radio border */
+    --color-ef-checkbox-checked: var(--color-ef-accent); /* Checked state - uses accent */
+
+    --color-ef-toggle-off: var(--color-gray-500); /* Toggle off state */
+    --color-ef-toggle-on: var(--color-ef-accent); /* Toggle on state - uses accent */
+
+    /* --- Dropdown/Combobox --- */
+    --color-ef-dropdown-bg: var(--color-gray-50); /* Dropdown background */
+    --color-ef-dropdown-hover: color-mix(in oklab, var(--color-gray-900) 5%, transparent); /* Dropdown hover */
+    --color-ef-dropdown-border: var(--color-gray-300); /* Dropdown border */
+
+    /* --- Special Elements --- */
+    --color-ef-label: var(--color-gray-900); /* Label text color */
+    --color-ef-icon: var(--color-gray-500); /* Icon color */
+    --color-ef-placeholder: var(--color-gray-400); /* Placeholder text */
+
+    /* --- Border & Spacing --- */
+    --ef-border-width: 1px; /* Main border width */
+    --radius-ef: var(--radius-lg); /* Border radius for inputs */
+    --radius-ef-sm: var(--radius-sm); /* Border radius for checkboxes */
+    --radius-ef-full: var(--radius-full); /* Full rounded (pills) */
+
+    /* --- Typography --- */
+    --text-ef: var(--text-sm); /* Main text size */
+    --text-ef-xs: var(--text-xs); /* Extra small text */
+    --text-ef-lg: var(--text-lg); /* Large text */
+    --text-ef-xl: var(--text-xl); /* Extra large text */
+
+    /* --- Spacing --- */
+    --spacing-ef: calc(var(--spacing) * 2.5); /* Standard spacing */
+    --spacing-ef-sm: calc(var(--spacing) * 1.5); /* Small spacing */
+    --spacing-ef-lg: calc(var(--spacing) * 3.5); /* Large spacing */
+}

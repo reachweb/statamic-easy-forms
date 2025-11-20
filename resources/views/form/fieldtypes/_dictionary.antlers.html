@@ -1,4 +1,4 @@
-<div 
+<div
     x-data="{
         options: {{ options | to_json | entities }},
         comboboxData: {{ options | to_json | entities }},
@@ -7,20 +7,20 @@
         openUpwards: false,
         openedWithKeyboard: false,
         selectedOption: null,
-        
+
         get selectedLabel() {
             return this.options[this.selectedOption]
         },
-        
+
         setSelectedOption(index) {
             this.selectedOption = index
             this.isOpen = false
             this.openedWithKeyboard = false
         },
-        
+
         getFilteredOptions(query) {
             this.options = Object.entries(this.comboboxData)
-                .filter(([key, value]) => 
+                .filter(([key, value]) =>
                     value.toLowerCase().includes(query.toLowerCase())
                 )
                 .reduce((obj, [key, value]) => {
@@ -33,7 +33,7 @@
                 this.$refs.noResultsMessage.classList.add('hidden')
             }
         },
-        
+
         handleKeydownOnOptions(event) {
             if ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8) {
                 this.$refs.searchField.focus()
@@ -51,9 +51,9 @@
     x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
 >
     <div class="relative">
-        <button 
+        <button
             type="button"
-            class="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-form-main focus:border-form-main w-full p-2.5 inline-flex items-center justify-between gap-2 font-medium tracking-wide transition hover:bg-gray-100 focus:outline-none focus:ring-2"
+            class="bg-ef-dropdown-bg border border-ef-dropdown-border text-ef-input-text rounded-ef focus:ring-ef-focus focus:border-ef-focus w-full p-2.5 inline-flex items-center justify-between gap-2 font-medium tracking-wide transition hover:bg-ef-dropdown-hover focus:outline-none focus:ring-2"
             role="combobox"
             aria-controls="list"
             aria-haspopup="listbox"
@@ -66,15 +66,15 @@
             x-bind:aria-label="selectedOption ? selectedLabel : '{{ "Please select" | trans }}'"
         >
             <span class="font-normal" x-text="selectedOption ? selectedLabel : '{{ "Please select" | trans }}'"></span>
-            <svg class="size-5 text-gray-900" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+            <svg class="size-5 text-ef-input-text" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
             </svg>
         </button>
 
-        <div 
+        <div
             x-show="isOpen || openedWithKeyboard"
             id="statesList"
-            class="absolute left-0 z-10 w-full overflow-hidden rounded-lg border border-gray-300 bg-gray-50"
+            class="absolute left-0 z-10 w-full overflow-hidden rounded-ef border border-ef-dropdown-border bg-ef-dropdown-bg"
             x-bind:class="openUpwards ? 'bottom-full' : 'top-11'"
             role="listbox"
             aria-label="list"
@@ -86,12 +86,12 @@
             x-trap="openedWithKeyboard"
         >
             <div class="relative">
-                <svg class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-gray-600/50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" aria-hidden="true">
+                <svg class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-ef-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" aria-hidden="true">
                     <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"/>
                 </svg>
-                <input 
+                <input
                     type="text"
-                    class="w-full border-b border-gray-300 bg-gray-50 py-2.5 pl-11 pr-4 text-sm text-gray-600 focus:border-form-main focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
+                    class="w-full border-b border-ef-dropdown-border bg-ef-dropdown-bg py-2.5 pl-11 pr-4 text-ef text-ef-text-muted focus:border-ef-focus focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
                     name="searchField"
                     aria-label="Search"
                     x-on:input="getFilteredOptions($el.value)"
@@ -100,13 +100,13 @@
                     autocomplete="off"
                 />
             </div>
-            <ul class="flex max-h-44 flex-col overflow-y-auto bg-white">
-                <li class="hidden px-4 py-2 text-sm text-gray-600" x-ref="noResultsMessage">
+            <ul class="flex max-h-44 flex-col overflow-y-auto bg-ef-text-white">
+                <li class="hidden px-4 py-2 text-ef text-ef-text-muted" x-ref="noResultsMessage">
                     <span>{{ "No results found" | trans }}</span>
                 </li>
                 <template x-for="(item, index) in options" x-bind:key="index">
-                    <li 
-                        class="combobox-option inline-flex cursor-pointer justify-between gap-6 bg-gray-50 px-4 py-2 text-sm text-gray-600 hover:bg-gray-900/5 hover:text-gray-900 focus-visible:bg-gray-900/5 focus-visible:text-gray-900 focus-visible:outline-none"
+                    <li
+                        class="combobox-option inline-flex cursor-pointer justify-between gap-6 bg-ef-dropdown-bg px-4 py-2 text-ef text-ef-text-muted hover:bg-ef-dropdown-hover hover:text-ef-text focus-visible:bg-ef-dropdown-hover focus-visible:text-ef-text focus-visible:outline-none"
                         role="option"
                         x-on:click="setSelectedOption(index)"
                         x-on:keydown.enter="setSelectedOption(index)"
@@ -117,7 +117,7 @@
                             <span x-bind:class="selectedOption == index ? 'font-bold' : null" x-text="item"></span>
                             <span class="sr-only" x-text="selectedOption == index ? 'selected' : null"></span>
                         </div>
-                        <svg 
+                        <svg
                             x-cloak
                             x-show="selectedOption == index"
                             class="size-4"

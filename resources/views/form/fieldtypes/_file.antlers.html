@@ -56,15 +56,15 @@
 >
     <!-- Drag & Drop Zone -->
     <div
-        class="flex w-full flex-col items-center justify-center gap-2 rounded-lg border-2 border-dashed p-8 text-gray-700 transition-colors duration-200"
-        :class="isDragging ? 'border-form-main bg-form-main/5' : 'border-gray-300 bg-gray-50'"
+        class="flex w-full flex-col items-center justify-center gap-2 rounded-ef border-2 border-dashed p-8 text-ef-text transition-colors duration-200"
+        :class="isDragging ? 'border-ef-accent bg-ef-accent/5' : 'border-ef-border bg-ef-input-bg'"
         @dragover.prevent="isDragging = true"
         @dragleave.prevent="isDragging = false"
         @drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
         x-show="files.length === 0 || maxFiles > 1"
     >
         <!-- Upload Icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-12 h-12 opacity-75 text-gray-400">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-12 h-12 opacity-75 text-ef-icon">
             <path fill-rule="evenodd" d="M10.5 3.75a6 6 0 0 0-5.98 6.496A5.25 5.25 0 0 0 6.75 20.25H18a4.5 4.5 0 0 0 2.206-8.423 3.75 3.75 0 0 0-4.133-4.303A6.001 6.001 0 0 0 10.5 3.75Zm2.03 5.47a.75.75 0 0 0-1.06 0l-3 3a.75.75 0 1 0 1.06 1.06l1.72-1.72v4.94a.75.75 0 0 0 1.5 0v-4.94l1.72 1.72a.75.75 0 1 0 1.06-1.06l-3-3Z" clip-rule="evenodd"/>
         </svg>
 
@@ -72,7 +72,7 @@
         <div class="text-center">
             <label
                 for="{{ handle }}"
-                class="font-medium text-form-main hover:text-form-main/80 cursor-pointer focus-within:underline transition-colors duration-200"
+                class="font-medium text-ef-accent hover:text-ef-accent-hover cursor-pointer focus-within:underline transition-colors duration-200"
             >
                 <input
                     id="{{ handle }}"
@@ -91,7 +91,7 @@
 
         <!-- File Format Instructions -->
         {{ if instructions }}
-        <small id="{{ handle }}-formats" class="text-xs text-gray-600">
+        <small id="{{ handle }}-formats" class="text-ef-xs text-ef-text-muted">
             {{ instructions }}
         </small>
         {{ /if }}
@@ -100,17 +100,17 @@
     <!-- Selected Files List -->
     <div x-show="files.length > 0" class="mt-4 space-y-2" x-transition.opacity>
         <template x-for="(file, index) in files" :key="index">
-            <div class="flex items-center justify-between p-3 bg-gray-50 border border-gray-200 rounded-lg hover:border-form-main/30 transition-colors duration-200">
+            <div class="flex items-center justify-between p-3 bg-ef-input-bg border border-ef-border rounded-ef hover:border-ef-accent/30 transition-colors duration-200">
                 <div class="flex items-center space-x-3 flex-1 min-w-0">
                     <!-- File Icon -->
-                    <svg class="h-5 w-5 text-gray-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+                    <svg class="h-5 w-5 text-ef-icon flex-shrink-0" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
                     </svg>
 
                     <!-- File Info -->
                     <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-gray-900 truncate" x-text="file.name"></p>
-                        <p class="text-xs text-gray-500" x-text="formatFileSize(file.size)"></p>
+                        <p class="text-ef font-medium text-ef-text truncate" x-text="file.name"></p>
+                        <p class="text-ef-xs text-ef-text-muted" x-text="formatFileSize(file.size)"></p>
                     </div>
                 </div>
 
@@ -118,7 +118,7 @@
                 <button
                     type="button"
                     @click="removeFile(index)"
-                    class="ml-3 text-red-500 hover:text-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 rounded p-1 transition-colors duration-200"
+                    class="ml-3 text-ef-error hover:text-ef-error focus:outline-none focus:ring-2 focus:ring-ef-error focus:ring-offset-2 rounded p-1 transition-colors duration-200"
                     :aria-label="'Remove ' + file.name"
                 >
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
@@ -129,7 +129,7 @@
         </template>
 
         <!-- File Counter (for multiple files) -->
-        <div x-show="maxFiles > 1" class="mt-2 text-sm text-gray-600">
+        <div x-show="maxFiles > 1" class="mt-2 text-ef text-ef-text-muted">
             <span x-text="files.length"></span> {{ "of" | trans }} <span x-text="maxFiles"></span> {{ "max files" | trans }}
         </div>
     </div>

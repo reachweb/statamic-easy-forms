@@ -1,10 +1,10 @@
-<input 
-    x-mask="99:99" 
-    placeholder="hh:mm" 
-    class="form-input bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:border-form-main focus:ring-0 focus:outline-none block w-full p-2.5" 
-    id="{{ handle }}" 
+<input
+    x-mask="99:99"
+    placeholder="hh:mm"
+    class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-0 focus:outline-none block w-full p-2.5"
+    id="{{ handle }}"
     name="{{ handle }}"
-    type="text" 
+    type="text"
     inputmode="numeric"
     {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     autocomplete="off"
