@@ -45,8 +45,42 @@ class EasyForm extends Tags
             throw new \Exception("Form with handle [$handle] cannot be found.");
         }
 
-        // Get and process all fields from the blueprint
-        $processedFields = collect($form->blueprint()->fields()->all())
+        // Get blueprint contents to check for sections
+        $blueprint = $form->blueprint();
+        $contents = $blueprint->contents();
+
+        // Check if blueprint has sections
+        $hasSections = false;
+        $sections = [];
+
+        if (isset($contents['tabs'])) {
+            foreach ($contents['tabs'] as $tab) {
+                if (isset($tab['sections']) && is_array($tab['sections'])) {
+                    foreach ($tab['sections'] as $section) {
+                        if (isset($section['fields']) && is_array($section['fields'])) {
+                            $hasSections = true;
+                            $processedSectionFields = [];
+
+                            foreach ($section['fields'] as $fieldConfig) {
+                                $field = $blueprint->field($fieldConfig['handle']);
+                                if ($field) {
+                                    $processedSectionFields[] = $this->processField($field);
+                                }
+                            }
+
+                            $sections[] = [
+                                'display' => $section['display'] ?? null,
+                                'instructions' => $section['instructions'] ?? null,
+                                'fields' => $processedSectionFields,
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        // Fallback: Process all fields without sections (legacy support)
+        $processedFields = collect($blueprint->fields()->all())
             ->map(fn ($field) => $this->processField($field))
             ->values()
             ->all();
@@ -56,6 +90,8 @@ class EasyForm extends Tags
             'handle' => $form->handle(),
             'title' => $form->title(),
             'fields' => $processedFields,
+            'sections' => $sections,
+            'has_sections' => $hasSections,
             'honeypot' => $form->honeypot(),
             'action' => $form->actionUrl(),
             'method' => 'POST',
@@ -68,7 +104,7 @@ class EasyForm extends Tags
 
         // Allow custom view template
         $view = $this->params->get('view', 'form/_form_component');
-
+        
         return view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()
             ->render();

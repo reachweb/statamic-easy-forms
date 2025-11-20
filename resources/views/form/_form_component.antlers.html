@@ -14,120 +14,37 @@
     {{ /if }}
 
     <div
-        class="grid grid-cols-12 gap-6"
         x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
         x-show="! successMessage"
+        class="space-y-6 lg:space-y-10 divide-y divide-ef-border"
         x-transition.opacity
     >
-    {{ fields }}
-    <div
-        class="{{ if honeypot === handle || input_type === 'hidden' }}hidden{{ /if }}
-        {{ if width === 50 }}col-span-12 md:col-span-6{{ elseif width === 33 }}col-span-12 md:col-span-4{{ elseif width === 25 }}col-span-12 md:col-span-3{{ else }}col-span-12{{ /if }}"
-        x-show="shouldShowField('{{ handle }}')"
-    >
-        {{ unless type === 'toggle' || type === 'spacer' }}
-        <div class="flex items-center mb-2">
-            <label class="block font-semibold text-ef text-ef-label" for="{{ handle }}">
-                {{ display }}
-            </label>
-            {{ if optional }}
-            <span class="ml-2 text-ef text-ef-text-muted">
-                ({{ "Optional" | trans }})
-            </span>
-            {{ /if }}
-        </div>
-        {{ /unless }}
+        {{ if has_sections }}
+            {{ sections }}
+                <fieldset class="not-last:pb-6 not-last:lg:pb-10">
+                    {{ if display }}
+                    <legend class="text-ef-xl font-bold text-ef-label mb-1">{{ display }}</legend>
+                    {{ /if }}
+                    {{ if instructions }}
+                    <p class="text-ef-sm text-ef-text-muted mb-6">{{ instructions }}</p>
+                    {{ /if }}
 
-        {{ if instructions && (instructions_position === 'above' || ! instructions_position) && type !== 'toggle' && type !== 'spacer' }}
-        <div class="mb-3 text-ef text-ef-text">
-            {{ instructions }}
-        </div>
+                    <div class="grid grid-cols-12 gap-6">
+                        {{# Section fields #}}
+                        {{ fields }}
+                            {{ partial:statamic-easy-forms::form/field_wrapper }}
+                        {{ /fields }}
+                    </div>
+                </fieldset>
+            {{ /sections }}
+        {{ else }}
+            {{# Render fields without sections #}}
+            <div class="grid grid-cols-12 gap-6">
+                {{ fields }}
+                    {{ partial:statamic-easy-forms::form/field_wrapper }}
+                {{ /fields }}
+            </div>
         {{ /if }}
-
-        {{# Simple text input #}}
-        {{ if type == 'text' && (input_type == 'text' || input_type == 'email' || (input_type == 'tel' && !improved_field) || (input_type == 'date' && !improved_field)) }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/text }}
-        {{ /if }}
-
-        {{# Date #}}
-        {{ if input_type == 'date' && type == 'text' && improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/date }}
-        {{ /if }}
-
-        {{# Phone #}}
-        {{ if input_type == 'tel' && type == 'text' && improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/telephone }}
-        {{ /if }}
-
-        {{# Time #}}
-        {{ if input_type == 'time' && type == 'text' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/time }}
-        {{ /if }}
-
-        {{# Integer #}}
-        {{ if type == 'integer' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
-        {{ /if }}
-
-        {{# Radio #}}
-        {{ if type == 'radio' && !improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/radio }}
-        {{ /if }}
-
-        {{# Radio Improved #}}
-        {{ if type == 'radio' && improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/radio_improved }}
-        {{ /if }}
-
-        {{# Checkboxes #}}
-        {{ if type == 'checkboxes' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/checkboxes }}
-        {{ /if }}
-
-        {{# Select #}}
-        {{ if type == 'select' && !improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/select }}
-        {{ /if }}
-
-        {{# Select Improved #}}
-        {{ if type == 'select' && improved_field }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/select_improved }}
-        {{ /if }}
-
-        {{# Textarea #}}
-        {{ if type == 'textarea' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/textarea }}
-        {{ /if }}
-
-        {{# File Upload / Assets #}}
-        {{ if type == 'assets' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/file }}
-        {{ /if }}
-
-        {{# Dictionary #}}
-        {{ if type == 'dictionary' && dictionary !== 'country_phone_codes' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/dictionary }}
-        {{ /if }}
-
-        {{# Toggle #}}
-        {{ if type == 'toggle' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/toggle }}
-        {{ /if }}
-
-        {{# Spacer #}}
-        {{ if type == 'spacer' }}
-            {{ partial:statamic-easy-forms::form/fieldtypes/spacer }}
-        {{ /if }}
-
-        {{ if instructions && instructions_position === 'below' && type !== 'toggle' && type !== 'spacer' }}
-        <div class="mt-3 text-ef text-ef-text">
-            {{ instructions }}
-        </div>
-        {{ /if }}
-
-        <div class="mt-1 text-ef-error" x-show="'{{ handle }}' in errors" x-text="errors['{{ handle }}']" x-transition role="alert" aria-live="polite"></div>
-    </div>
-    {{ /fields }}
     </div>
 
     <div class="w-full" x-cloak x-show="! successMessage">
