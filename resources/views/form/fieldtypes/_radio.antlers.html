@@ -12,7 +12,7 @@
                 {{ if key == default }}checked{{ /if }}
             >
             <label class="ml-2 text-ef-text cursor-pointer" for="{{ handle }}_{{ key }}">
-                {{ value }}
+                {{ value ?? key }}
             </label>
         </div>
     {{ /foreach:options }}

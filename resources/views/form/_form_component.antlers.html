@@ -159,21 +159,21 @@
     {{ /fields }}
     </div>
 
-    <div class="w-full" x-show="! successMessage">
+    <div class="w-full" x-cloak x-show="! successMessage">
         <div class="my-1 text-center text-ef-error" x-show="fatalError" x-cloak>
             There is a technical problem with our form. Please contact us using email.
         </div>
     </div>
 
-    <div class="w-full py-4">
+    <div class="w-full pt-8 xl:pt-12">
         <button
-            class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none uppercase font-black rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
             x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
             type="submit"
             x-bind:disabled="disableSubmit"
             x-show="! successMessage"
         >
-            <span class="text-ef-lg xl:text-ef-xl uppercase">{{ "Submit" | trans }}</span>
+            <span class="text-ef-lg">{{ "Submit" | trans }}</span>
         </button>
     </div>
 

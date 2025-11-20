@@ -24,9 +24,9 @@
                 class="sr-only"
                 x-model="selected"
                 {{ if key == default }}checked{{ /if }}
-                aria-label="{{ value }}"
+                aria-label="{{ value ?? key }}"
             >
-            <span>{{ value }}</span>
+            <span>{{ value ?? key }}</span>
         </label>
     {{ /foreach:options }}
 </div>
