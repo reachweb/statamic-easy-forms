@@ -104,7 +104,7 @@ class EasyForm extends Tags
 
         // Allow custom view template
         $view = $this->params->get('view', 'form/_form_component');
-        
+
         return view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()
             ->render();

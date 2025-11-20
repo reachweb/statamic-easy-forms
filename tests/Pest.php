@@ -89,16 +89,7 @@ function createTestForm(string $handle = 'test_form', array $fields = []): \Stat
 
     if (! empty($fields)) {
         $contents = [
-            'tabs' => [
-                'main' => [
-                    'display' => 'Main',
-                    'sections' => [
-                        [
-                            'fields' => $fields,
-                        ],
-                    ],
-                ],
-            ],
+            'fields' => $fields,
         ];
 
         $blueprint = \Statamic\Facades\Blueprint::make($handle)->setContents($contents);
@@ -125,6 +116,53 @@ function createFieldDefinition(string $handle, string $type = 'text', array $con
             'display' => ucfirst($handle),
         ], $config),
     ], $config);
+}
+
+/**
+ * Create a test form with sections.
+ *
+ * @param  string  $handle  The form handle
+ * @param  array  $sections  Array of section definitions
+ */
+function createFormWithSections(string $handle = 'test_form', array $sections = []): \Statamic\Forms\Form
+{
+    $formConfig = [
+        'title' => 'Test Form',
+        'honeypot' => 'honeypot',
+    ];
+
+    $form = \Statamic\Facades\Form::make($handle)
+        ->title($formConfig['title'])
+        ->honeypot($formConfig['honeypot']);
+
+    $form->save();
+
+    if (! empty($sections)) {
+        $blueprintSections = [];
+
+        foreach ($sections as $section) {
+            $blueprintSections[] = [
+                'display' => $section['display'] ?? null,
+                'instructions' => $section['instructions'] ?? null,
+                'fields' => $section['fields'] ?? [],
+            ];
+        }
+
+        $contents = [
+            'tabs' => [
+                'main' => [
+                    'display' => 'Main',
+                    'sections' => $blueprintSections,
+                ],
+            ],
+        ];
+
+        $blueprint = \Statamic\Facades\Blueprint::make($handle)->setContents($contents);
+        $blueprint->setNamespace('forms');
+        $blueprint->save();
+    }
+
+    return $form;
 }
 
 /**
