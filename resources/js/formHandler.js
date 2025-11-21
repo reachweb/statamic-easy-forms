@@ -1,8 +1,8 @@
 const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY
 
-export default function formHandler(eventName = 'formSubmitted') {
+export default function formHandler(formHandle = 'formSubmitted') {
     return {
-        eventName: eventName,
+        formHandle: formHandle,
         submitData: {},
         errors: {},
         fatalError: false,
@@ -21,6 +21,12 @@ export default function formHandler(eventName = 'formSubmitted') {
         },
 
         async formSubmit() {
+            // Dispatch submit event
+            this.$refs.form.dispatchEvent(new CustomEvent('form:submit', {
+                bubbles: true,
+                detail: { submitData: this.submitData, formHandle: this.formHandle }
+            }))
+
             try {
                 this.clearErrors()
                 this.toggleSubmit()
@@ -48,6 +54,12 @@ export default function formHandler(eventName = 'formSubmitted') {
             } catch (error) {
                 this.fatalError = true
                 this.toggleSubmit()
+
+                // Dispatch error event
+                this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                    bubbles: true,
+                    detail: { error: error.message, fatalError: true, formHandle: this.formHandle }
+                }))
             }
         },
 
@@ -79,7 +91,12 @@ export default function formHandler(eventName = 'formSubmitted') {
         handleSuccess(data) {
             if (data.success) {
                 this.successMessage = true;
-                this.trackAnalytics()
+
+                // Dispatch success event
+                this.$refs.form.dispatchEvent(new CustomEvent('form:success', {
+                    bubbles: true,
+                    detail: { data: data, submitData: this.submitData, formHandle: this.formHandle }
+                }))
             }
         },
 
@@ -91,25 +108,27 @@ export default function formHandler(eventName = 'formSubmitted') {
                     const errorData = await response.json()
                     this.errors = errorData?.error || errorData?.errors || {}
                 }
+
+                // Dispatch error event
+                this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                    bubbles: true,
+                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, formHandle: this.formHandle }
+                }))
             } catch (parseError) {
                 // If we can't parse the response, treat it as a fatal error
                 this.fatalError = true
+
+                // Dispatch error event for parse errors too
+                this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                    bubbles: true,
+                    detail: { errors: {}, fatalError: true, formHandle: this.formHandle }
+                }))
             }
         },
 
         clearErrors() {
             this.errors = {}
             this.fatalError = false
-        },
-
-        trackAnalytics() {
-            window.dataLayer = window.dataLayer || []
-            window.dataLayer.push({
-                'custEmail': this.submitData.email,
-                'custPhone': this.submitData.phone,
-                'FB_Event_ID': window.Cookies.get('XSRF-TOKEN'),
-                'event': this.eventName,
-            })
         },
 
         loadReCaptcha() {

@@ -187,12 +187,11 @@ test('parseHideFields handles empty string', function () {
     expect($result)->toBe([]);
 });
 
-test('tag includes custom event_name parameter', function () {
-    createTestForm('tracked_form');
+test('tag uses form handle as formHandler identifier', function () {
+    createTestForm('contact_form');
 
-    $output = renderEasyFormTag('tracked_form', [
-        'event_name' => 'customFormSubmit',
-    ]);
+    $output = renderEasyFormTag('contact_form');
 
-    expect($output)->toContain('customFormSubmit');
+    // The form handle should be used as the formHandler identifier
+    expect($output)->toContain("formHandler('contact_form')");
 });

@@ -101,7 +101,6 @@ trait HandlesForms
             // Tag parameters
             'hide_fields' => $this->parseHideFields($this->params->get('hide_fields', '')),
             'prepopulated_data' => $this->params->get('prepopulated_data', []),
-            'event_name' => $this->params->get('event_name', 'formSubmitted'),
         ];
     }
 

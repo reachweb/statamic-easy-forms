@@ -23,11 +23,10 @@ class EasyForm extends Tags
      * Usage: {{ easyform handle="contact" }}
      *
      * Available parameters:
-     * - handle (required): The form handle
+     * - handle (required): The form handle (also used as the formHandler identifier for events)
      * - view: Custom view template to use (default: "form/_form_component")
      * - hide_fields: Array of field handles to hide (e.g., hide_fields="field1|field2")
      * - prepopulated_data: Array of field values to prepopulate
-     * - event_name: Custom analytics event name (default: "formSubmitted")
      *
      * Example with custom view:
      * {{ easyform handle="contact" view="forms/custom-contact" }}
