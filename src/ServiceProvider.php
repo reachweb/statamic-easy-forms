@@ -2,6 +2,8 @@
 
 namespace Reach\StatamicEasyForms;
 
+use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
+use Statamic\Events\FormSubmitted;
 use Statamic\Fieldtypes\Radio;
 use Statamic\Fieldtypes\Select;
 use Statamic\Fieldtypes\Text;
@@ -16,6 +18,12 @@ class ServiceProvider extends AddonServiceProvider
 
     protected $stylesheets = [
         __DIR__.'/../dist/css/easy-forms.css',
+    ];
+
+    protected $listen = [
+        FormSubmitted::class => [
+            ValidateRecaptcha::class,
+        ],
     ];
 
     public function bootAddon()
