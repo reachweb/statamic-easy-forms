@@ -10,7 +10,6 @@ trait HandlesDictionaries
      * Get dictionary options.
      *
      * @param  string|array  $dictionary
-     * @return array
      */
     protected function getDictionaryOptions($dictionary): array
     {

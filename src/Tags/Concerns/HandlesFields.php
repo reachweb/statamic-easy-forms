@@ -10,7 +10,6 @@ trait HandlesFields
      * Process a field to extract needed properties and add optional flag.
      *
      * @param  \Statamic\Fields\Field  $field
-     * @return array
      */
     protected function processField($field): array
     {
@@ -45,7 +44,6 @@ trait HandlesFields
      * Check if a field is optional (not required).
      *
      * @param  \Statamic\Fields\Field  $field
-     * @return bool
      */
     protected function isFieldOptional($field): bool
     {
@@ -96,7 +94,6 @@ trait HandlesFields
      * Process all fields from the blueprint.
      *
      * @param  \Statamic\Fields\Blueprint  $blueprint
-     * @return array
      */
     protected function processAllFields($blueprint): array
     {

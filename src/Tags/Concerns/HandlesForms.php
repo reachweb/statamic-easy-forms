@@ -33,7 +33,6 @@ trait HandlesForms
     /**
      * Extract sections from blueprint contents.
      *
-     * @param  array  $contents
      * @param  \Statamic\Fields\Blueprint  $blueprint
      * @return array ['has_sections' => bool, 'sections' => array]
      */
@@ -81,10 +80,6 @@ trait HandlesForms
      * Prepare view data for rendering.
      *
      * @param  \Statamic\Forms\Form  $form
-     * @param  array  $processedFields
-     * @param  array  $sections
-     * @param  bool  $hasSections
-     * @return array
      */
     protected function prepareViewData($form, array $processedFields, array $sections, bool $hasSections): array
     {
@@ -108,7 +103,6 @@ trait HandlesForms
      * Parse hide_fields parameter into an array.
      *
      * @param  string|array  $hideFields
-     * @return array
      */
     protected function parseHideFields($hideFields): array
     {
@@ -128,7 +122,6 @@ trait HandlesForms
      * Process all sections from the blueprint.
      *
      * @param  \Statamic\Fields\Blueprint  $blueprint
-     * @return array
      */
     protected function processSections($blueprint): array
     {
@@ -139,9 +132,6 @@ trait HandlesForms
 
     /**
      * Render the view with the given data.
-     *
-     * @param  array  $data
-     * @return string
      */
     protected function renderView(array $data): string
     {
