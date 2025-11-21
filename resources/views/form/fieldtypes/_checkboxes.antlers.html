@@ -1,4 +1,4 @@
-<fieldset class="grid grid-cols-1 lg:grid-cols-2 gap-2">
+<fieldset class="grid grid-cols-1 lg:grid-cols-2 gap-2" {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}>
     <legend class="sr-only">{{ display ?? handle }}</legend>
     {{ foreach:options }}
         <div class="flex items-center">

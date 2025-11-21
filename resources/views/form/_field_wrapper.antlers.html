@@ -3,7 +3,18 @@
     x-show="shouldShowField('{{ handle }}')"
 >
     {{ unless type === 'toggle' || type === 'spacer' }}
-    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'rating' }}id="{{ handle }}-label"{{ /if }}>
+    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'rating' }}id="{{ handle }}-label"{{ elseif type === 'integer' && integer_template === 'counter' }}id="{{ handle }}-label"{{ elseif type === 'radio' && improved_field }}id="{{ handle }}-label"{{ /if }}>
+        {{ if type === 'checkboxes' || (type === 'radio' && !improved_field) }}
+        <span class="block font-semibold text-ef text-ef-label">
+            {{ if prepend }}
+            <span class="text-ef-text-muted">{{ prepend }}</span>
+            {{ /if }}
+            {{ display }}
+            {{ if append }}
+            <span class="text-ef-text-muted">{{ append }}</span>
+            {{ /if }}
+        </span>
+        {{ else }}
         <label class="block font-semibold text-ef text-ef-label" for="{{ handle }}">
             {{ if prepend }}
             <span class="text-ef-text-muted">{{ prepend }}</span>
@@ -13,6 +24,7 @@
             <span class="text-ef-text-muted">{{ append }}</span>
             {{ /if }}
         </label>
+        {{ /if }}
         {{ if optional }}
         <span class="ml-2 text-ef text-ef-text-muted">
             ({{ "Optional" | trans }})
@@ -22,7 +34,7 @@
     {{ /unless }}
 
     {{ if has_own_instructions && instructions && (instructions_position === 'above' || ! instructions_position) && type !== 'toggle' && type !== 'spacer' }}
-    <div class="mb-3 text-ef text-ef-text">
+    <div id="{{ handle }}-description" class="mb-3 text-ef text-ef-text">
         {{ instructions }}
     </div>
     {{ /if }}
@@ -113,7 +125,7 @@
     {{ /if }}
 
     {{ if has_own_instructions && instructions && instructions_position === 'below' && type !== 'toggle' && type !== 'spacer' }}
-    <div class="mt-3 text-ef text-ef-text">
+    <div id="{{ handle }}-description" class="mt-3 text-ef text-ef-text">
         {{ instructions }}
     </div>
     {{ /if }}
