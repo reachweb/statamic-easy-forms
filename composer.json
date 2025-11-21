@@ -1,5 +1,23 @@
 {
     "name": "reachweb/statamic-easy-forms",
+    "description": "Easy frontend forms for Statamic.",
+    "keywords": [
+        "Statamic",
+        "Forms"
+    ],
+    "homepage": "https://easy-forms.dev/",
+    "license": "proprietary",
+    "type": "statamic-addon",
+    "authors": [
+        {
+            "name": "Iosif Chatzimichail",
+            "email": "iosif@reach.gr",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "email": "iosif@reach.gr"
+    },
     "autoload": {
         "psr-4": {
             "Reach\\StatamicEasyForms\\": "src"
@@ -27,7 +45,7 @@
     "extra": {
         "statamic": {
             "name": "Statamic Easy Forms",
-            "description": "Statamic Easy Forms addon"
+            "description": "Easy frontend forms for Statamic."
         },
         "laravel": {
             "providers": [
