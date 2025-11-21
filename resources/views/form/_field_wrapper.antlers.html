@@ -5,7 +5,13 @@
     {{ unless type === 'toggle' || type === 'spacer' }}
     <div class="flex items-center mb-2">
         <label class="block font-semibold text-ef text-ef-label" for="{{ handle }}">
+            {{ if prepend }}
+            <span class="text-ef-text-muted">{{ prepend }}</span>
+            {{ /if }}
             {{ display }}
+            {{ if append }}
+            <span class="text-ef-text-muted">{{ append }}</span>
+            {{ /if }}
         </label>
         {{ if optional }}
         <span class="ml-2 text-ef text-ef-text-muted">

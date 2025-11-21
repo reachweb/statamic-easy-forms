@@ -195,3 +195,62 @@ test('tag uses form handle as formHandler identifier', function () {
     // The form handle should be used as the formHandler identifier
     expect($output)->toContain("formHandler('contact_form')");
 });
+
+test('tag displays prepend value in field label', function () {
+    createTestForm('prepend_form', [
+        [
+            'handle' => 'text_field',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Text Field',
+                'prepend' => 'Prefix:',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('prepend_form');
+
+    expect($output)
+        ->toContain('Prefix:')
+        ->toContain('Text Field');
+});
+
+test('tag displays append value in field label', function () {
+    createTestForm('append_form', [
+        [
+            'handle' => 'text_field',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Text Field',
+                'append' => '(required)',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('append_form');
+
+    expect($output)
+        ->toContain('Text Field')
+        ->toContain('(required)');
+});
+
+test('tag displays both prepend and append values in field label', function () {
+    createTestForm('prepend_append_form', [
+        [
+            'handle' => 'amount_field',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Amount',
+                'prepend' => '$',
+                'append' => 'USD',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('prepend_append_form');
+
+    expect($output)
+        ->toContain('$')
+        ->toContain('Amount')
+        ->toContain('USD');
+});
