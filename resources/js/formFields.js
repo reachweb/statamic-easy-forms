@@ -42,11 +42,15 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             if (!field) return false
 
             // Fallback if Statamic conditions aren't available
-            if (!window.Statamic?.$conditions?.showField) {
+            try {
+                if (typeof window.Statamic === 'undefined' || !window.Statamic?.$conditions?.showField) {
+                    return true
+                }
+                return window.Statamic.$conditions.showField(field, this.submitFields)
+            } catch (error) {
+                // If Statamic is not available or throws an error, show all fields
                 return true
             }
-
-            return Statamic.$conditions.showField(field, this.submitFields)
         },
 
         initializeFields(fields) {
