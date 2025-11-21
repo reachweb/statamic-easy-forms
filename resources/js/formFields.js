@@ -17,15 +17,19 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 [field.handle]: field
             }), {})
 
-            if (Object.values(prepopulatedData).length > 0) {
+            if (prepopulatedData && Object.keys(prepopulatedData).length > 0) {
                 this.loadPrepopulatedData(prepopulatedData)
             }
-                        
-            // Watch for changes and dispatch to parent
+
+            // Watch for changes and dispatch to parent with debouncing
+            let debounceTimer
             this.$watch('submitFields', () => {
-                this.$dispatch('fields-changed', this.submitFields)
+                clearTimeout(debounceTimer)
+                debounceTimer = setTimeout(() => {
+                    this.$dispatch('fields-changed', this.submitFields)
+                }, 100)
             }, { deep: true })
-            
+
             // Initial dispatch
             this.$nextTick(() => {
                 this.$dispatch('fields-changed', this.submitFields)
@@ -36,6 +40,12 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         shouldShowField(fieldHandle) {
             const field = this.fieldsMap[fieldHandle]
             if (!field) return false
+
+            // Fallback if Statamic conditions aren't available
+            if (!window.Statamic?.$conditions?.showField) {
+                return true
+            }
+
             return Statamic.$conditions.showField(field, this.submitFields)
         },
 

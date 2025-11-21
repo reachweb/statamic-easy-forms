@@ -31,7 +31,26 @@ export default function formHandler(formHandle = 'formSubmitted') {
                 this.clearErrors()
                 this.toggleSubmit()
 
-                const token = RECAPTCHA_SITE_KEY ? await this.getReCaptchaToken() : null
+                let token = null
+                if (RECAPTCHA_SITE_KEY) {
+                    try {
+                        token = await this.getReCaptchaToken()
+                    } catch (recaptchaError) {
+                        // Handle ReCAPTCHA-specific errors
+                        this.fatalError = true
+                        this.toggleSubmit()
+                        this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                            bubbles: true,
+                            detail: {
+                                error: 'ReCAPTCHA verification failed. Please refresh the page.',
+                                fatalError: true,
+                                formHandle: this.formHandle
+                            }
+                        }))
+                        return
+                    }
+                }
+
                 const formData = this.buildFormData(token)
 
                 const response = await fetch(this.$refs.form.action, {
