@@ -5,6 +5,7 @@ namespace Reach\StatamicEasyForms;
 use Statamic\Fieldtypes\Radio;
 use Statamic\Fieldtypes\Select;
 use Statamic\Fieldtypes\Text;
+use Statamic\Fieldtypes\Toggle;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
@@ -143,6 +144,18 @@ class ServiceProvider extends AddonServiceProvider
                 'type' => 'toggle',
                 'display' => 'Enable Improved Fields',
                 'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
+            ],
+        ]);
+
+        Toggle::appendConfigFields([
+            'easy_forms' => [
+                'type' => 'section',
+                'display' => 'Easy Forms',
+            ],
+            'label_override' => [
+                'type' => 'markdown',
+                'display' => 'Label override',
+                'instructions' => 'Override the inline label here to use Markdown.',
             ],
         ]);
     }

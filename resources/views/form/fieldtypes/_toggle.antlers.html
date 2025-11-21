@@ -6,18 +6,22 @@
             id="{{ handle }}"
             name="{{ handle }}"
             role="switch"
-            {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+            {{ if inline_label }}aria-labelledby="{{ handle }}-label"{{ /if }}
             x-model="submitFields['{{ handle }}']"
         >
         <div
-            class="relative flex-shrink-0 w-11 h-6 bg-ef-toggle-off peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ef-focus/60
+            class="relative shrink-0 w-11 h-6 bg-ef-toggle-off peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ef-focus/60
             rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-ef-text-white
-            after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-ef-text-white after:border-ef-checkbox-border
+            after:content-[''] after:absolute after:top-0.5 after:start-0.5 after:bg-ef-text-white after:border-ef-checkbox-border
             after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-ef-toggle-on"
         >
         </div>
-            <span class="ms-3 font-medium text-ef-text *:underline *:font-bold" id="{{ handle }}-description">
-                {{ instructions | markdown | strip_tags('p') }}
-            </span>
+        <span class="ms-3 text-ef-text [&_a]:underline [&_a]:text-ef-accent" id="{{ handle }}-label">
+        {{ if label_override }}
+            {{ label_override | markdown | strip_tags:p | replace:'<a ':'<a target="_blank" rel="noopener noreferrer" ' }}
+        {{ else }}
+            {{ inline_label }}
+        {{ /if }}
+        </span>
     </label>
 </div>
