@@ -1,12 +1,6 @@
 @import "tailwindcss";
+@import "./theme.css";
 
-/*
- * Statamic Easy Forms - Frontend Styles
- *
- * This file only includes the Tailwind CSS import.
- * All custom styling should be done in your published views.
- *
- * To customize the form appearance:
- * 1. Run: php artisan vendor:publish --tag=easy-forms-views
- * 2. Edit the templates in: resources/views/vendor/statamic-easy-forms/
- */
+@plugin "@tailwindcss/forms" {
+    strategy: class
+}
