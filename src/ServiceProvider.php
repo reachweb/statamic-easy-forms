@@ -20,14 +20,15 @@ class ServiceProvider extends AddonServiceProvider
         __DIR__.'/../dist/css/easy-forms.css',
     ];
 
-    protected $listen = [
-        FormSubmitted::class => [
-            ValidateRecaptcha::class,
-        ],
-    ];
-
     public function bootAddon()
     {
+        // Only register reCAPTCHA validation if secret key is configured
+        if (! empty(env('RECAPTCHA_SECRET_KEY'))) {
+            $this->listen[FormSubmitted::class] = [
+                ValidateRecaptcha::class,
+            ];
+        }
+
         $this->addConfigOptions();
 
         // Load views from the resources/views directory
