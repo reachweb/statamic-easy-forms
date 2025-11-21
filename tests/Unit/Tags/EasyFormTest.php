@@ -254,3 +254,153 @@ test('tag displays both prepend and append values in field label', function () {
         ->toContain('Amount')
         ->toContain('USD');
 });
+
+test('tag renders integer counter fieldtype', function () {
+    createTestForm('counter_form', [
+        [
+            'handle' => 'quantity',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Quantity',
+                'integer_template' => 'counter',
+                'min_value' => 1,
+                'max_value' => 10,
+                'default' => 5,
+                'increment_amount' => 2,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('counter_form');
+
+    expect($output)
+        ->toContain('name="quantity"')
+        ->toContain('minVal: 1')
+        ->toContain('maxVal: 10')
+        ->toContain('incrementAmount: 2')
+        ->toContain('x-model.number="submitFields[\'quantity\']"')
+        ->toContain('role="group"')
+        ->toContain('aria-labelledby="quantity-label"')
+        ->toContain(':min="minVal"')
+        ->toContain(':max="maxVal"');
+});
+
+test('tag renders integer rating fieldtype', function () {
+    createTestForm('rating_form', [
+        [
+            'handle' => 'rating',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Rating',
+                'integer_template' => 'rating',
+                'min_value' => 1,
+                'max_value' => 5,
+                'default' => 3,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('rating_form');
+
+    expect($output)
+        ->toContain('name="rating"')
+        ->toContain('minVal: 1')
+        ->toContain('maxVal: 5')
+        ->toContain('x-model.number="submitFields[\'rating\']"')
+        ->toContain('role="radiogroup"')
+        ->toContain('aria-labelledby="rating-label"')
+        ->toContain('aria-live="polite"')
+        ->toContain('aria-atomic="true"');
+});
+
+test('tag renders simple integer fieldtype when template is simple', function () {
+    createTestForm('simple_integer_form', [
+        [
+            'handle' => 'age',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Age',
+                'integer_template' => 'simple',
+                'min_value' => 18,
+                'max_value' => 100,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('simple_integer_form');
+
+    expect($output)
+        ->toContain('name="age"')
+        ->toContain('type="number"')
+        ->toContain('min="18"')
+        ->toContain('max="100"')
+        ->toContain('x-model.number="submitFields[\'age\']"')
+        ->not->toContain('role="group"')
+        ->not->toContain('incrementAmount');
+});
+
+test('tag renders simple integer fieldtype when template is not set', function () {
+    createTestForm('default_integer_form', [
+        [
+            'handle' => 'count',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Count',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('default_integer_form');
+
+    expect($output)
+        ->toContain('name="count"')
+        ->toContain('type="number"')
+        ->toContain('x-model.number="submitFields[\'count\']"')
+        ->not->toContain('role="group"')
+        ->not->toContain('incrementAmount');
+});
+
+test('integer counter respects increment amount', function () {
+    createTestForm('counter_increment_form', [
+        [
+            'handle' => 'items',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Items',
+                'integer_template' => 'counter',
+                'min_value' => 0,
+                'increment_amount' => 5,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('counter_increment_form');
+
+    expect($output)
+        ->toContain('incrementAmount: 5')
+        ->toContain('minVal: 0');
+});
+
+test('integer rating respects min and max values', function () {
+    createTestForm('rating_range_form', [
+        [
+            'handle' => 'score',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Score',
+                'integer_template' => 'rating',
+                'min_value' => 0,
+                'max_value' => 10,
+                'default' => 7,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('rating_range_form');
+
+    expect($output)
+        ->toContain('minVal: 0')
+        ->toContain('maxVal: 10')
+        ->toContain('type="radio"')
+        ->toContain('focus-within:ring-2');
+});

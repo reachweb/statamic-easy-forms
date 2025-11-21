@@ -4,6 +4,7 @@ namespace Reach\StatamicEasyForms;
 
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
+use Statamic\Fieldtypes\Integer;
 use Statamic\Fieldtypes\Radio;
 use Statamic\Fieldtypes\Select;
 use Statamic\Fieldtypes\Text;
@@ -165,6 +166,48 @@ class ServiceProvider extends AddonServiceProvider
                 'type' => 'markdown',
                 'display' => 'Label override',
                 'instructions' => 'Override the inline label here to use Markdown.',
+            ],
+        ]);
+
+        Integer::appendConfigFields([
+            'easy_forms' => [
+                'type' => 'section',
+                'display' => 'Easy Forms',
+            ],
+            'integer_template' => [
+                'type' => 'button_group',
+                'display' => 'Field template',
+                'instructions' => 'Select the type of template you want to use',
+                'options' => [
+                    'simple' => 'Simple',
+                    'counter' => 'Counter',
+                    'rating' => 'Rating',
+                ],
+                'default' => 'simple',
+            ],
+            'min_value' => [
+                'type' => 'integer',
+                'display' => 'Minimum value',
+                'instructions' => 'Select the minimum value allowed',
+                'unless' => [
+                    'integer_template' => 'is simple',
+                ],
+            ],
+            'max_value' => [
+                'type' => 'integer',
+                'display' => 'Maximum value',
+                'instructions' => 'Select the maximum value allowed',
+                'unless' => [
+                    'integer_template' => 'is simple',
+                ],
+            ],
+            'increment_amount' => [
+                'type' => 'integer',
+                'display' => 'Increment amount',
+                'instructions' => 'How much the value should change when user clicks + or -',
+                'if' => [
+                    'integer_template' => 'is counter',
+                ],
             ],
         ]);
     }

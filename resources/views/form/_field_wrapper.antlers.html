@@ -3,7 +3,7 @@
     x-show="shouldShowField('{{ handle }}')"
 >
     {{ unless type === 'toggle' || type === 'spacer' }}
-    <div class="flex items-center mb-2">
+    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'rating' }}id="{{ handle }}-label"{{ /if }}>
         <label class="block font-semibold text-ef text-ef-label" for="{{ handle }}">
             {{ if prepend }}
             <span class="text-ef-text-muted">{{ prepend }}</span>
@@ -48,8 +48,18 @@
     {{ /if }}
 
     {{# Integer #}}
-    {{ if type == 'integer' }}
+    {{ if type == 'integer' && (integer_template === 'simple' || !integer_template) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
+    {{ /if }}
+
+    {{# Integer Counter #}}
+    {{ if type == 'integer' && integer_template === 'counter' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/integer_counter }}
+    {{ /if }}
+
+    {{# Integer Rating #}}
+    {{ if type == 'integer' && integer_template === 'rating' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/integer_rating }}
     {{ /if }}
 
     {{# Radio #}}

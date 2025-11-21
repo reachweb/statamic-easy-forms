@@ -1,0 +1,42 @@
+<div
+    x-data="{
+        minVal: {{ if min_value || min_value === 0 }}{{ min_value }}{{ else }}1{{ /if }},
+        maxVal: {{ if max_value || max_value === 0 }}{{ max_value }}{{ else }}5{{ /if }},
+        stars: []
+    }"
+    x-init="stars = Array.from({ length: maxVal - minVal + 1 }, (_, i) => minVal + i)"
+    class="flex items-center gap-1"
+    role="radiogroup"
+    aria-labelledby="{{ handle }}-label"
+    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+>
+    <template x-for="star in stars" :key="star">
+        <label
+            :for="'{{ handle }}_' + star"
+            class="transition hover:scale-125 focus-within:scale-125 focus-within:ring-2 focus-within:ring-ef-focus focus-within:ring-offset-2 rounded-ef cursor-pointer"
+        >
+            <input
+                x-model.number="submitFields['{{ handle }}']"
+                :id="'{{ handle }}_' + star"
+                type="radio"
+                class="sr-only"
+                name="{{ handle }}"
+                :value="star"
+                :aria-label="star + ' {{ if max_value > 5 }}{{ 'points' | trans }}{{ else }}{{ 'stars' | trans }}{{ /if }}'"
+            >
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="size-6 transition-colors"
+                :class="submitFields['{{ handle }}'] >= star ? 'text-yellow-500' : 'text-ef-text-muted'"
+            >
+                <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"/>
+            </svg>
+        </label>
+    </template>
+    <span class="ml-2 text-ef text-ef-text-muted" x-show="submitFields['{{ handle }}']" aria-live="polite" aria-atomic="true">
+        <span x-text="submitFields['{{ handle }}']"></span>/<span x-text="maxVal"></span>
+    </span>
+</div>

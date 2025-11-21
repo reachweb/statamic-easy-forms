@@ -1,0 +1,53 @@
+<div
+    x-data="{
+        minVal: {{ if min_value || min_value === 0 }}{{ min_value }}{{ else }}0{{ /if }},
+        maxVal: {{ if max_value || max_value === 0 }}{{ max_value }}{{ else }}null{{ /if }},
+        incrementAmount: {{ increment_amount ?? 1 }}
+    }"
+    class="flex flex-col gap-1"
+>
+    <div
+        x-on:dblclick.prevent
+        class="flex items-center"
+        role="group"
+        aria-labelledby="{{ handle }}-label"
+        {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    >
+        <button
+            type="button"
+            x-on:click="submitFields['{{ handle }}'] = Math.max(minVal, Number(submitFields['{{ handle }}']) - incrementAmount)"
+            :disabled="Number(submitFields['{{ handle }}']) <= minVal"
+            :class="Number(submitFields['{{ handle }}']) <= minVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
+            class="flex h-10 items-center justify-center rounded-l-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
+            :aria-label="'{{ 'Subtract' | trans }} ' + incrementAmount"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/>
+            </svg>
+        </button>
+        <label for="{{ handle }}" class="sr-only">{{ display }}</label>
+        <input
+            x-model.number="submitFields['{{ handle }}']"
+            id="{{ handle }}"
+            name="{{ handle }}"
+            type="number"
+            inputmode="numeric"
+            :min="minVal"
+            :max="maxVal"
+            class="h-10 w-20 rounded-none border-y border-ef-border bg-ef-input-bg/50 text-center text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+            aria-live="polite"
+        />
+        <button
+            type="button"
+            x-on:click="submitFields['{{ handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ handle }}']) + incrementAmount) : Number(submitFields['{{ handle }}']) + incrementAmount"
+            :disabled="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal"
+            :class="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
+            class="flex h-10 items-center justify-center rounded-r-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
+            :aria-label="'{{ 'Add' | trans }} ' + incrementAmount"
+        >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2" class="size-4">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+            </svg>
+        </button>
+    </div>
+</div>

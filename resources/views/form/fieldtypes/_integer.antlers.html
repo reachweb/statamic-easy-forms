@@ -4,7 +4,9 @@
     name="{{ handle }}"
     type="number"
     inputmode="numeric"
+    {{ if min_value || min_value === 0 }}min="{{ min_value }}"{{ /if }}
+    {{ if max_value || max_value === 0 }}max="{{ max_value }}"{{ /if }}
     {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     autocomplete="off"
-    x-model="submitFields['{{ handle }}']"
+    x-model.number="submitFields['{{ handle }}']"
 >
