@@ -39,7 +39,7 @@
                                 
                                 {{ fields }}
                                 {{ unless fieldtype == 'section' }}
-                                
+
                                 {{ if value }}
                                 <tr>
                                     <td width="35%" valign="middle" style="padding: 12px 10px 12px 0; border-bottom: 1px solid #eeeeee;">
@@ -47,21 +47,26 @@
                                             {{ display }}
                                         </p>
                                     </td>
-                                    
+
                                     <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                         <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
+                                            {{ if fieldtype === 'assets' }}
+                                                <a href="{{ cp_url }}/cp/forms/{{ form:handle }}/submissions/{{ id }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
+                                                    Login to view file(s) →
+                                                </a>
+                                            {{ /if }}
                                             {{ if value | is_array }}
                                                 {{ value }}
-                                                    {{ label ?? key }}{{ unless last }}, {{ /unless }}
+                                                    {{ label ?? value ?? key }}{{ unless last }}, {{ /unless }}
                                                 {{ /value }}
                                             {{ else }}
-                                                {{ value | nl2br }}
+                                                {{ value:label ?? label ?? value ?? key }}
                                             {{ /if }}
                                         </div>
                                     </td>
                                 </tr>
                                 {{ /if }}
-                                
+
                                 {{ /unless }}
                                 {{ /fields }}
 
