@@ -60,3 +60,62 @@ test('toggle field has Alpine model binding', function () {
 
     expect($output)->toContain('x-model');
 });
+
+test('toggle field can display instructions above', function () {
+    createTestForm('toggle_instructions_above', [
+        [
+            'handle' => 'marketing',
+            'field' => [
+                'type' => 'toggle',
+                'display' => 'Marketing Emails',
+                'instructions' => 'Receive marketing and promotional emails',
+                'instructions_position' => 'above',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('toggle_instructions_above');
+
+    expect($output)
+        ->toContain('Receive marketing and promotional emails')
+        ->toContain('id="marketing-description"');
+});
+
+test('toggle field can display instructions below', function () {
+    createTestForm('toggle_instructions_below', [
+        [
+            'handle' => 'notifications',
+            'field' => [
+                'type' => 'toggle',
+                'display' => 'Notifications',
+                'instructions' => 'Get notified about important updates',
+                'instructions_position' => 'below',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('toggle_instructions_below');
+
+    expect($output)
+        ->toContain('Get notified about important updates')
+        ->toContain('id="notifications-description"');
+});
+
+test('toggle field displays instructions by default above when position not specified', function () {
+    createTestForm('toggle_instructions_default', [
+        [
+            'handle' => 'terms',
+            'field' => [
+                'type' => 'toggle',
+                'display' => 'Accept Terms',
+                'instructions' => 'By enabling this, you accept our terms of service',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('toggle_instructions_default');
+
+    expect($output)
+        ->toContain('By enabling this, you accept our terms of service')
+        ->toContain('id="terms-description"');
+});
