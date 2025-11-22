@@ -33,6 +33,8 @@ class InstallEasyForms extends Command
         $this->info('Installing Statamic Easy Forms...');
         $this->newLine();
 
+        $this->publishAssets();
+
         if ($this->confirm('Do you want to publish the form views? (recommended)', true)) {
             $this->publishViews();
         }
@@ -92,6 +94,19 @@ class InstallEasyForms extends Command
         ]);
 
         $this->line('  ✓ Email template published to resources/views/vendor/statamic-easy-forms/emails');
+
+        return $this;
+    }
+
+    protected function publishAssets()
+    {
+        $this->info('Publishing assets...');
+
+        $this->callSilent('vendor:publish', [
+            '--tag' => 'easy-forms-assets',
+        ]);
+
+        $this->line('  ✓ Assets published to public/vendor/easy-forms');
 
         return $this;
     }
