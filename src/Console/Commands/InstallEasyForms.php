@@ -80,7 +80,7 @@ class InstallEasyForms extends Command
             '--tag' => 'easy-forms-theme',
         ]);
 
-        $this->line('  ✓ Theme published to resources/css/vendor/statamic-easy-forms');
+        $this->line('  ✓ Theme published to resources/css/easy-forms-theme.css');
 
         return $this;
     }

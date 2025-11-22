@@ -47,7 +47,7 @@ class ServiceProvider extends AddonServiceProvider
 
         // Publish theme file
         $this->publishes([
-            __DIR__.'/../resources/css/theme.css' => resource_path('css/livewire-filters-theme.css'),
+            __DIR__.'/../resources/css/theme.css' => resource_path('css/easy-forms-theme.css'),
         ], 'easy-forms-theme');
 
         // Publish assets for production use
