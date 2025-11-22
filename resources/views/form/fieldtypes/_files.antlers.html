@@ -1,0 +1,29 @@
+<div class="relative flex w-full flex-col gap-1">
+    <input
+        id="{{ handle }}"
+        name="{{ handle }}"
+        type="file"
+        class="w-full overflow-clip rounded-ef border border-ef-border bg-ef-input-bg text-ef text-ef-input-text file:mr-4 file:border-none file:bg-ef-subtle file:px-4 file:py-2 file:font-medium file:text-ef-text focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none"
+        {{ if max_files > 1 }}multiple{{ /if }}
+        {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+        x-ref="fileInput"
+        @change="handleFileChange($event)"
+    />
+</div>
+
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('fileField_{{ handle }}', () => ({
+            handleFileChange(event) {
+                const files = Array.from(event.target.files)
+                const maxFiles = {{ max_files ?? 1 }}
+
+                if (maxFiles === 1) {
+                    submitFields['{{ handle }}'] = files[0] || null
+                } else {
+                    submitFields['{{ handle }}'] = files.length > 0 ? files : null
+                }
+            }
+        }))
+    })
+</script>
