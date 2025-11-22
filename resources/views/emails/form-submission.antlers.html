@@ -1,3 +1,4 @@
+{{ real_url = config:app:url }}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -51,7 +52,7 @@
                                     <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                         <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
                                             {{ if fieldtype === 'assets' }}
-                                                <a href="{{ cp_url }}/cp/forms/{{ form:handle }}/submissions/{{ id }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
+                                                <a href="{{ real_url }}/cp/forms/{{ form:handle }}/submissions/{{ id }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
                                                     Login to view file(s) →
                                                 </a>
                                             {{ /if }}
