@@ -2,6 +2,7 @@
 
 namespace Reach\StatamicEasyForms;
 
+use Reach\StatamicEasyForms\Console\Commands\InstallEasyForms;
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
 use Statamic\Fieldtypes\Integer;
@@ -13,12 +14,8 @@ use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
-    protected $scripts = [
-        __DIR__.'/../dist/js/easy-forms.js',
-    ];
-
-    protected $stylesheets = [
-        __DIR__.'/../dist/css/easy-forms.css',
+    protected $commands = [
+        InstallEasyForms::class,
     ];
 
     public function bootAddon()
@@ -40,8 +37,18 @@ class ServiceProvider extends AddonServiceProvider
 
         // Publish views for customization
         $this->publishes([
-            __DIR__.'/../resources/views' => resource_path('views/vendor/statamic-easy-forms'),
+            __DIR__.'/../resources/views/form' => resource_path('views/vendor/statamic-easy-forms'),
         ], 'easy-forms-views');
+
+        // Publish email template
+        $this->publishes([
+            __DIR__.'/../resources/views/emails' => resource_path('views/vendor/statamic-easy-forms/emails'),
+        ], 'easy-forms-emails');
+
+        // Publish theme file
+        $this->publishes([
+            __DIR__.'/../resources/css/theme.css' => resource_path('css/livewire-filters-theme.css'),
+        ], 'easy-forms-theme');
 
         // Publish assets for production use
         $this->publishes([
