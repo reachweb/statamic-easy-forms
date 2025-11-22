@@ -524,7 +524,7 @@ test('date field includes keyboard navigation', function () {
 
     expect($output)
         ->toContain('x-on:keydown.escape')
-        ->toContain('x-on:keydown.enter');
+        ->toContain('x-on:keydown.space');
 });
 
 test('date field includes click outside to close', function () {
@@ -580,4 +580,67 @@ test('date field without dont_close_after_selection defaults to false', function
     $output = renderEasyFormTag('date_default_close_test');
 
     expect($output)->toContain('dontCloseAfterSelection: false');
+});
+
+test('date field includes enhanced keyboard navigation methods', function () {
+    createTestForm('date_keyboard_enhanced', [
+        [
+            'handle' => 'date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Date',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_keyboard_enhanced');
+
+    expect($output)
+        ->toContain('handleKeyboardNavigation')
+        ->toContain('focusDateButton')
+        ->toContain('initFocusOnOpen')
+        ->toContain('focusedDate');
+});
+
+test('date field buttons have keyboard event handlers', function () {
+    createTestForm('date_button_keyboard', [
+        [
+            'handle' => 'event_date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Event Date',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_button_keyboard');
+
+    expect($output)
+        ->toContain('x-on:keydown="if (focusedDate) handleKeyboardNavigation($event, focusedDate)"')
+        ->toContain('x-on:focus="focusedDate = date"')
+        ->toContain('x-bind:data-date="date"')
+        ->toContain('x-bind:tabindex="focusedDate === date ? 0 : -1"');
+});
+
+test('date field input initializes focus on open', function () {
+    createTestForm('date_init_focus', [
+        [
+            'handle' => 'date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Date',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_init_focus');
+
+    expect($output)
+        ->toContain('if(showDatepicker) initFocusOnOpen()');
 });

@@ -36,6 +36,7 @@
         years: [],
         DAYS: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
         MONTH_NAMES: ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],
+        focusedDate: null,
 
         init() {
             let today = new Date();
@@ -294,6 +295,125 @@
                  d.setHours(0,0,0,0);
                  this.hoverDate = d;
             }
+        },
+
+        handleKeyboardNavigation(event, currentDate) {
+            const key = event.key;
+
+            // Set focused date if not set
+            if (this.focusedDate === null) {
+                this.focusedDate = currentDate;
+            }
+
+            let newFocusedDate = this.focusedDate;
+            let changeMonth = 0;
+
+            switch(key) {
+                case 'ArrowRight':
+                    event.preventDefault();
+                    newFocusedDate++;
+                    if (newFocusedDate > this.no_of_days.length) {
+                        newFocusedDate = 1;
+                        changeMonth = 1;
+                    }
+                    break;
+                case 'ArrowLeft':
+                    event.preventDefault();
+                    newFocusedDate--;
+                    if (newFocusedDate < 1) {
+                        changeMonth = -1;
+                        const prevMonth = this.month === 0 ? 11 : this.month - 1;
+                        const prevYear = this.month === 0 ? this.year - 1 : this.year;
+                        newFocusedDate = new Date(prevYear, prevMonth + 1, 0).getDate();
+                    }
+                    break;
+                case 'ArrowDown':
+                    event.preventDefault();
+                    newFocusedDate += 7;
+                    if (newFocusedDate > this.no_of_days.length) {
+                        changeMonth = 1;
+                        newFocusedDate = newFocusedDate - this.no_of_days.length;
+                    }
+                    break;
+                case 'ArrowUp':
+                    event.preventDefault();
+                    newFocusedDate -= 7;
+                    if (newFocusedDate < 1) {
+                        changeMonth = -1;
+                        const prevMonth = this.month === 0 ? 11 : this.month - 1;
+                        const prevYear = this.month === 0 ? this.year - 1 : this.year;
+                        const daysInPrevMonth = new Date(prevYear, prevMonth + 1, 0).getDate();
+                        newFocusedDate = daysInPrevMonth + newFocusedDate;
+                    }
+                    break;
+                case 'Home':
+                    event.preventDefault();
+                    newFocusedDate = 1;
+                    break;
+                case 'End':
+                    event.preventDefault();
+                    newFocusedDate = this.no_of_days.length;
+                    break;
+                case 'PageUp':
+                    event.preventDefault();
+                    changeMonth = event.shiftKey ? -12 : -1;
+                    break;
+                case 'PageDown':
+                    event.preventDefault();
+                    changeMonth = event.shiftKey ? 12 : 1;
+                    break;
+                case 'Enter':
+                case ' ':
+                    event.preventDefault();
+                    this.selectDate(this.focusedDate);
+                    return;
+                case 'Escape':
+                    event.preventDefault();
+                    this.showDatepicker = false;
+                    this.$refs.dateInput.focus();
+                    return;
+                default:
+                    return;
+            }
+
+            if (changeMonth !== 0) {
+                this.changeMonth(changeMonth);
+                this.$nextTick(() => {
+                    // Clamp to valid dates in new month
+                    if (newFocusedDate > this.no_of_days.length) {
+                        newFocusedDate = this.no_of_days.length;
+                    }
+                    this.focusedDate = newFocusedDate;
+                    this.focusDateButton(newFocusedDate);
+                });
+            } else {
+                this.focusedDate = newFocusedDate;
+                this.focusDateButton(newFocusedDate);
+            }
+        },
+
+        focusDateButton(date) {
+            this.$nextTick(() => {
+                const button = this.$el.querySelector('[data-date=\'' + date + '\']');
+                if (button && !button.disabled) {
+                    button.focus();
+                }
+            });
+        },
+
+        initFocusOnOpen() {
+            this.$nextTick(() => {
+                // Focus the selected date or today's date
+                let initialFocus = this.dateFrom ? this.dateFrom.getDate() : new Date().getDate();
+
+                // If we're viewing a different month, focus the 1st
+                if (this.dateFrom && (this.dateFrom.getMonth() !== this.month || this.dateFrom.getFullYear() !== this.year)) {
+                    initialFocus = 1;
+                }
+
+                this.focusedDate = initialFocus;
+                this.focusDateButton(initialFocus);
+            });
         }
     }"
     class="relative w-full"
@@ -312,8 +432,8 @@
             type="text"
             readonly
             x-model="selectedDate"
-            x-on:click="showDatepicker = !showDatepicker"
-            x-on:keydown.enter="showDatepicker = !showDatepicker"
+            x-on:click="showDatepicker = !showDatepicker; if(showDatepicker) initFocusOnOpen()"
+            x-on:keydown.space.prevent="showDatepicker = !showDatepicker; if(showDatepicker) initFocusOnOpen()"
             x-bind:aria-expanded="showDatepicker"
             aria-haspopup="dialog"
             aria-label="Choose date"
@@ -384,16 +504,19 @@
                 </template>
             </div>
 
-            <div class="grid grid-cols-7 gap-y-1">
+            <div class="grid grid-cols-7 gap-y-1" x-on:keydown="if (focusedDate) handleKeyboardNavigation($event, focusedDate)">
                 <template x-for="blank in blankdays">
                     <div class="p-1"></div>
-                </template> 
-                
+                </template>
+
                 <template x-for="date in no_of_days" x-bind:key="date">
                     <button
                         type="button"
                         x-on:click="selectDate(date)"
                         x-on:mouseenter="setHover(date)"
+                        x-on:focus="focusedDate = date"
+                        x-bind:data-date="date"
+                        x-bind:tabindex="focusedDate === date ? 0 : -1"
                         x-text="date"
                         x-bind:disabled="!isAllowed(date)"
                         x-bind:aria-label="getAriaLabel(date)"
