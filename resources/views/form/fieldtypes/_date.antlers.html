@@ -6,24 +6,24 @@
         showDatepicker: false,
         showYearPicker: false,
         
-        // --- Configuration ---
+        {{# --- Configuration --- #}}
         mode: '{{ if date_range }}range{{ else }}single{{ /if }}',
         
-        // Static dates (Strings)
+        {{# Static dates (Strings) #}}
         configMinDateStr: '{{ min_date ?? "" }}',
         configMaxDateStr: '{{ max_date ?? "" }}',
         
-        // Relative dates (Integers)
+        {{# Relative dates (Integers) #}}
         configMinDateToday: {{ if min_date_today !== null }}{{ min_date_today }}{{ else }}null{{ /if }},
         configMaxDateToday: {{ if max_date_today !== null }}{{ max_date_today }}{{ else }}null{{ /if }},
         
-        // Range limit
+        {{# Range limit #}}
         maxRange: {{ max_range ?? 'null' }},
 
-        // Close after selection (inverted logic - default is to close)
+        {{# Close after selection (inverted logic - default is to close) #}}
         dontCloseAfterSelection: {{ dont_close_after_selection ? 'true' : 'false' }},
 
-        // --- Internal State ---
+        {{# --- Internal State --- #}}
         dateFrom: null,
         dateTo: null,
         hoverDate: null,
@@ -42,7 +42,7 @@
             let today = new Date();
             today.setHours(0,0,0,0);
 
-            // Calculate Minimum Date
+            {{# Calculate Minimum Date #}}
             if (this.configMinDateToday !== null) {
                 this.minDateObj = new Date(today);
                 let offset = parseInt(this.configMinDateToday);
@@ -52,7 +52,7 @@
             }
             if (this.minDateObj) this.minDateObj.setHours(0,0,0,0);
 
-            // Calculate Maximum Date
+            {{# Calculate Maximum Date #}}
             if (this.configMaxDateToday !== null) {
                 this.maxDateObj = new Date(today);
                 let offset = parseInt(this.configMaxDateToday);
@@ -62,31 +62,31 @@
             }
             if (this.maxDateObj) this.maxDateObj.setHours(0,0,0,0);
 
-            // Set initial view to Today (default)
+            {{# Set initial view to Today (default) #}}
             this.month = today.getMonth();
             this.year = today.getFullYear();
             
-            // If minDate is in the future, shift view there
+            {{# If minDate is in the future, shift view there #}}
             if(this.minDateObj && this.minDateObj > today) {
                 this.month = this.minDateObj.getMonth();
                 this.year = this.minDateObj.getFullYear();
             }
 
-            // Parse existing value (Overrides Today/MinDate view if value exists)
+            {{# Parse existing value (Overrides Today/MinDate view if value exists) #}}
             this.parseSelectedDate();
 
-            // Generate grid
+            {{# Generate grid #}}
             this.generateDays();
             this.generateYears();
 
-            // Watch for changes to input (e.g. form reset or manual change)
+            {{# Watch for changes to input (e.g. form reset or manual change) #}}
             this.$watch('selectedDate', () => {
                 this.parseSelectedDate();
                 this.generateDays();
             });
         },
 
-        // Restores state from the string value
+        {{# Restores state from the string value #}}
         parseSelectedDate() {
             if (!this.selectedDate) {
                 this.dateFrom = null;
@@ -94,7 +94,7 @@
                 return;
             }
 
-            // Safe parser (avoids timezone shifts)
+            {{# Safe parser (avoids timezone shifts) #}}
             const parse = (str) => {
                 if(!str) return null;
                 const [y, m, d] = str.split('-').map(Number);
@@ -109,31 +109,31 @@
                 this.dateFrom = parse(this.selectedDate);
             }
 
-            // Sync Calendar View to the selected date
+            {{# Sync Calendar View to the selected date #}}
             if (this.dateFrom) {
                 this.month = this.dateFrom.getMonth();
                 this.year = this.dateFrom.getFullYear();
             }
         },
 
-        // --- Helper to determine the effective 'End Date' for styling (Actual or Hover) ---
+        {{# --- Helper to determine the effective 'End Date' for styling (Actual or Hover) --- #}}
         get effectiveEnd() {
             if (this.dateTo) return this.dateTo;
             if (this.dateFrom && this.hoverDate) return this.hoverDate;
             return null;
         },
 
-        // --- Logic ---
+        {{# --- Logic --- #}}
 
         isAllowed(date) {
             const d = new Date(this.year, this.month, date);
             d.setHours(0,0,0,0);
 
-            // Global Min/Max
+            {{# Global Min/Max #}}
             if (this.minDateObj && d < this.minDateObj) return false;
             if (this.maxDateObj && d > this.maxDateObj) return false;
 
-            // Max Range Check (using effective end to show invalid state on hover)
+            {{# Max Range Check (using effective end to show invalid state on hover) #}}
             if (this.mode === 'range' && this.maxRange && this.dateFrom && !this.dateTo) {
                 const diffTime = Math.abs(d - this.dateFrom);
                 const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
@@ -143,7 +143,7 @@
             return true;
         },
 
-        // Check if exact Start Date
+        {{# Check if exact Start Date #}}
         isStart(date) {
             if (!this.dateFrom) return false;
             const d = new Date(this.year, this.month, date);
@@ -151,7 +151,7 @@
             return d.getTime() === this.dateFrom.getTime();
         },
 
-        // Check if exact End Date (or Hover End)
+        {{# Check if exact End Date (or Hover End) #}}
         isEnd(date) {
             const effective = this.effectiveEnd;
             if (!effective) return false;
@@ -159,14 +159,14 @@
             const d = new Date(this.year, this.month, date);
             d.setHours(0,0,0,0);
             
-            // Handle backwards hover/selection
+            {{# Handle backwards hover/selection #}}
             const start = this.dateFrom < effective ? this.dateFrom : effective;
             const end = this.dateFrom < effective ? effective : this.dateFrom;
 
             return d.getTime() === end.getTime();
         },
 
-        // Check if Start (for styling logic, handles swap)
+        {{# Check if Start (for styling logic, handles swap) #}}
         isVisualStart(date) {
             const effective = this.effectiveEnd;
             if (!this.dateFrom) return false;
@@ -188,7 +188,7 @@
             const d = new Date(this.year, this.month, date);
             d.setHours(0,0,0,0);
 
-            // Sort dates to handle backwards selection
+            {{# Sort dates to handle backwards selection #}}
             const start = this.dateFrom < effective ? this.dateFrom : effective;
             const end = this.dateFrom < effective ? effective : this.dateFrom;
 
@@ -213,12 +213,12 @@
                 }
             } else {
                 if (!this.dateFrom || (this.dateFrom && this.dateTo)) {
-                    // Start Selection
+                    {{# Start Selection #}}
                     this.dateFrom = selectedDateObj;
                     this.dateTo = null;
                     this.hoverDate = null;
                 } else {
-                    // End Selection
+                    {{# End Selection #}}
                     if (selectedDateObj < this.dateFrom) {
                         if (this.maxRange) {
                             const diffTime = Math.abs(selectedDateObj - this.dateFrom);
@@ -300,7 +300,7 @@
         handleKeyboardNavigation(event, currentDate) {
             const key = event.key;
 
-            // Set focused date if not set
+            {{# Set focused date if not set #}}
             if (this.focusedDate === null) {
                 this.focusedDate = currentDate;
             }
@@ -379,7 +379,7 @@
             if (changeMonth !== 0) {
                 this.changeMonth(changeMonth);
                 this.$nextTick(() => {
-                    // Clamp to valid dates in new month
+                    {{# Clamp to valid dates in new month #}}
                     if (newFocusedDate > this.no_of_days.length) {
                         newFocusedDate = this.no_of_days.length;
                     }
@@ -403,10 +403,10 @@
 
         initFocusOnOpen() {
             this.$nextTick(() => {
-                // Focus the selected date or today's date
+                {{# Focus the selected date or today's date #}}
                 let initialFocus = this.dateFrom ? this.dateFrom.getDate() : new Date().getDate();
 
-                // If we're viewing a different month, focus the 1st
+                {{# If we're viewing a different month, focus the 1st #}}
                 if (this.dateFrom && (this.dateFrom.getMonth() !== this.month || this.dateFrom.getFullYear() !== this.year)) {
                     initialFocus = 1;
                 }
@@ -527,19 +527,19 @@
                         x-bind:class="{
                             'text-ef-disabled cursor-not-allowed opacity-50': !isAllowed(date),
 
-                            // Single Date Mode or Exact Match Start & End (e.g. 1 day range) or Start without End
+                            {{# Single Date Mode or Exact Match Start & End (e.g. 1 day range) or Start without End #}}
                             'bg-ef-accent text-ef-text-white rounded-full': (mode === 'single' && isStart(date)) || (mode === 'range' && isStart(date) && !effectiveEnd) || (mode === 'range' && isVisualStart(date) && isEnd(date)),
 
-                            // Range Start (Rounded Left only)
+                            {{# Range Start (Rounded Left only) #}}
                             'bg-ef-accent text-ef-text-white rounded-l-full rounded-r-none': mode === 'range' && isVisualStart(date) && effectiveEnd && !isEnd(date),
 
-                            // Range End (Rounded Right only)
+                            {{# Range End (Rounded Right only) #}}
                             'bg-ef-accent text-ef-text-white rounded-r-full rounded-l-none': mode === 'range' && isEnd(date) && isVisualStart(date) === false,
 
-                            // In Range (Square)
+                            {{# In Range (Square) #}}
                             'bg-ef-subtle text-ef-text rounded-none': isInRange(date),
 
-                            // Hover states for unselected
+                            {{# Hover states for unselected #}}
                             'hover:bg-ef-subtle text-ef-text-muted rounded-full': !isVisualStart(date) && !isEnd(date) && !isInRange(date) && isAllowed(date)
                         }"
                     ></button>

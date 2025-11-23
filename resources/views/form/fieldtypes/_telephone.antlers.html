@@ -9,18 +9,18 @@
         selectedOption: null,
 
         init() {
-            // Check for a pre-filled value on component initialization (e.g., on an edit form).
+            {{# Check for a pre-filled value on component initialization (e.g., on an edit form). #}}
             const initialValue = this.$refs.phoneNumber.value;
 
             if (initialValue) {
-                // Find the country code that the initial value starts with.
-                // Sort by length descending to match longer codes first.
+                {{# Find the country code that the initial value starts with. #}}
+                {{# Sort by length descending to match longer codes first. #}}
                 const matchingOption = [...this.comboboxData]
                     .sort((a, b) => b.code.length - a.code.length)
                     .find(opt => initialValue.startsWith(opt.code));
 
                 if (matchingOption) {
-                    // If a match is found, set it as the selected option.
+                    {{# If a match is found, set it as the selected option. #}}
                     this.selectedOption = matchingOption.value;
                 }
             }
@@ -33,14 +33,14 @@
 
             let existingValue = this.$refs.phoneNumber.value || '';
 
-            // Use a simple regex to strip any previous country code.
-            // This removes a leading '+' followed by one or more digits and an optional space.
+            {{# Use a simple regex to strip any previous country code. #}}
+            {{# This removes a leading '+' followed by one or more digits and an optional space. #}}
             existingValue = existingValue.replace(/^\+\d+\s*/, '');
 
-            // Set new value with selected country code + existing number.
+            {{# Set new value with selected country code + existing number. #}}
             this.$refs.phoneNumber.value = `${option.code} ${existingValue}`;
 
-            // Focus the input and position cursor at the end for immediate typing
+            {{# Focus the input and position cursor at the end for immediate typing #}}
             this.$nextTick(() => {
                 this.$refs.phoneNumber.focus();
                 const cursorPos = this.$refs.phoneNumber.value.length;
@@ -49,7 +49,7 @@
         },
 
         handleDeletion(event) {
-            // Prevent deletion of the country code prefix.
+            {{# Prevent deletion of the country code prefix. #}}
             if (this.selectedOption) {
                 const selected = this.comboboxData.find(opt => opt.value === this.selectedOption);
                 if (selected && (event.key === 'Backspace' || event.key === 'Delete')) {
@@ -62,15 +62,15 @@
         },
 
         handleInput(event) {
-            // Ensure the country code always stays at the beginning.
+            {{# Ensure the country code always stays at the beginning. #}}
             if (this.selectedOption) {
                 const selected = this.comboboxData.find(opt => opt.value === this.selectedOption);
                 if (selected && !event.target.value.startsWith(selected.code + ' ')) {
-                    // If the user tries to remove the prefix, restore it.
+                    {{# If the user tries to remove the prefix, restore it. #}}
                     let currentValue = event.target.value.replace(selected.code, '').trim();
                     event.target.value = `${selected.code} ${currentValue}`;
 
-                    // Restore cursor position after the prefix.
+                    {{# Restore cursor position after the prefix. #}}
                     this.$nextTick(() => {
                         const cursorPos = selected.code.length + 1;
                         event.target.setSelectionRange(cursorPos, cursorPos);
@@ -98,7 +98,7 @@
         },
 
         handleKeydownOnOptions(event) {
-            // Allows typing to focus the search field when the dropdown is open.
+            {{# Allows typing to focus the search field when the dropdown is open. #}}
             if (!this.isOpen) return;
             if ((event.keyCode >= 65 && event.keyCode <= 90) || (event.keyCode >= 48 && event.keyCode <= 57) || event.keyCode === 8) {
                 this.$refs.searchField.focus();
