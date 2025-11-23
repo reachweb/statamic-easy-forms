@@ -12,12 +12,12 @@
 >
     <template x-for="star in stars" :key="star">
         <label
-            :for="'{{ handle }}_' + star"
+            :for="'{{ handle }}-star-' + star"
             class="transition hover:scale-125 focus-within:scale-125 focus-within:ring-2 focus-within:ring-ef-focus focus-within:ring-offset-2 rounded-ef cursor-pointer"
         >
             <input
                 x-model.number="submitFields['{{ handle }}']"
-                :id="'{{ handle }}_' + star"
+                :id="'{{ handle }}-star-' + star"
                 type="radio"
                 class="sr-only"
                 name="{{ handle }}"
