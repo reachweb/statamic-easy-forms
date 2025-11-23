@@ -32,7 +32,7 @@ trait HandlesFields
             [
                 'optional' => $this->isFieldOptional($field),
                 'value' => $field->value() ?? $field->defaultValue(),
-                'has_own_instructions' => $field->get('instructions') !== null,
+                'has_own_instructions' => !empty($field->get('instructions')),
             ],
             $field->fieldtype()->extraRenderableFieldData()
         );
