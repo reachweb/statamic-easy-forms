@@ -10,7 +10,10 @@
 >
     {{# Honeypot field #}}
     {{ if honeypot }}
-    <input type="text" name="{{ honeypot }}" class="hidden" tabindex="-1" autocomplete="off">
+    <div class="hidden" aria-hidden="true">
+        <label for="{{ honeypot }}">Leave this field blank</label>
+        <input type="text" id="{{ honeypot }}" name="{{ honeypot }}" tabindex="-1" autocomplete="off">
+    </div>
     {{ /if }}
 
     <div
