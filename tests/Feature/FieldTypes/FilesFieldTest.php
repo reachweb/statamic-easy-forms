@@ -145,7 +145,7 @@ test('files field has Alpine.js data binding', function () {
 
     expect($output)
         ->toContain('x-ref="fileInput"')
-        ->toContain('@change="handleFileChange($event)"')
+        ->toContain('x-on:change="handleFileChange($event)"')
         ->toContain('submitFields');
 });
 
@@ -165,7 +165,7 @@ test('files field handles file change events', function () {
     expect($output)
         ->toContain('handleFileChange')
         ->toContain('x-data=')
-        ->toContain('@change="handleFileChange($event)"');
+        ->toContain('x-on:change="handleFileChange($event)"');
 });
 
 test('files field respects max_files configuration', function () {
