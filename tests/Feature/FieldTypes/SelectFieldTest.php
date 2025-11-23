@@ -96,6 +96,56 @@ test('select field has Alpine model binding', function () {
     expect($output)->toContain('x-model');
 });
 
+test('select field with multiple attribute renders correctly', function () {
+    createTestForm('select_multiple', [
+        [
+            'handle' => 'colors',
+            'field' => [
+                'type' => 'select',
+                'display' => 'Colors',
+                'options' => [
+                    'red' => 'Red',
+                    'blue' => 'Blue',
+                    'green' => 'Green',
+                ],
+                'multiple' => true,
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('select_multiple');
+
+    expect($output)
+        ->toContain('name="colors[]"')
+        ->toContain('multiple')
+        ->not->toContain('form-select')
+        ->not->toContain('Please select');
+});
+
+test('select field without multiple has form-select class and placeholder', function () {
+    createTestForm('select_single', [
+        [
+            'handle' => 'color',
+            'field' => [
+                'type' => 'select',
+                'display' => 'Color',
+                'options' => [
+                    'red' => 'Red',
+                    'blue' => 'Blue',
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('select_single');
+
+    expect($output)
+        ->toContain('name="color"')
+        ->toContain('form-select')
+        ->toContain('Please select')
+        ->not->toContain('name="color[]"');
+});
+
 // Tests for improved select field
 test('select improved field renders with single selection (no checkboxes)', function () {
     createTestForm('select_improved_single', [
