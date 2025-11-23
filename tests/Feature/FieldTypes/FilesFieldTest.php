@@ -164,7 +164,8 @@ test('files field handles file change events', function () {
 
     expect($output)
         ->toContain('handleFileChange')
-        ->toContain('fileField_upload');
+        ->toContain('x-data=')
+        ->toContain('@change="handleFileChange($event)"');
 });
 
 test('files field respects max_files configuration', function () {
@@ -222,7 +223,7 @@ test('files field has proper input type', function () {
         ->toContain('type="file"');
 });
 
-test('files field includes Alpine script initialization', function () {
+test('files field uses inline Alpine.js data', function () {
     createTestForm('script_files', [
         [
             'handle' => 'upload',
@@ -236,8 +237,8 @@ test('files field includes Alpine script initialization', function () {
     $output = renderEasyFormTag('script_files');
 
     expect($output)
-        ->toContain('alpine:init')
-        ->toContain('Alpine.data');
+        ->toContain('x-data=')
+        ->toContain('handleFileChange(event)');
 });
 
 test('files field updates submit fields correctly for single file', function () {
