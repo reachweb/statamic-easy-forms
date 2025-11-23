@@ -404,3 +404,77 @@ test('integer rating respects min and max values', function () {
         ->toContain('type="radio"')
         ->toContain('focus-within:ring-2');
 });
+
+test('tag respects custom submit_text parameter', function () {
+    createTestForm('custom_submit_form', [
+        [
+            'handle' => 'name',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Name',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('custom_submit_form', [
+        'submit_text' => 'Send Now',
+    ]);
+
+    expect($output)
+        ->toContain('Send Now')
+        ->not->toContain('<span>Submit</span>');
+});
+
+test('tag respects custom success_message parameter', function () {
+    createTestForm('custom_success_form', [
+        [
+            'handle' => 'email',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Email',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('custom_success_form', [
+        'success_message' => 'Message received!',
+    ]);
+
+    expect($output)
+        ->toContain('Message received!')
+        ->not->toContain('Thank you for your message! We will get back to you shortly!');
+});
+
+test('tag uses default submit text when submit_text not provided', function () {
+    createTestForm('default_submit_form', [
+        [
+            'handle' => 'name',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Name',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('default_submit_form');
+
+    expect($output)
+        ->toContain('Submit');
+});
+
+test('tag uses default success message when success_message not provided', function () {
+    createTestForm('default_success_form', [
+        [
+            'handle' => 'email',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Email',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('default_success_form');
+
+    expect($output)
+        ->toContain('Thank you for your message! We will get back to you shortly!');
+});

@@ -27,9 +27,14 @@ class EasyForm extends Tags
      * - view: Custom view template to use (default: "form/_form_component")
      * - hide_fields: Array of field handles to hide (e.g., hide_fields="field1|field2")
      * - prepopulated_data: Array of field values to prepopulate
+     * - submit_text: Custom text for the submit button
+     * - success_message: Custom text for the success message after submission
      *
      * Example with custom view:
      * {{ easyform handle="contact" view="forms/custom-contact" }}
+     *
+     * Example with custom text:
+     * {{ easyform handle="contact" submit_text="Send Message" success_message="Thanks! We'll be in touch soon." }}
      *
      * @return string Rendered HTML
      */
