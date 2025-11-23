@@ -154,6 +154,7 @@
             x-on:keydown.up.prevent="$focus.wrap().previous()"
             x-transition
             x-trap.inert="openedWithKeyboard"
+            x-cloak
         >
             <div class="relative">
                 <svg class="absolute left-4 top-1/2 size-5 -translate-y-1/2 text-ef-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.5" aria-hidden="true">
@@ -207,7 +208,7 @@
             </ul>
         </div>
         <input
-            id="phoneNumber"
+            id="{{ handle }}"
             type="tel"
             class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-r-ef focus:ring-2 focus:ring-ef-focus focus:border-ef-focus focus:outline-none block w-full p-2.5 disabled:cursor-not-allowed disabled:opacity-75"
             x-ref="phoneNumber"

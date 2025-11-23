@@ -27,7 +27,7 @@ test('telephone field with improved_field enabled renders telephone partial', fu
 
     expect($output)
         ->toContain('type="tel"')
-        ->toContain('id="phoneNumber"')
+        ->toContain('id="phone"')
         ->toContain('x-ref="phoneNumber"')
         ->toContain('id="phonesList"');
 });
