@@ -431,6 +431,8 @@
             x-ref="dateInput"
             type="text"
             readonly
+            id="{{ handle }}"
+            name="{{ handle }}"
             x-model="selectedDate"
             x-on:click="showDatepicker = !showDatepicker; if(showDatepicker) initFocusOnOpen()"
             x-on:keydown.space.prevent="showDatepicker = !showDatepicker; if(showDatepicker) initFocusOnOpen()"

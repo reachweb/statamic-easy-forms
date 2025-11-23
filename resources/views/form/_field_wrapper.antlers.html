@@ -3,8 +3,8 @@
     x-show="shouldShowField('{{ handle }}')"
 >
     {{ unless type === 'toggle' || type === 'spacer' }}
-    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'rating' }}id="{{ handle }}-label"{{ elseif type === 'integer' && integer_template === 'counter' }}id="{{ handle }}-label"{{ elseif type === 'radio' && improved_field }}id="{{ handle }}-label"{{ /if }}>
-        {{ if type === 'checkboxes' || (type === 'radio' && !improved_field) }}
+    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'counter' }}id="{{ handle }}-label"{{ /if }}>
+        {{ if type === 'checkboxes' || type === 'radio' || (type === 'integer' && integer_template === 'rating') }}
         <span class="block font-semibold text-ef text-ef-label">
             {{ if prepend }}
             <span class="text-ef-text-muted">{{ prepend }}</span>

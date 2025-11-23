@@ -1,4 +1,4 @@
-<div
+<fieldset
     x-data="{
         minVal: {{ if min_value || min_value === 0 }}{{ min_value }}{{ else }}1{{ /if }},
         maxVal: {{ if max_value || max_value === 0 }}{{ max_value }}{{ else }}5{{ /if }},
@@ -6,10 +6,9 @@
     }"
     x-init="stars = Array.from({ length: maxVal - minVal + 1 }, (_, i) => minVal + i)"
     class="flex items-center gap-1"
-    role="radiogroup"
-    aria-labelledby="{{ handle }}-label"
     {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >
+    <legend class="sr-only">{{ display ?? handle }}</legend>
     <template x-for="star in stars" :key="star">
         <label
             :for="'{{ handle }}-star-' + star"
@@ -39,4 +38,4 @@
     <span class="ml-2 text-ef text-ef-text-muted" x-show="submitFields['{{ handle }}']" aria-live="polite" aria-atomic="true">
         <span x-text="submitFields['{{ handle }}']"></span>/<span x-text="maxVal"></span>
     </span>
-</div>
+</fieldset>

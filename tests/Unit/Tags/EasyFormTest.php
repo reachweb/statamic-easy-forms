@@ -307,8 +307,8 @@ test('tag renders integer rating fieldtype', function () {
         ->toContain('minVal: 1')
         ->toContain('maxVal: 5')
         ->toContain('x-model.number="submitFields[\'rating\']"')
-        ->toContain('role="radiogroup"')
-        ->toContain('aria-labelledby="rating-label"')
+        ->toContain('<fieldset')
+        ->toContain('<legend class="sr-only">')
         ->toContain('aria-live="polite"')
         ->toContain('aria-atomic="true"');
 });

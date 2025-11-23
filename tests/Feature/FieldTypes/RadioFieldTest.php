@@ -161,8 +161,9 @@ test('improved radio field renders with button-style labels when improved_field 
 
     expect($output)
         ->toContain('sr-only')
-        ->toContain('has-[:checked]')
-        ->toContain('role="radiogroup"')
+        ->toContain('has-checked')
+        ->toContain('<fieldset')
+        ->toContain('<legend class="sr-only">')
         ->toContain('flex-col')
         ->toContain('md:flex-row');
 });
@@ -223,6 +224,7 @@ test('improved radio field has accessibility attributes', function () {
                 'display' => 'Accessible',
                 'options' => ['x' => 'X', 'y' => 'Y'],
                 'improved_field' => true,
+                'instructions' => 'Select an option',
             ],
         ],
     ]);
@@ -230,9 +232,9 @@ test('improved radio field has accessibility attributes', function () {
     $output = renderEasyFormTag('improved_a11y');
 
     expect($output)
-        ->toContain('role="radiogroup"')
-        ->toContain('aria-labelledby')
-        ->toContain('aria-label');
+        ->toContain('<fieldset')
+        ->toContain('<legend class="sr-only">')
+        ->toContain('aria-describedby="accessible-description"');
 });
 
 test('improved radio field has responsive flex layout', function () {

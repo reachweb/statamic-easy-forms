@@ -27,7 +27,7 @@ test('assets field renders correctly', function () {
     expect($output)
         ->toContain('name="attachments"')
         ->toContain('type="file"')
-        ->toContain('id="attachments-file-input"');
+        ->toContain('id="attachments"');
 });
 
 test('assets field with multiple files enabled', function () {

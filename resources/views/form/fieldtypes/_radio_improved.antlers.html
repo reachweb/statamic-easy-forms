@@ -1,20 +1,19 @@
-<div
+<fieldset
     class="flex flex-col md:flex-row gap-2"
     x-data="{
         selected: {{ if default }}'{{ default }}'{{ else }}null{{ /if }}
     }"
     x-modelable="selected"
     x-model="submitFields['{{ handle }}']"
-    role="radiogroup"
-    aria-labelledby="{{ handle }}-label"
     {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >
+    <legend class="sr-only">{{ display ?? handle }}</legend>
     {{ foreach:options }}
         <label
             for="{{ handle }}_{{ key }}"
             class="flex w-full md:flex-1 items-center justify-center gap-2 py-2.5 px-4 text-center uppercase text-ef font-bold rounded-ef
             bg-ef-input-bg border border-ef-border mr-0 md:mr-4 last:mr-0 cursor-pointer transition-colors duration-500
-            has-[:checked]:!bg-ef-checkbox-checked has-[:checked]:text-ef-text-white has-focus:ring-2 has-focus:ring-ef-focus has-focus:ring-offset-2"
+            has-checked:bg-ef-checkbox-checked! has-checked:text-ef-text-white has-focus:ring-2 has-focus:ring-ef-focus has-focus:ring-offset-2"
         >
             <input
                 id="{{ handle }}_{{ key }}"
@@ -24,9 +23,8 @@
                 class="sr-only"
                 x-model="selected"
                 {{ if key == default }}checked{{ /if }}
-                aria-label="{{ value ?? key }}"
             >
             <span>{{ value ?? key }}</span>
         </label>
     {{ /foreach:options }}
-</div>
+</fieldset>
