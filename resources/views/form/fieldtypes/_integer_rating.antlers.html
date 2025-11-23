@@ -22,8 +22,8 @@
                 class="sr-only"
                 name="{{ handle }}"
                 :value="star"
-                :aria-label="star + ' {{ if max_value > 5 }}{{ 'points' | trans }}{{ else }}{{ 'stars' | trans }}{{ /if }}'"
             >
+            <span class="sr-only" x-text="star + ' {{ if max_value > 5 }}{{ 'points' | trans }}{{ else }}{{ 'stars' | trans }}{{ /if }}'"></span>
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 aria-hidden="true"
