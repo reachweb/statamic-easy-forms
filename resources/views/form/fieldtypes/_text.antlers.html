@@ -5,6 +5,6 @@
     placeholder="{{ placeholder ?? '' | trans }}"
     type="{{ input_type ?? 'text' }}"
     {{ if autocomplete }}autocomplete="{{ autocomplete }}"{{ /if }}
-    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     x-model="submitFields['{{ handle }}']"
 >

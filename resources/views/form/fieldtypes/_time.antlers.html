@@ -6,7 +6,7 @@
     name="{{ handle }}"
     type="text"
     inputmode="numeric"
-    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     autocomplete="off"
     x-model="submitFields['{{ handle }}']"
 >

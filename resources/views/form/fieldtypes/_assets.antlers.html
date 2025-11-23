@@ -81,7 +81,7 @@
                     x-ref="input"
                     {{ if max_files > 1 }}multiple{{ /if }}
                     @change="handleFiles($event.target.files)"
-                    {{ if instructions }}aria-describedby="{{ handle }}-formats"{{ /if }}
+                    {{ if has_own_instructions }}aria-describedby="{{ handle }}-formats"{{ /if }}
                 />
                 {{ "Browse" | trans }}
             </label>

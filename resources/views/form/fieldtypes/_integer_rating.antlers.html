@@ -8,7 +8,7 @@
     class="flex items-center gap-1"
     role="radiogroup"
     aria-labelledby="{{ handle }}-label"
-    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >
     <template x-for="star in stars" :key="star">
         <label

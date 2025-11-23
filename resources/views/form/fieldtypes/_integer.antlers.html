@@ -6,7 +6,7 @@
     inputmode="numeric"
     {{ if min_value || min_value === 0 }}min="{{ min_value }}"{{ /if }}
     {{ if max_value || max_value === 0 }}max="{{ max_value }}"{{ /if }}
-    {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     autocomplete="off"
     x-model.number="submitFields['{{ handle }}']"
 >

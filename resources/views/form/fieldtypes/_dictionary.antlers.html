@@ -57,6 +57,7 @@
             role="combobox"
             aria-controls="list"
             aria-haspopup="listbox"
+            {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
             x-ref="dropdownButton"
             x-on:click="isOpen = ! isOpen; checkPosition()"
             x-on:keydown.down.prevent="openedWithKeyboard = true"

@@ -11,7 +11,7 @@
         class="flex items-center"
         role="group"
         aria-labelledby="{{ handle }}-label"
-        {{ if instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+        {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     >
         <button
             type="button"

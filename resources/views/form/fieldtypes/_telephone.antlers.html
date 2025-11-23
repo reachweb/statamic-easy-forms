@@ -218,6 +218,7 @@
             x-on:input="handleInput($event)"
             placeholder="{{ "Select country code first" | trans }}"
             x-bind:readonly="!selectedOption"
+            {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
         />
     </div>
 </div>

@@ -7,6 +7,7 @@
             name="{{ handle }}"
             role="switch"
             {{ if inline_label }}aria-labelledby="{{ handle }}-label"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
             x-model="submitFields['{{ handle }}']"
         >
         <div
