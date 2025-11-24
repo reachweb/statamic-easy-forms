@@ -133,6 +133,11 @@ export default function formHandler(formHandle = 'formSubmitted') {
                     bubbles: true,
                     detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, formHandle: this.formHandle }
                 }))
+
+                // Scroll to first error field if outside of viewport
+                this.$nextTick(() => {
+                    this.scrollToFirstError()
+                })
             } catch (parseError) {
                 // If we can't parse the response, treat it as a fatal error
                 this.fatalError = true
@@ -142,6 +147,30 @@ export default function formHandler(formHandle = 'formSubmitted') {
                     bubbles: true,
                     detail: { errors: {}, fatalError: true, formHandle: this.formHandle }
                 }))
+            }
+        },
+
+        scrollToFirstError() {
+            if (Object.keys(this.errors).length === 0) return
+
+            const firstErrorHandle = Object.keys(this.errors)[0]
+
+            // Find field by label or fallback to input element
+            const label = this.$refs.form.querySelector(`label[for="${firstErrorHandle}"]`)
+            const fieldElement = label ? label.closest('div') : this.$refs.form.querySelector(`#${firstErrorHandle}`)
+
+            if (!fieldElement) return
+
+            // Check if element is in viewport
+            const rect = fieldElement.getBoundingClientRect()
+            const isInViewport = rect.top >= 0 && rect.bottom <= window.innerHeight
+
+            // Only scroll if not in viewport
+            if (!isInViewport) {
+                fieldElement.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                })
             }
         },
 
