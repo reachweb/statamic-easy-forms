@@ -517,8 +517,15 @@ test('version method returns dev or valid version string', function () {
 
     $version = $tag->version();
 
-    // Should be either 'dev' for local development or a version string like '1.0.0'
-    expect($version === 'dev' || preg_match('/^\d+\.\d+\.\d+/', $version))->toBeTrue();
+    // Should be one of:
+    // - 'dev' for local development without Composer
+    // - 'dev-main' or 'dev-master' for git repository installs
+    // - A semantic version string like '1.0.0'
+    expect(
+        $version === 'dev' ||
+        str_starts_with($version, 'dev-') ||
+        preg_match('/^\d+\.\d+\.\d+/', $version)
+    )->toBeTrue();
 });
 
 test('version method handles missing InstalledVersions class gracefully', function () {
