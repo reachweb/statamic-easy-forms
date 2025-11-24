@@ -58,10 +58,10 @@
                                             {{ /if }}
                                             {{ if value | is_array }}
                                                 {{ value }}
-                                                    {{ label ?? value ?? key }}{{ unless last }}, {{ /unless }}
+                                                    {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
                                                 {{ /value }}
                                             {{ else }}
-                                                {{ value:label ?? label ?? value ?? key }}
+                                                {{ value:label ?? label ?? value ?? key | entities }}
                                             {{ /if }}
                                         </div>
                                     </td>
