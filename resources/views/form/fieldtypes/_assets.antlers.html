@@ -4,15 +4,6 @@
         isDragging: false,
         maxFiles: {{ max_files ?? 1 }},
 
-        init() {
-            {{# Set up accessible label association #}}
-            this.$nextTick(() => {
-                if (this.$refs.input) {
-                    this.$refs.input.setAttribute('aria-describedby', '{{ handle }}-formats')
-                }
-            })
-        },
-
         handleFiles(fileList) {
             const newFiles = Array.from(fileList)
 
