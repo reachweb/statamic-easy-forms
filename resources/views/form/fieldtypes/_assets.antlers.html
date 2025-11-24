@@ -57,10 +57,10 @@
     {{# Drag & Drop Zone #}}
     <div
         class="flex w-full flex-col items-center justify-center gap-2 rounded-ef border-2 border-dashed p-8 text-ef-text transition-colors duration-200"
-        :class="isDragging ? 'border-ef-accent bg-ef-accent/5' : 'border-ef-border bg-ef-input-bg'"
-        @dragover.prevent="isDragging = true"
-        @dragleave.prevent="isDragging = false"
-        @drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
+        x-bind:class="isDragging ? 'border-ef-accent bg-ef-accent/5' : 'border-ef-border bg-ef-input-bg'"
+        x-on:dragover.prevent="isDragging = true"
+        x-on:dragleave.prevent="isDragging = false"
+        x-on:drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
         x-show="files.length === 0 || maxFiles > 1"
     >
         {{# Upload Icon #}}
@@ -109,9 +109,9 @@
                 {{# Remove Button #}}
                 <button
                     type="button"
-                    @click="removeFile(index)"
+                    x-on:click="removeFile(index)"
                     class="ml-3 text-ef-error hover:text-ef-error focus:outline-none focus:ring-2 focus:ring-ef-error focus:ring-offset-2 rounded p-1 transition-colors duration-200"
-                    :aria-label="'Remove ' + file.name"
+                    x-bind:aria-label="'Remove ' + file.name"
                 >
                     <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
                         <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
