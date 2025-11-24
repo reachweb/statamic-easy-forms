@@ -8,6 +8,7 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         disableSubmit: false,
         successMessage: false,
         hasReCaptcha: !!recaptchaSiteKey,
+        isSubmitting: false,
 
         init() {
             if (this.recaptchaSiteKey) {
@@ -20,6 +21,10 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         },
 
         async formSubmit() {
+            // Double-submit prevention
+            if (this.isSubmitting) return;
+            this.isSubmitting = true;
+
             // Dispatch submit event
             this.$refs.form.dispatchEvent(new CustomEvent('form:submit', {
                 bubbles: true,
@@ -37,7 +42,6 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
                     } catch (recaptchaError) {
                         // Handle ReCAPTCHA-specific errors
                         this.fatalError = true
-                        this.toggleSubmit()
                         this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                             bubbles: true,
                             detail: {
@@ -63,7 +67,6 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
 
                 if (!response.ok) {
                     await this.handleErrors(response)
-                    this.toggleSubmit()
                     return
                 }
 
@@ -71,13 +74,16 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
                 this.handleSuccess(data)
             } catch (error) {
                 this.fatalError = true
-                this.toggleSubmit()
 
                 // Dispatch error event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
                     detail: { error: error.message, fatalError: true, formHandle: this.formHandle }
                 }))
+            } finally {
+                // Always reset submission state
+                this.toggleSubmit()
+                this.isSubmitting = false
             }
         },
 
@@ -199,16 +205,38 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
                     return;
                 }
 
-                if (typeof grecaptcha === 'undefined') {
-                    reject(new Error('ReCaptcha not loaded'));
-                    return;
-                }
-                grecaptcha.ready(() => {
-                    grecaptcha.execute(this.recaptchaSiteKey, { action: 'submit' })
-                        .then(resolve)
-                        .catch(reject)
-                })
-            })
+                // Timeout after 10 seconds
+                const timeout = setTimeout(() => {
+                    reject(new Error('ReCAPTCHA timeout'));
+                }, 10000);
+
+                let retries = 0;
+                const maxRetries = 100; // 100 * 100ms = 10 seconds max
+
+                const checkRecaptcha = () => {
+                    if (typeof grecaptcha !== 'undefined' && grecaptcha.ready) {
+                        grecaptcha.ready(() => {
+                            grecaptcha.execute(this.recaptchaSiteKey, { action: 'submit' })
+                                .then((token) => {
+                                    clearTimeout(timeout);
+                                    resolve(token);
+                                })
+                                .catch((error) => {
+                                    clearTimeout(timeout);
+                                    reject(error);
+                                });
+                        });
+                    } else if (retries++ < maxRetries) {
+                        // Retry after 100ms if grecaptcha not loaded yet
+                        setTimeout(checkRecaptcha, 100);
+                    } else {
+                        clearTimeout(timeout);
+                        reject(new Error('ReCAPTCHA failed to load'));
+                    }
+                };
+
+                checkRecaptcha();
+            });
         },
     }
 }
