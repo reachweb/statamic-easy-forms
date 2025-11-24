@@ -1,17 +1,16 @@
-const RECAPTCHA_SITE_KEY = import.meta.env.VITE_RECAPTCHA_SITE_KEY
-
-export default function formHandler(formHandle = 'formSubmitted') {
+export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteKey = null) {
     return {
         formHandle: formHandle,
+        recaptchaSiteKey: recaptchaSiteKey,
         submitData: {},
         errors: {},
         fatalError: false,
         disableSubmit: false,
         successMessage: false,
-        hasReCaptcha: !!RECAPTCHA_SITE_KEY,
+        hasReCaptcha: !!recaptchaSiteKey,
 
         init() {
-            if (RECAPTCHA_SITE_KEY) {
+            if (this.recaptchaSiteKey) {
                 this.loadReCaptcha();
             }
         },
@@ -32,7 +31,7 @@ export default function formHandler(formHandle = 'formSubmitted') {
                 this.toggleSubmit()
 
                 let token = null
-                if (RECAPTCHA_SITE_KEY) {
+                if (this.recaptchaSiteKey) {
                     try {
                         token = await this.getReCaptchaToken()
                     } catch (recaptchaError) {
@@ -180,13 +179,13 @@ export default function formHandler(formHandle = 'formSubmitted') {
         },
 
         loadReCaptcha() {
-            if (!RECAPTCHA_SITE_KEY) {
+            if (!this.recaptchaSiteKey) {
                 return;
             }
-            
+
             if (!document.querySelector('script[src*="recaptcha"]')) {
                 const script = document.createElement('script')
-                script.src = `https://www.google.com/recaptcha/api.js?render=${RECAPTCHA_SITE_KEY}`                
+                script.src = `https://www.google.com/recaptcha/api.js?render=${this.recaptchaSiteKey}`                
                 script.async = true
                 script.defer = true
                 document.head.appendChild(script)
@@ -195,17 +194,17 @@ export default function formHandler(formHandle = 'formSubmitted') {
 
         getReCaptchaToken() {
             return new Promise((resolve, reject) => {
-                if (!RECAPTCHA_SITE_KEY) {
+                if (!this.recaptchaSiteKey) {
                     resolve(null);
                     return;
                 }
-                
+
                 if (typeof grecaptcha === 'undefined') {
                     reject(new Error('ReCaptcha not loaded'));
                     return;
                 }
                 grecaptcha.ready(() => {
-                    grecaptcha.execute(RECAPTCHA_SITE_KEY, { action: 'submit' })
+                    grecaptcha.execute(this.recaptchaSiteKey, { action: 'submit' })
                         .then(resolve)
                         .catch(reject)
                 })

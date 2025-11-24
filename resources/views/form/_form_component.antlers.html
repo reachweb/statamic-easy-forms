@@ -1,7 +1,7 @@
 <form
     method="{{ method }}"
     action="{{ action }}"
-    x-data="formHandler('{{ handle }}')"
+    x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }})"
     x-ref="form"
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"

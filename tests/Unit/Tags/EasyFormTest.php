@@ -193,7 +193,32 @@ test('tag uses form handle as formHandler identifier', function () {
     $output = renderEasyFormTag('contact_form');
 
     // The form handle should be used as the formHandler identifier
-    expect($output)->toContain("formHandler('contact_form')");
+    expect($output)->toContain("formHandler('contact_form'");
+});
+
+test('tag passes recaptcha site key when configured', function () {
+    createTestForm('recaptcha_form');
+
+    // Set the environment variable
+    putenv('RECAPTCHA_SITE_KEY=test_site_key_123');
+
+    $output = renderEasyFormTag('recaptcha_form');
+
+    // Clean up
+    putenv('RECAPTCHA_SITE_KEY');
+
+    expect($output)->toContain("formHandler('recaptcha_form', 'test_site_key_123')");
+});
+
+test('tag passes null for recaptcha when not configured', function () {
+    createTestForm('no_recaptcha_form');
+
+    // Ensure the environment variable is not set
+    putenv('RECAPTCHA_SITE_KEY');
+
+    $output = renderEasyFormTag('no_recaptcha_form');
+
+    expect($output)->toContain("formHandler('no_recaptcha_form', null)");
 });
 
 test('tag displays prepend value in field label', function () {

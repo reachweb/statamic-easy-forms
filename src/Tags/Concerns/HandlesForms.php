@@ -92,6 +92,7 @@ trait HandlesForms
             'honeypot' => $form->honeypot(),
             'action' => $form->actionUrl(),
             'method' => 'POST',
+            'recaptcha_site_key' => env('RECAPTCHA_SITE_KEY'),
 
             // Tag parameters
             'hide_fields' => $this->parseHideFields($this->params->get('hide_fields', '')),
