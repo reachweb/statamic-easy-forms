@@ -40,7 +40,7 @@
     {{ /if }}
 
     {{# Simple text input #}}
-    {{ if type == 'text' && (input_type == 'text' || input_type == 'email' || (input_type == 'tel' && !improved_field) || (input_type == 'date' && !improved_field)) }}
+    {{ if type == 'text' && !((input_type == 'tel' && improved_field) || (input_type == 'date' && improved_field) || (input_type == 'time' && improved_field)) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/text }}
     {{ /if }}
 
@@ -55,7 +55,7 @@
     {{ /if }}
 
     {{# Time #}}
-    {{ if input_type == 'time' && type == 'text' }}
+    {{ if input_type == 'time' && type == 'text' && improved_field }}
         {{ partial:statamic-easy-forms::form/fieldtypes/time }}
     {{ /if }}
 
@@ -135,5 +135,5 @@
     </div>
     {{ /if }}
 
-    <div class="mt-1 text-ef-error" x-show="'{{ handle }}' in errors" x-text="errors['{{ handle }}']" x-transition role="alert" aria-live="polite"></div>
+    <div class="mt-2 text-ef-error" x-show="'{{ handle }}' in errors" x-text="errors['{{ handle }}']" x-transition role="alert" aria-live="polite"></div>
 </div>
