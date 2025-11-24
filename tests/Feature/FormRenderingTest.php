@@ -244,6 +244,16 @@ test('error message container is included', function () {
         ->toContain('fatalError');  // Global error handling
 });
 
+test('recaptcha error message container is included', function () {
+    createTestForm('recaptcha_error');
+
+    $output = renderEasyFormTag('recaptcha_error');
+
+    expect($output)
+        ->toContain("'recaptcha' in errors")
+        ->toContain("errors['recaptcha']");
+});
+
 test('submit button has correct attributes', function () {
     createTestForm('submit_button');
 

@@ -53,15 +53,15 @@ test('listener is registered in service provider', function () {
     expect($hasListener)->toBeTrue();
 });
 
-test('listener skips validation when no recaptcha response present', function () {
+test('listener throws exception when recaptcha is configured but token is missing', function () {
     $form = createTestForm('test_form');
     $submission = $form->makeSubmission();
 
     $event = new FormSubmitted($submission);
     $listener = new ValidateRecaptcha;
 
-    // Should not throw exception when no g-recaptcha-response
-    expect(fn () => $listener->handle($event))->not->toThrow(ValidationException::class);
+    // Should throw exception when reCAPTCHA is configured but g-recaptcha-response is missing
+    expect(fn () => $listener->handle($event))->toThrow(ValidationException::class);
 });
 
 test('listener skips validation when secret key not configured', function () {

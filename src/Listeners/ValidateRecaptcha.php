@@ -45,14 +45,14 @@ class ValidateRecaptcha
      */
     public function handle(FormSubmitted $event): void
     {
-        // Skip validation if no reCAPTCHA response is present
-        if (! request()->has('g-recaptcha-response')) {
+        if (empty($this->secret)) {
             return;
         }
 
-        // Skip validation if secret key is not configured
-        if (empty($this->secret)) {
-            return;
+        if (! request()->has('g-recaptcha-response')) {
+            throw ValidationException::withMessages([
+                'recaptcha' => __('ReCAPTCHA verification is required.'),
+            ]);
         }
 
         $this->verify();

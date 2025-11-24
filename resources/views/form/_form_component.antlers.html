@@ -54,6 +54,8 @@
         <div class="my-1 text-center text-ef-error" x-show="fatalError" x-cloak role="alert" aria-live="assertive">
             {{ "There is a technical problem with our form. Please contact us using email." | trans }}
         </div>
+        {{# Display reCAPTCHA and other form-level errors #}}
+        <div class="my-1 text-center text-ef-error" x-show="'recaptcha' in errors" x-text="errors['recaptcha']" x-cloak role="alert" aria-live="polite"></div>
     </div>
 
     <div class="w-full pt-8 xl:pt-12" x-show="! successMessage">
