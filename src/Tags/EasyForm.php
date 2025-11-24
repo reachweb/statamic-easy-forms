@@ -5,6 +5,7 @@ namespace Reach\StatamicEasyForms\Tags;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesDictionaries;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesFields;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesForms;
+use Reach\StatamicEasyForms\Tags\Concerns\HasVersion;
 use Statamic\Tags\Tags;
 
 class EasyForm extends Tags
@@ -12,6 +13,7 @@ class EasyForm extends Tags
     use HandlesDictionaries;
     use HandlesFields;
     use HandlesForms;
+    use HasVersion;
 
     protected static $handle = 'easyform';
 

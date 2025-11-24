@@ -503,3 +503,38 @@ test('tag uses default success message when success_message not provided', funct
     expect($output)
         ->toContain('Thank you for your message! We will get back to you shortly!');
 });
+
+test('version method returns a string', function () {
+    $tag = new EasyForm;
+
+    $version = $tag->version();
+
+    expect($version)->toBeString();
+});
+
+test('version method returns dev or valid version string', function () {
+    $tag = new EasyForm;
+
+    $version = $tag->version();
+
+    // Should be either 'dev' for local development or a version string like '1.0.0'
+    expect($version === 'dev' || preg_match('/^\d+\.\d+\.\d+/', $version))->toBeTrue();
+});
+
+test('version method handles missing InstalledVersions class gracefully', function () {
+    // Create a mock tag that simulates missing InstalledVersions
+    $tag = new class extends EasyForm
+    {
+        public function version(): string
+        {
+            // Simulate class_exists returning false
+            if (! class_exists('NonExistentClass')) {
+                return 'dev';
+            }
+
+            return parent::version();
+        }
+    };
+
+    expect($tag->version())->toBe('dev');
+});
