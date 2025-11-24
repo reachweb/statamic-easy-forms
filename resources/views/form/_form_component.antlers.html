@@ -32,7 +32,7 @@
                     <p class="text-ef-sm text-ef-text-muted mb-6">{{ instructions }}</p>
                     {{ /if }}
 
-                    <div class="grid grid-cols-12 gap-6">
+                    <div class="grid grid-cols-12 gap-6 lg:gap-8">
                         {{# Section fields #}}
                         {{ fields }}
                             {{ partial:statamic-easy-forms::form/field_wrapper }}
@@ -42,7 +42,7 @@
             {{ /sections }}
         {{ else }}
             {{# Render fields without sections #}}
-            <div class="grid grid-cols-12 gap-6">
+            <div class="grid grid-cols-12 gap-6 lg:gap-8">
                 {{ fields }}
                     {{ partial:statamic-easy-forms::form/field_wrapper }}
                 {{ /fields }}
