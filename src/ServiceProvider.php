@@ -2,7 +2,6 @@
 
 namespace Reach\StatamicEasyForms;
 
-use Reach\StatamicEasyForms\Console\Commands\InstallEasyForms;
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
 use Statamic\Fieldtypes\Integer;
@@ -14,8 +13,8 @@ use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
-    protected $commands = [
-        InstallEasyForms::class,
+    protected $publishables = [
+        __DIR__.'/../dist' => '',
     ];
 
     public function bootAddon()
@@ -49,11 +48,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../resources/css/theme.css' => resource_path('css/easy-forms-theme.css'),
         ], 'easy-forms-theme');
-
-        // Publish assets for production use
-        $this->publishes([
-            __DIR__.'/../dist' => public_path('vendor/easy-forms'),
-        ], 'easy-forms-assets');
     }
 
     public function addConfigOptions()
