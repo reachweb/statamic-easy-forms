@@ -36,7 +36,7 @@ class ServiceProvider extends AddonServiceProvider
 
         // Publish views for customization
         $this->publishes([
-            __DIR__.'/../resources/views/form' => resource_path('views/vendor/statamic-easy-forms'),
+            __DIR__.'/../resources/views/form' => resource_path('views/vendor/statamic-easy-forms/form'),
         ], 'easy-forms-views');
 
         // Publish email template
