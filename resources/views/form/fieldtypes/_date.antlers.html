@@ -438,7 +438,7 @@
             x-on:keydown.space.prevent="showDatepicker = !showDatepicker; if(showDatepicker) initFocusOnOpen()"
             x-bind:aria-expanded="showDatepicker"
             aria-haspopup="dialog"
-            aria-label="Choose date"
+            aria-label="{{ 'Choose date' | trans }}"
             {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
             placeholder="{{ placeholder ?? "Please select" | trans }}"
             class="form-input cursor-pointer bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full py-2.5 px-10"
@@ -449,7 +449,7 @@
             x-show="selectedDate"
             x-on:click="resetDate()"
             x-cloak
-            aria-label="Clear date"
+            aria-label="{{ 'Clear date' | trans }}"
             class="absolute inset-y-0 end-0 flex z-10 items-center pe-2.5 cursor-pointer text-ef-accent hover:text-ef-text-muted focus:outline-none focus:text-ef-text"
         >
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
@@ -464,7 +464,7 @@
         x-cloak
         role="dialog"
         aria-modal="true"
-        aria-label="Calendar"
+        aria-label="{{ 'Calendar' | trans }}"
         class="absolute top-full mt-1 left-0 z-50 bg-ef-text-white rounded-ef shadow-xl border border-ef-border p-4 w-72"
     >
         <div class="flex justify-between items-center mb-4">
@@ -474,15 +474,15 @@
                     type="button"
                     x-text="year"
                     x-on:click="showYearPicker = !showYearPicker"
-                    aria-label="Select year"
+                    aria-label="{{ 'Select year' | trans }}"
                     class="ml-1 text-base text-ef-text-muted font-normal cursor-pointer hover:text-ef-accent hover:underline focus:outline-none focus:ring-2 focus:ring-ef-focus rounded px-1">
                 </button>
             </div>
             <div>
-                <button type="button" aria-label="Previous month" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(-1)" x-bind:disabled="showYearPicker">
+                <button type="button" aria-label="{{ 'Previous month' | trans }}" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(-1)" x-bind:disabled="showYearPicker">
                     <svg class="h-5 w-5 text-ef-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
-                <button type="button" aria-label="Next month" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(1)" x-bind:disabled="showYearPicker">
+                <button type="button" aria-label="{{ 'Next month' | trans }}" class="p-1 hover:bg-ef-subtle rounded-full focus:outline-none focus:ring-2 focus:ring-ef-focus" x-on:click="changeMonth(1)" x-bind:disabled="showYearPicker">
                     <svg class="h-5 w-5 text-ef-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </button>
             </div>

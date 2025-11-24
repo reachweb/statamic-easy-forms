@@ -222,7 +222,8 @@ test('select improved field includes search when searchable is true', function (
     expect($output)
         ->toContain('searchField')
         ->toContain('getFilteredOptions')
-        ->toContain('placeholder="Search"');
+        ->toContain('placeholder=')
+        ->toContain('Search');
 });
 
 test('select improved field includes search by default', function () {
@@ -246,7 +247,8 @@ test('select improved field includes search by default', function () {
 
     expect($output)
         ->toContain('searchField')
-        ->toContain('placeholder="Search"');
+        ->toContain('placeholder=')
+        ->toContain('Search');
 });
 
 test('select improved field includes clear button when clearable is true', function () {

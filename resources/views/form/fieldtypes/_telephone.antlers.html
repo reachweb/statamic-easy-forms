@@ -164,7 +164,7 @@
                     type="text"
                     class="w-full border-b border-ef-dropdown-border bg-ef-dropdown-bg py-2.5 pl-11 pr-4 text-ef text-ef-text-muted focus:border-ef-focus focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
                     name="searchField"
-                    aria-label="Search"
+                    aria-label="{{ 'Search' | trans }}"
                     x-on:input="getFilteredOptions($el.value)"
                     x-ref="searchField"
                     placeholder="{{ "Filter..." | trans }}"
@@ -188,7 +188,7 @@
                             <span x-bind:class="selectedOption == item.value ? 'font-bold' : null">
                                 <span x-text="item.label"></span> (<span class="font-bold" x-text="item.code"></span>)
                             </span>
-                            <span class="sr-only" x-text="selectedOption == item.value ? 'selected' : null"></span>
+                            <span class="sr-only" x-text="selectedOption == item.value ? '{{ 'selected' | trans }}' : null"></span>
                         </div>
                         <svg
                             x-cloak

@@ -67,7 +67,7 @@
             x-bind:aria-expanded="isOpen || openedWithKeyboard"
             x-bind:aria-label="selectedOption ? selectedLabel : '{{ "Please select" | trans }}'"
         >
-            <span class="font-normal" x-text="selectedOption ? selectedLabel : '{{ "Please select" | trans }}'"></span>
+            <span class="font-normal" x-text="selectedOption ? selectedLabel : '{{ placeholder ?? "Please select" | trans }}'"></span>
             <svg class="size-5 text-ef-input-text" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
             </svg>
@@ -95,10 +95,10 @@
                     type="text"
                     class="w-full border-b border-ef-dropdown-border bg-ef-dropdown-bg py-2.5 pl-11 pr-4 text-ef text-ef-text-muted focus:border-ef-focus focus:ring-0 focus:outline-none disabled:cursor-not-allowed disabled:opacity-75"
                     name="searchField"
-                    aria-label="Search"
+                    aria-label="{{ 'Search' | trans }}"
                     x-on:input="getFilteredOptions($el.value)"
                     x-ref="searchField"
-                    placeholder="{{ "Filter..." | trans }}"
+                    placeholder="{{ 'Search' | trans }}..."
                     autocomplete="off"
                 />
             </div>
@@ -117,7 +117,7 @@
                     >
                         <div class="flex items-center gap-2">
                             <span x-bind:class="selectedOption == index ? 'font-bold' : null" x-text="item"></span>
-                            <span class="sr-only" x-text="selectedOption == index ? 'selected' : null"></span>
+                            <span class="sr-only" x-text="selectedOption == index ? '{{ 'selected' | trans }}' : null"></span>
                         </div>
                         <svg
                             x-cloak
