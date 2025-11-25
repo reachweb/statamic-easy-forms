@@ -144,7 +144,7 @@ test('assets field includes instructions', function () {
 
     expect($output)
         ->toContain('PDF, DOC, or DOCX only (max 5MB)')
-        ->toContain('aria-describedby="docs-formats"');
+        ->toContain('aria-describedby="docs-description"');
 });
 
 test('assets field shows file counter for multiple files', function () {
