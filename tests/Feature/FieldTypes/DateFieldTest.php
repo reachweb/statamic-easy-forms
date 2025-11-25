@@ -642,5 +642,5 @@ test('date field input initializes focus on open', function () {
     $output = renderEasyFormTag('date_init_focus');
 
     expect($output)
-        ->toContain('if(showDatepicker) initFocusOnOpen()');
+        ->toContain('if(showDatepicker) { checkPosition(); initFocusOnOpen(); }');
 });
