@@ -512,19 +512,17 @@ test('version method returns a string', function () {
     expect($version)->toBeString();
 });
 
-test('version method returns dev or valid version string', function () {
+test('version method returns dev or hashed version string', function () {
     $tag = new EasyForm;
 
     $version = $tag->version();
 
     // Should be one of:
     // - 'dev' for local development without Composer
-    // - 'dev-main' or 'dev-master' for git repository installs
-    // - A semantic version string like '1.0.0'
+    // - A 12-character hexadecimal hash for installed versions
     expect(
         $version === 'dev' ||
-        str_starts_with($version, 'dev-') ||
-        preg_match('/^\d+\.\d+\.\d+/', $version)
+        preg_match('/^[a-f0-9]{12}$/', $version)
     )->toBeTrue();
 });
 
