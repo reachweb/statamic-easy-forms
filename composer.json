@@ -29,10 +29,10 @@
         }
     },
     "require": {
-        "statamic/cms": "^5.29.0"
+        "statamic/cms": "^5.29.0 || ^6.0."
     },
     "require-dev": {
-        "orchestra/testbench": "^9.0",
+        "orchestra/testbench": "^9.0 || ^10.0",
         "pestphp/pest": "^4.1",
         "laravel/pint": "^1.25"
     },
