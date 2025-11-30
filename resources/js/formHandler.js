@@ -1,7 +1,8 @@
-export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteKey = null) {
+export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteKey = null, precognitionEnabled = false) {
     return {
         formHandle: formHandle,
         recaptchaSiteKey: recaptchaSiteKey,
+        precognitionEnabled: precognitionEnabled,
         submitData: {},
         errors: {},
         fatalError: false,
@@ -9,15 +10,121 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         successMessage: false,
         hasReCaptcha: !!recaptchaSiteKey,
         isSubmitting: false,
+        
+        // Precognition-specific properties
+        precogForm: null,
+        precogInitialized: false,
+        validating: false,
+        touched: {},
 
         init() {
             if (this.recaptchaSiteKey) {
                 this.loadReCaptcha();
             }
+
+            // Precognition will be initialized when we receive the first field data
+            // via updateSubmitData(), not here (since submitData is empty at this point)
+        },
+
+        initPrecognition() {
+            // Check if the $form magic is available (Precognition plugin loaded)
+            if (typeof this.$form !== 'function') {
+                console.warn('Easy Forms: Precognition is enabled but the laravel-precognition-alpine plugin is not loaded. Load easy-forms-precognition.js to enable precognition support.');
+                this.precognitionEnabled = false;
+                return;
+            }
+
+            // Initialize the precognition form with the action URL and initial data
+            this.precogForm = this.$form(
+                'post',
+                this.$refs.form.action,
+                this.submitData
+            );
+
+            // Set a reasonable debounce timeout for validation
+            this.precogForm.setValidationTimeout(300);
+            this.precogInitialized = true;
+
+            // Watch precogForm.errors and sync to our errors object
+            // This ensures the template's error display works with precognition
+            this.$watch('precogForm.errors', (newErrors) => {
+                this.errors = { ...newErrors };
+            });
         },
 
         updateSubmitData(data) {
             this.submitData = data;
+            
+            // Initialize precognition on first data update if enabled
+            if (this.precognitionEnabled && !this.precogInitialized) {
+                this.initPrecognition();
+            }
+            
+            // Sync data to precognition form if enabled
+            // The precognition form has data properties directly on the form object
+            if (this.precognitionEnabled && this.precogForm) {
+                Object.keys(data).forEach(key => {
+                    this.precogForm[key] = data[key];
+                });
+            }
+        },
+
+        // Validate a specific field using precognition
+        validateField(fieldHandle) {
+            if (!this.precognitionEnabled || !this.precogForm) {
+                return;
+            }
+
+            // Mark field as touched
+            this.touched[fieldHandle] = true;
+
+            // Trigger precognition validation for this field
+            this.precogForm.validate(fieldHandle);
+        },
+
+        // Check if a field is valid (precognition)
+        isValid(fieldHandle) {
+            if (!this.precognitionEnabled || !this.precogForm) {
+                return !this.errors[fieldHandle];
+            }
+            return this.precogForm.valid(fieldHandle);
+        },
+
+        // Check if a field is invalid (precognition)
+        isInvalid(fieldHandle) {
+            if (!this.precognitionEnabled || !this.precogForm) {
+                return !!this.errors[fieldHandle];
+            }
+            return this.precogForm.invalid(fieldHandle);
+        },
+
+        // Check if a field has been touched
+        isTouched(fieldHandle) {
+            return !!this.touched[fieldHandle];
+        },
+
+        // Get error message for a field
+        getError(fieldHandle) {
+            if (this.precognitionEnabled && this.precogForm) {
+                return this.precogForm.errors[fieldHandle];
+            }
+            return this.errors[fieldHandle];
+        },
+
+        // Check if form is currently validating (precognition)
+        get isValidating() {
+            if (this.precognitionEnabled && this.precogForm) {
+                return this.precogForm.validating;
+            }
+            return false;
+        },
+
+        // Check if form has any errors
+        get hasErrors() {
+            if (this.precognitionEnabled && this.precogForm) {
+                return this.precogForm.hasErrors;
+            }
+            return Object.keys(this.errors).length > 0;
         },
 
         async formSubmit() {
@@ -116,6 +223,12 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
             if (data.success) {
                 this.successMessage = true;
 
+                // Reset precognition form if enabled
+                if (this.precognitionEnabled && this.precogForm) {
+                    this.precogForm.reset();
+                    this.touched = {};
+                }
+
                 // Dispatch success event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:success', {
                     bubbles: true,
@@ -131,6 +244,11 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
                 } else {
                     const errorData = await response.json()
                     this.errors = errorData?.error || errorData?.errors || {}
+
+                    // Sync errors to precognition form if enabled
+                    if (this.precognitionEnabled && this.precogForm) {
+                        this.precogForm.setErrors(this.errors);
+                    }
                 }
 
                 // Dispatch error event
@@ -156,9 +274,13 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         },
 
         scrollToFirstError() {
-            if (Object.keys(this.errors).length === 0) return
+            const errorsToCheck = this.precognitionEnabled && this.precogForm 
+                ? this.precogForm.errors 
+                : this.errors;
+                
+            if (Object.keys(errorsToCheck).length === 0) return
 
-            const firstErrorHandle = Object.keys(this.errors)[0]
+            const firstErrorHandle = Object.keys(errorsToCheck)[0]
 
             // Find field by label or fallback to input element
             const label = this.$refs.form.querySelector(`label[for="${firstErrorHandle}"]`)
@@ -182,6 +304,13 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         clearErrors() {
             this.errors = {}
             this.fatalError = false
+
+            // Clear precognition errors if enabled
+            if (this.precognitionEnabled && this.precogForm) {
+                Object.keys(this.precogForm.errors).forEach(field => {
+                    this.precogForm.forgetError(field);
+                });
+            }
         },
 
         loadReCaptcha() {

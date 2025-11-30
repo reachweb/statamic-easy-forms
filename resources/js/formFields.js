@@ -1,15 +1,18 @@
-export default function formFields(fields, honeypot, hideFields, prepopulatedData) {
+export default function formFields(fields, honeypot, hideFields, prepopulatedData, precognitionEnabled = false) {
     return {
         submitFields: {},
+        previousFields: {},
         fields: [],
         fieldsMap: {},
         honeypot: '',
+        precognitionEnabled: precognitionEnabled,
         
         init() {
             this.honeypot = honeypot
             this.fields = fields.filter(field => field.input_type !== 'hidden')
                               .filter(field => !hideFields.includes(field.handle))
             this.submitFields = this.initializeFields(fields)
+            this.previousFields = JSON.parse(JSON.stringify(this.submitFields))
             
             // Create a second map for quick field lookup by handle of all fields
             this.fieldsMap = fields.reduce((acc, field) => ({
@@ -23,11 +26,32 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             // Watch for changes and dispatch to parent with debouncing
             let debounceTimer
-            this.$watch('submitFields', () => {
+            let validationDebounceTimers = {}
+            
+            this.$watch('submitFields', (newValue) => {
                 clearTimeout(debounceTimer)
                 debounceTimer = setTimeout(() => {
                     this.$dispatch('fields-changed', this.submitFields)
                 }, 100)
+
+                // If precognition is enabled, detect which field changed and validate it
+                if (this.precognitionEnabled) {
+                    Object.keys(newValue).forEach(key => {
+                        const newVal = JSON.stringify(newValue[key])
+                        const oldVal = JSON.stringify(this.previousFields[key])
+                        
+                        if (newVal !== oldVal) {
+                            // Debounce validation per field to avoid too many requests
+                            clearTimeout(validationDebounceTimers[key])
+                            validationDebounceTimers[key] = setTimeout(() => {
+                                this.$dispatch('validate-field', key)
+                            }, 300)
+                        }
+                    })
+                    
+                    // Update previous values
+                    this.previousFields = JSON.parse(JSON.stringify(newValue))
+                }
             }, { deep: true })
 
             // Initial dispatch

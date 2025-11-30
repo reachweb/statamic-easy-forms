@@ -31,12 +31,16 @@ class EasyForm extends Tags
      * - prepopulated_data: Array of field values to prepopulate
      * - submit_text: Custom text for the submit button
      * - success_message: Custom text for the success message after submission
+     * - precognition: Enable Laravel Precognition for real-time validation (default: false)
      *
      * Example with custom view:
      * {{ easyform handle="contact" view="forms/custom-contact" }}
      *
      * Example with custom text:
      * {{ easyform handle="contact" submit_text="Send Message" success_message="Thanks! We'll be in touch soon." }}
+     *
+     * Example with precognition:
+     * {{ easyform handle="contact" precognition="true" }}
      *
      * @return string Rendered HTML
      */
