@@ -1,5 +1,6 @@
 <select
     x-model="submitFields['{{ handle }}']"
+    x-on:change="$dispatch('validate-field', '{{ handle }}')"
     id="{{ handle }}"
     name="{{ handle }}{{ if multiple }}[]{{ /if }}"
     {{ if multiple }}multiple{{ /if }}

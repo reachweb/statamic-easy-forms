@@ -16,6 +16,7 @@
             this.selectedOption = index
             this.isOpen = false
             this.openedWithKeyboard = false
+            this.$dispatch('validate-field', '{{ handle }}')
         },
 
         getFilteredOptions(query) {
@@ -48,7 +49,7 @@
     x-model="submitFields['{{ handle }}']"
     class="flex w-full max-w-full flex-col gap-1"
     x-on:keydown="handleKeydownOnOptions($event)"
-    x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
+    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}') }"
 >
     <div class="relative">
         <button
@@ -81,7 +82,7 @@
             role="listbox"
             aria-label="list"
             x-ref="dropdown"
-            x-on:click.outside="isOpen = false, openedWithKeyboard = false"
+            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}')"
             x-on:keydown.down.prevent="$focus.wrap().next()"
             x-on:keydown.up.prevent="$focus.wrap().previous()"
             x-transition

@@ -37,6 +37,7 @@
         selectOption(optionKey) {
             this.selectedOptions = [optionKey];
             this.isOpen = false;
+            this.$dispatch('validate-field', '{{ handle }}');
         },
         getFilteredOptions(query) {
             if (!query) {
@@ -127,7 +128,7 @@
         }
     }"
     x-init="init()"
-    x-on:keydown.esc.window="isOpen = false, openedWithKeyboard = false"
+    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}') }"
     class="w-full flex flex-col relative"
 >
     <div class="relative w-full">
@@ -188,7 +189,7 @@
         <div
             x-cloak
             x-show="isOpen || openedWithKeyboard"
-            x-on:click.outside="isOpen = false, openedWithKeyboard = false"
+            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}')"
             x-transition
             x-ref="dropdown"
             class="absolute z-30 left-0 w-full bg-ef-input-bg border border-ef-border rounded-ef overflow-hidden shadow-lg"

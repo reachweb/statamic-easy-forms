@@ -7,4 +7,5 @@
     {{ if autocomplete }}autocomplete="{{ autocomplete }}"{{ /if }}
     {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
     x-model="submitFields['{{ handle }}']"
+    x-on:blur="$dispatch('validate-field', '{{ handle }}')"
 >

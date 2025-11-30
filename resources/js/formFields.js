@@ -23,7 +23,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             // Watch for changes and dispatch to parent with debouncing
             let debounceTimer
-            this.$watch('submitFields', () => {
+            
+            this.$watch('submitFields', (newValue) => {
                 clearTimeout(debounceTimer)
                 debounceTimer = setTimeout(() => {
                     this.$dispatch('fields-changed', this.submitFields)

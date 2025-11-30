@@ -207,7 +207,7 @@ test('tag passes recaptcha site key when configured', function () {
     // Clean up
     putenv('RECAPTCHA_SITE_KEY');
 
-    expect($output)->toContain("formHandler('recaptcha_form', 'test_site_key_123')");
+    expect($output)->toContain("formHandler('recaptcha_form', 'test_site_key_123', false)");
 });
 
 test('tag passes null for recaptcha when not configured', function () {
@@ -218,7 +218,7 @@ test('tag passes null for recaptcha when not configured', function () {
 
     $output = renderEasyFormTag('no_recaptcha_form');
 
-    expect($output)->toContain("formHandler('no_recaptcha_form', null)");
+    expect($output)->toContain("formHandler('no_recaptcha_form', null, false)");
 });
 
 test('tag displays prepend value in field label', function () {

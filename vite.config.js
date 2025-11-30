@@ -1,23 +1,22 @@
 import { defineConfig } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
+import { resolve } from 'path'
 
-export default defineConfig({
+// Build config for the main easy-forms bundle
+const mainConfig = defineConfig({
     plugins: [tailwindcss()],
     build: {
         manifest: true,
         outDir: 'dist',
-        rollupOptions: {
-            input: { 'easy-forms': 'resources/js/frontend.js' },
-            output: {
-                entryFileNames: 'js/[name].js',
-                chunkFileNames: 'js/[name]-[hash].js',
-                assetFileNames: (assetInfo) => {
-                    // CSS files go to css/, everything else to assets/
-                    return assetInfo.names[0]?.endsWith('.css')
-                        ? 'css/[name][extname]'
-                        : 'assets/[name]-[hash][extname]'
-                },
-            },
+        emptyOutDir: true,
+        lib: {
+            entry: resolve(__dirname, 'resources/js/frontend.js'),
+            name: 'EasyForms',
+            fileName: () => 'js/easy-forms.js',
+            cssFileName: 'css/easy-forms',
+            formats: ['iife'],
         },
     },
 })
+
+export default mainConfig

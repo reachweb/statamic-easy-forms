@@ -20,7 +20,7 @@ So we made it ridiculously simple: just add the `{{ easyform }}` tag and get a f
 - **Lightweight** - Only 5KB JavaScript (2KB gzipped), requires just Alpine.js
 - **Conditional Fields** - Show/hide fields based on conditions set in Statamic
 - **Built-in Security** - CSRF protection, honeypot spam detection, optional reCAPTCHA v3
-- **Server-side Validation** - Full support for Statamic's (Laravel's) validation
+- **Server-side Validation** - Full support for Statamic's (Laravel's) validation & Laravel Precognition
 - **Email Template Included** - Simple, effective template to send form submissions
 - **200+ Tests** - Built with Pest for peace of mind
 - **Tailwind Styled** - Mobile-first, 12-column grid, easy to customize with themes
