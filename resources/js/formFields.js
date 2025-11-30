@@ -6,6 +6,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         fieldsMap: {},
         honeypot: '',
         precognitionEnabled: precognitionEnabled,
+        initialized: false,
         
         init() {
             this.honeypot = honeypot
@@ -35,12 +36,19 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 }, 100)
 
                 // If precognition is enabled, detect which field changed and validate it
-                if (this.precognitionEnabled) {
+                // Only validate after initialization is complete to avoid validating on load
+                if (this.precognitionEnabled && this.initialized) {
                     Object.keys(newValue).forEach(key => {
                         const newVal = JSON.stringify(newValue[key])
                         const oldVal = JSON.stringify(this.previousFields[key])
                         
                         if (newVal !== oldVal) {
+                            // Skip validation for file/asset fields - precognition can't validate files
+                            const field = this.fieldsMap[key]
+                            if (field && field.type === 'assets') {
+                                return
+                            }
+                            
                             // Debounce validation per field to avoid too many requests
                             clearTimeout(validationDebounceTimers[key])
                             validationDebounceTimers[key] = setTimeout(() => {
@@ -48,15 +56,20 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                             }, 300)
                         }
                     })
-                    
-                    // Update previous values
-                    this.previousFields = JSON.parse(JSON.stringify(newValue))
                 }
+                
+                // Always update previous values for next comparison
+                this.previousFields = JSON.parse(JSON.stringify(newValue))
             }, { deep: true })
 
             // Initial dispatch
             this.$nextTick(() => {
                 this.$dispatch('fields-changed', this.submitFields)
+                // Mark as initialized after the initial dispatch cycle completes
+                // Use a small delay to ensure any field component initialization is complete
+                setTimeout(() => {
+                    this.initialized = true
+                }, 100)
             })
         },
 

@@ -21,9 +21,6 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
             if (this.recaptchaSiteKey) {
                 this.loadReCaptcha();
             }
-
-            // Precognition will be initialized when we receive the first field data
-            // via updateSubmitData(), not here (since submitData is empty at this point)
         },
 
         initPrecognition() {
@@ -61,7 +58,6 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
             }
             
             // Sync data to precognition form if enabled
-            // The precognition form has data properties directly on the form object
             if (this.precognitionEnabled && this.precogForm) {
                 Object.keys(data).forEach(key => {
                     this.precogForm[key] = data[key];
@@ -72,6 +68,11 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         // Validate a specific field using precognition
         validateField(fieldHandle) {
             if (!this.precognitionEnabled || !this.precogForm) {
+                return;
+            }
+
+            // Skip validation for captcha fields
+            if (fieldHandle === 'g-recaptcha-response' || fieldHandle === 'recaptcha') {
                 return;
             }
 
