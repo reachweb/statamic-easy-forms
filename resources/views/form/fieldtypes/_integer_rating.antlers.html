@@ -5,6 +5,7 @@
         stars: []
     }"
     x-init="stars = Array.from({ length: maxVal - minVal + 1 }, (_, i) => minVal + i)"
+    x-on:change="$dispatch('validate-field', '{{ handle }}')"
     class="flex items-center gap-1"
     {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >

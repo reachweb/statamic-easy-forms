@@ -15,7 +15,7 @@
     >
         <button
             type="button"
-            x-on:click="submitFields['{{ handle }}'] = Math.max(minVal, Number(submitFields['{{ handle }}']) - incrementAmount)"
+            x-on:click="submitFields['{{ handle }}'] = Math.max(minVal, Number(submitFields['{{ handle }}']) - incrementAmount); $dispatch('validate-field', '{{ handle }}')"
             :disabled="Number(submitFields['{{ handle }}']) <= minVal"
             :class="Number(submitFields['{{ handle }}']) <= minVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-l-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
@@ -38,7 +38,7 @@
         />
         <button
             type="button"
-            x-on:click="submitFields['{{ handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ handle }}']) + incrementAmount) : Number(submitFields['{{ handle }}']) + incrementAmount"
+            x-on:click="submitFields['{{ handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ handle }}']) + incrementAmount) : Number(submitFields['{{ handle }}']) + incrementAmount; $dispatch('validate-field', '{{ handle }}')"
             :disabled="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal"
             :class="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-r-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"

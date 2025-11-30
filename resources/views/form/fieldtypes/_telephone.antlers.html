@@ -215,6 +215,7 @@
             x-model="submitFields['{{ handle }}']"
             x-on:keydown="handleDeletion($event)"
             x-on:input="handleInput($event)"
+            x-on:blur="$dispatch('validate-field', '{{ handle }}')"
             placeholder="{{ "Select country code first" | trans }}"
             x-bind:readonly="!selectedOption"
             {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}

@@ -115,6 +115,10 @@
                 this.month = this.dateFrom.getMonth();
                 this.year = this.dateFrom.getFullYear();
             }
+
+            this.$nextTick(() => {
+                this.$dispatch('validate-field', '{{ handle }}');
+            });
         },
 
         {{# --- Helper to determine the effective 'End Date' for styling (Actual or Hover) --- #}}
@@ -261,6 +265,9 @@
             this.dateTo = null;
             this.hoverDate = null;
             this.selectedDate = '';
+            this.$nextTick(() => {
+                this.$dispatch('validate-field', '{{ handle }}');
+            });
         },
 
         changeMonth(step) {

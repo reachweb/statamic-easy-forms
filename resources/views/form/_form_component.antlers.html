@@ -18,7 +18,7 @@
     {{ /if }}
 
     <div
-        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }}, {{ precognition | bool_string }})"
+        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
         x-show="! successMessage"
         class="space-y-6 lg:space-y-10 divide-y divide-ef-border"
         x-transition.opacity

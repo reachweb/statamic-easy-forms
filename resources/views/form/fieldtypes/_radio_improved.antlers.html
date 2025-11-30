@@ -5,6 +5,7 @@
     }"
     x-modelable="selected"
     x-model="submitFields['{{ handle }}']"
+    x-on:change="$dispatch('validate-field', '{{ handle }}')"
     {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
 >
     <legend class="sr-only">{{ display ?? handle }}</legend>

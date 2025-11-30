@@ -10,12 +10,8 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         successMessage: false,
         hasReCaptcha: !!recaptchaSiteKey,
         isSubmitting: false,
-        
-        // Precognition-specific properties
         precogForm: null,
         precogInitialized: false,
-        validating: false,
-        touched: {},
 
         init() {
             if (this.recaptchaSiteKey) {
@@ -23,109 +19,60 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
             }
         },
 
+        /**
+         * Initialize Laravel Precognition for real-time validation.
+         * Requires the laravel-precognition-alpine plugin to be loaded.
+         */
         initPrecognition() {
-            // Check if the $form magic is available (Precognition plugin loaded)
             if (typeof this.$form !== 'function') {
-                console.warn('Easy Forms: Precognition is enabled but the laravel-precognition-alpine plugin is not loaded. Load easy-forms-precognition.js to enable precognition support.');
+                console.warn('Easy Forms: Precognition is enabled but laravel-precognition-alpine is not loaded.');
                 this.precognitionEnabled = false;
                 return;
             }
 
-            // Initialize the precognition form with the action URL and initial data
-            this.precogForm = this.$form(
-                'post',
-                this.$refs.form.action,
-                this.submitData
-            );
-
-            // Set a reasonable debounce timeout for validation
+            this.precogForm = this.$form('post', this.$refs.form.action, this.submitData);
             this.precogForm.setValidationTimeout(300);
             this.precogInitialized = true;
 
-            // Watch precogForm.errors and sync to our errors object
-            // This ensures the template's error display works with precognition
+            // Sync precognition errors to our errors object for template display
             this.$watch('precogForm.errors', (newErrors) => {
                 this.errors = { ...newErrors };
             });
         },
 
+        /**
+         * Update submit data and sync to precognition form.
+         * Called when form fields change via the 'fields-changed' event.
+         */
         updateSubmitData(data) {
             this.submitData = data;
             
-            // Initialize precognition on first data update if enabled
             if (this.precognitionEnabled && !this.precogInitialized) {
                 this.initPrecognition();
             }
             
-            // Sync data to precognition form if enabled
-            if (this.precognitionEnabled && this.precogForm) {
+            if (this.precogForm) {
                 Object.keys(data).forEach(key => {
                     this.precogForm[key] = data[key];
                 });
             }
         },
 
-        // Validate a specific field using precognition
+        /**
+         * Validate a specific field using precognition.
+         * Called when fieldtypes dispatch 'validate-field' events.
+         */
         validateField(fieldHandle) {
-            if (!this.precognitionEnabled || !this.precogForm) {
-                return;
+            if (!this.precognitionEnabled || !this.precogForm) return;
+            if (fieldHandle === 'g-recaptcha-response' || fieldHandle === 'recaptcha') return;
+
+            // Sync the latest value before validating (fields-changed is debounced)
+            if (this.submitData[fieldHandle] !== undefined) {
+                this.precogForm[fieldHandle] = this.submitData[fieldHandle];
             }
 
-            // Skip validation for captcha fields
-            if (fieldHandle === 'g-recaptcha-response' || fieldHandle === 'recaptcha') {
-                return;
-            }
-
-            // Mark field as touched
-            this.touched[fieldHandle] = true;
-
-            // Trigger precognition validation for this field
-            this.precogForm.validate(fieldHandle);
-        },
-
-        // Check if a field is valid (precognition)
-        isValid(fieldHandle) {
-            if (!this.precognitionEnabled || !this.precogForm) {
-                return !this.errors[fieldHandle];
-            }
-            return this.precogForm.valid(fieldHandle);
-        },
-
-        // Check if a field is invalid (precognition)
-        isInvalid(fieldHandle) {
-            if (!this.precognitionEnabled || !this.precogForm) {
-                return !!this.errors[fieldHandle];
-            }
-            return this.precogForm.invalid(fieldHandle);
-        },
-
-        // Check if a field has been touched
-        isTouched(fieldHandle) {
-            return !!this.touched[fieldHandle];
-        },
-
-        // Get error message for a field
-        getError(fieldHandle) {
-            if (this.precognitionEnabled && this.precogForm) {
-                return this.precogForm.errors[fieldHandle];
-            }
-            return this.errors[fieldHandle];
-        },
-
-        // Check if form is currently validating (precognition)
-        get isValidating() {
-            if (this.precognitionEnabled && this.precogForm) {
-                return this.precogForm.validating;
-            }
-            return false;
-        },
-
-        // Check if form has any errors
-        get hasErrors() {
-            if (this.precognitionEnabled && this.precogForm) {
-                return this.precogForm.hasErrors;
-            }
-            return Object.keys(this.errors).length > 0;
+            // Force validation using 'only' to bypass change detection
+            this.precogForm.validate({ only: [fieldHandle] });
         },
 
         async formSubmit() {
@@ -227,7 +174,6 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
                 // Reset precognition form if enabled
                 if (this.precognitionEnabled && this.precogForm) {
                     this.precogForm.reset();
-                    this.touched = {};
                 }
 
                 // Dispatch success event

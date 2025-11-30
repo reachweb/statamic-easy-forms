@@ -1,19 +1,15 @@
-export default function formFields(fields, honeypot, hideFields, prepopulatedData, precognitionEnabled = false) {
+export default function formFields(fields, honeypot, hideFields, prepopulatedData) {
     return {
         submitFields: {},
-        previousFields: {},
         fields: [],
         fieldsMap: {},
         honeypot: '',
-        precognitionEnabled: precognitionEnabled,
-        initialized: false,
         
         init() {
             this.honeypot = honeypot
             this.fields = fields.filter(field => field.input_type !== 'hidden')
                               .filter(field => !hideFields.includes(field.handle))
             this.submitFields = this.initializeFields(fields)
-            this.previousFields = JSON.parse(JSON.stringify(this.submitFields))
             
             // Create a second map for quick field lookup by handle of all fields
             this.fieldsMap = fields.reduce((acc, field) => ({
@@ -27,49 +23,17 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             // Watch for changes and dispatch to parent with debouncing
             let debounceTimer
-            let validationDebounceTimers = {}
             
             this.$watch('submitFields', (newValue) => {
                 clearTimeout(debounceTimer)
                 debounceTimer = setTimeout(() => {
                     this.$dispatch('fields-changed', this.submitFields)
                 }, 100)
-
-                // If precognition is enabled, detect which field changed and validate it
-                // Only validate after initialization is complete to avoid validating on load
-                if (this.precognitionEnabled && this.initialized) {
-                    Object.keys(newValue).forEach(key => {
-                        const newVal = JSON.stringify(newValue[key])
-                        const oldVal = JSON.stringify(this.previousFields[key])
-                        
-                        if (newVal !== oldVal) {
-                            // Skip validation for file/asset fields - precognition can't validate files
-                            const field = this.fieldsMap[key]
-                            if (field && field.type === 'assets') {
-                                return
-                            }
-                            
-                            // Debounce validation per field to avoid too many requests
-                            clearTimeout(validationDebounceTimers[key])
-                            validationDebounceTimers[key] = setTimeout(() => {
-                                this.$dispatch('validate-field', key)
-                            }, 300)
-                        }
-                    })
-                }
-                
-                // Always update previous values for next comparison
-                this.previousFields = JSON.parse(JSON.stringify(newValue))
             }, { deep: true })
 
             // Initial dispatch
             this.$nextTick(() => {
                 this.$dispatch('fields-changed', this.submitFields)
-                // Mark as initialized after the initial dispatch cycle completes
-                // Use a small delay to ensure any field component initialization is complete
-                setTimeout(() => {
-                    this.initialized = true
-                }, 100)
             })
         },
 
