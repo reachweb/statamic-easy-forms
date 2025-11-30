@@ -99,6 +99,7 @@ trait HandlesForms
             'prepopulated_data' => $this->params->get('prepopulated_data', []),
             'submit_text' => $this->params->get('submit_text'),
             'success_message' => $this->params->get('success_message'),
+            'precognition' => $this->params->bool('precognition', false),
         ];
     }
 

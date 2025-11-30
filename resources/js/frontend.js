@@ -3,6 +3,8 @@
  *
  * This file imports and initializes the form handler and field management
  * components for use with Alpine.js in Statamic forms.
+ * 
+ * For Precognition support, also load easy-forms-precognition.js
  */
 
 // Import CSS

@@ -1,10 +1,11 @@
 <form
     method="{{ method }}"
     action="{{ action }}"
-    x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }})"
+    x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }})"
     x-ref="form"
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"
+    x-on:validate-field="validateField($event.detail)"
     data-csrf-token="{{ csrf_token }}"
     aria-label="{{ title }}"
 >
@@ -17,7 +18,7 @@
     {{ /if }}
 
     <div
-        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
+        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }}, {{ precognition | bool_string }})"
         x-show="! successMessage"
         class="space-y-6 lg:space-y-10 divide-y divide-ef-border"
         x-transition.opacity
