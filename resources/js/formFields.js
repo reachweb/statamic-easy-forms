@@ -12,10 +12,10 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             this.submitFields = this.initializeFields(fields)
             
             // Create a second map for quick field lookup by handle of all fields
-            this.fieldsMap = fields.reduce((acc, field) => ({
-                ...acc,
-                [field.handle]: field
-            }), {})
+            this.fieldsMap = fields.reduce((acc, field) => {
+                acc[field.handle] = field;
+                return acc;
+            }, {})
 
             if (prepopulatedData && Object.keys(prepopulatedData).length > 0) {
                 this.loadPrepopulatedData(prepopulatedData)
@@ -65,10 +65,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 } else {
                     defaultValue = field.default || ''
                 }
-                return {
-                    ...acc,
-                    [field.handle]: defaultValue
-                }
+                acc[field.handle] = defaultValue;
+                return acc;
             }, {})
         },
 
