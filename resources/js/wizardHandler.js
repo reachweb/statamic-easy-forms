@@ -47,8 +47,8 @@ export default function wizardHandler(totalSteps) {
          * Validate current step's fields using Precognition.
          */
         async validateCurrentStep() {
-            const fields = this.stepFields[this.currentStep] || [];
-            
+            const fields = Array.from(this.stepFields[this.currentStep] || []);
+
             if (fields.length === 0) return true;
 
             if (!this.precogForm) {
@@ -66,18 +66,30 @@ export default function wizardHandler(totalSteps) {
                     }
                 });
 
-                try {
-                    await this.precogForm.validate({ only: fields });
-                } catch {
-                    // Validation request failed/rejected - errors should now be in precogForm.errors
+                // Trigger validation
+                this.precogForm.validate({ only: fields });
+
+                // Wait for validation to start (handling potential debounce)
+                let attempts = 0;
+                while (!this.precogForm.validating && attempts < 20) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    attempts++;
+                }
+
+                // Wait for validation to complete
+                while (this.precogForm.validating) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
                 }
 
                 // Check for errors after validation (whether resolved or rejected)
                 const hasErrors = fields.some(field => {
+                    if (typeof this.precogForm.invalid === 'function') {
+                        return this.precogForm.invalid(field);
+                    }
                     const fieldErrors = this.precogForm.errors?.[field];
                     return fieldErrors && (Array.isArray(fieldErrors) ? fieldErrors.length > 0 : true);
                 });
-
+                
                 if (hasErrors) {
                     this.scrollToFirstError(fields);
                     return false;
@@ -93,10 +105,15 @@ export default function wizardHandler(totalSteps) {
          * Scroll to the first error field in the current step.
          */
         scrollToFirstError(fields) {
-            const errors = this.precogForm?.errors || {};
-            
             for (const field of fields) {
-                if (errors[field]) {
+                let hasError = false;
+                if (this.precogForm && typeof this.precogForm.invalid === 'function') {
+                    hasError = this.precogForm.invalid(field);
+                } else {
+                    hasError = !!this.precogForm?.errors?.[field];
+                }
+
+                if (hasError) {
                     const el = this.$refs.form?.querySelector(`[name="${field}"], #${field}`);
                     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     break;
