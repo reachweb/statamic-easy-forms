@@ -10,7 +10,7 @@ export default function wizardHandler(totalSteps) {
         currentStep: 1,
         totalSteps: totalSteps,
         stepValidating: false,
-        stepFields: {}, // { stepNumber: ['field1', 'field2'] }
+        stepFields: {},
 
         /**
          * Navigate to the next step after validation.
@@ -41,6 +41,17 @@ export default function wizardHandler(totalSteps) {
          */
         getProgressPercent() {
             return Math.round((this.currentStep / this.totalSteps) * 100);
+        },
+
+        /**
+         * Check if a specific field has errors.
+         */
+        hasFieldError(field) {
+            if (this.precogForm && typeof this.precogForm.invalid === 'function') {
+                return this.precogForm.invalid(field);
+            }
+            const fieldErrors = this.precogForm?.errors?.[field];
+            return fieldErrors && (Array.isArray(fieldErrors) ? fieldErrors.length > 0 : true);
         },
 
         /**
@@ -81,14 +92,8 @@ export default function wizardHandler(totalSteps) {
                     await new Promise(resolve => setTimeout(resolve, 50));
                 }
 
-                // Check for errors after validation (whether resolved or rejected)
-                const hasErrors = fields.some(field => {
-                    if (typeof this.precogForm.invalid === 'function') {
-                        return this.precogForm.invalid(field);
-                    }
-                    const fieldErrors = this.precogForm.errors?.[field];
-                    return fieldErrors && (Array.isArray(fieldErrors) ? fieldErrors.length > 0 : true);
-                });
+                // Check for errors after validation
+                const hasErrors = fields.some(field => this.hasFieldError(field));
                 
                 if (hasErrors) {
                     this.scrollToFirstError(fields);
@@ -106,14 +111,7 @@ export default function wizardHandler(totalSteps) {
          */
         scrollToFirstError(fields) {
             for (const field of fields) {
-                let hasError = false;
-                if (this.precogForm && typeof this.precogForm.invalid === 'function') {
-                    hasError = this.precogForm.invalid(field);
-                } else {
-                    hasError = !!this.precogForm?.errors?.[field];
-                }
-
-                if (hasError) {
+                if (this.hasFieldError(field)) {
                     const el = this.$refs.form?.querySelector(`[name="${field}"], #${field}`);
                     el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     break;

@@ -26,20 +26,7 @@
 
     {{# Wizard Progress Indicator #}}
     {{ if wizard }}
-    <div x-ref="wizard" class="mb-8" x-show="! successMessage" x-cloak>
-        <div class="flex justify-between mb-2">
-            <span class="text-ef-sm text-ef-text-muted">
-                {{ "Step" | trans }} <span x-text="currentStep"></span> {{ "of" | trans }} {{ sections | count }}
-            </span>
-            <span class="text-ef-sm text-ef-text-muted" x-text="getProgressPercent() + '%'"></span>
-        </div>
-        <div class="w-full bg-ef-border rounded-full h-2">
-            <div 
-                class="bg-ef-button-bg h-2 rounded-full transition-all duration-300"
-                x-bind:style="'width: ' + getProgressPercent() + '%'"
-            ></div>
-        </div>
-    </div>
+    {{ partial:statamic-easy-forms::form/wizard/progress }}
     {{ /if }}
 
     <div
@@ -48,42 +35,14 @@
         {{ if wizard }}
         x-init="stepFields = { {{ sections }}{{ step }}: {{ field_handles | to_json | entities }}{{ unless is_last }}, {{ /unless }}{{ /sections }} }"
         {{ /if }}
-        class="space-y-6 lg:space-y-10 {{ unless wizard }}divide-y divide-ef-border{{ /unless }}"
+        class="{{ if wizard }}grid grid-cols-1{{ else }}space-y-6 lg:space-y-10 divide-y divide-ef-border{{ /if }}"
         x-transition.opacity
     >
         {{ if has_sections }}
             {{ sections }}
                 {{ if wizard }}
                 {{# WIZARD MODE: Steps with visibility toggle #}}
-                <div 
-                    x-ref="step-{{ step }}"
-                    x-show="currentStep === {{ step }}"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-x-4"
-                    x-transition:enter-end="opacity-100 translate-x-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    class="space-y-6"
-                    x-cloak
-                >
-                    {{# Step Header #}}
-                    {{ if display }}
-                    <div class="mb-6">
-                        <h2 class="text-ef-xl font-bold text-ef-label">{{ display | trans }}</h2>
-                        {{ if instructions }}
-                        <p class="text-ef-sm text-ef-text-muted mt-1">{{ instructions | trans }}</p>
-                        {{ /if }}
-                    </div>
-                    {{ /if }}
-
-                    {{# Step Fields #}}
-                    <div class="grid grid-cols-12 gap-6 lg:gap-8">
-                        {{ fields }}
-                            {{ partial:statamic-easy-forms::form/field_wrapper }}
-                        {{ /fields }}
-                    </div>
-                </div>
+                {{ partial:statamic-easy-forms::form/wizard/wizard_component }}                
                 {{ else }}
                 {{# REGULAR MODE: Fieldsets #}}
                 <fieldset class="not-last:pb-6 not-last:lg:pb-10">
