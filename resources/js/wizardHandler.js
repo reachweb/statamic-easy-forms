@@ -107,9 +107,38 @@ export default function wizardHandler(totalSteps) {
         },
 
         /**
-         * Scroll to the first error field in the current step.
+         * Scroll to the first error field.
+         * If fields param is provided, checks only those fields (step validation).
+         * If no param, checks all errors and switches step if needed (form submit).
          */
         scrollToFirstError(fields) {
+            // Handle global form submission errors (called from formHandler)
+            if (!fields) {
+                const errors = this.precogForm?.errors || this.errors || {};
+                const errorFields = Object.keys(errors);
+                
+                if (errorFields.length === 0) return;
+
+                // Find the first step that contains an error
+                for (let step = 1; step <= this.totalSteps; step++) {
+                    const stepFields = this.stepFields[step] || [];
+                    // Check if any of the error fields belong to this step
+                    const hasErrorInStep = stepFields.some(field => errorFields.includes(field));
+                    if (hasErrorInStep) {
+                        this.currentStep = step;
+                        this.dispatchStepChange();
+                        
+                        // Wait for step to become visible then scroll
+                        this.$nextTick(() => {
+                            this.scrollToFirstError(stepFields);
+                        });
+                        return;
+                    }
+                }
+                return;
+            }
+
+            // Handle specific fields (step validation)
             for (const field of fields) {
                 if (this.hasFieldError(field)) {
                     const el = this.$refs.form?.querySelector(`[name="${field}"], #${field}`);
