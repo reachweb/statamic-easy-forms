@@ -1,0 +1,38 @@
+<div class="w-full pt-8 xl:pt-12 flex gap-4" x-show="! successMessage" x-cloak>
+    {{# Previous Button #}}
+    <button
+        type="button"
+        x-show="currentStep > 1"
+        x-on:click="goPrev()"
+        class="px-6 py-3.5 text-ef-text bg-ef-border hover:bg-ef-border/80 focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg focus:ring-ef-focus/20 transition-all duration-300 cursor-pointer"
+        x-cloak
+    >
+        {{ prev_text ?? { "Previous" | trans } }}
+    </button>
+
+    {{# Next Button #}}
+    <button
+        type="button"
+        x-show="currentStep < {{ sections | count }}"
+        x-on:click="goNext()"
+        x-bind:disabled="stepValidating"
+        class="flex-1 px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+        x-cloak
+    >
+        <span x-show="!stepValidating">{{ next_text ?? { "Next" | trans } }}</span>
+        <span x-show="stepValidating" x-cloak>{{ "Validating..." | trans }}</span>
+    </button>
+
+    {{# Submit Button (Last Step Only) #}}
+    <button
+        x-show="currentStep === {{ sections | count }}"
+        class="flex-1 px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+        x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
+        type="submit"
+        x-bind:disabled="disableSubmit"            
+        x-bind:aria-busy="disableSubmit"
+        x-cloak
+    >
+        <span>{{ submit_text ?? { "Submit" | trans } }}</span>
+    </button>
+</div>

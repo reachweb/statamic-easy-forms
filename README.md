@@ -17,7 +17,8 @@ So we made it ridiculously simple: just add the `{{ easyform }}` tag and get a f
 - **One Tag Setup** - `{{ easyform handle="your-form" }}` and you're done
 - **18 Field Types** - Text, email, textarea, date picker, phone, select, radio, checkboxes, toggle, file upload, rating, counter, and more
 - **WCAG 2.1 AA Compliant** - Full accessibility with ARIA labels and keyboard navigation
-- **Lightweight** - Only 5KB JavaScript (2KB gzipped), requires just Alpine.js
+- **Wizard Mode** - Leverage Statamic's form sections to create a wizard-like form. It works like magic!
+- **Lightweight** - Only 8KB JavaScript (3KB gzipped), requires just Alpine.js
 - **Conditional Fields** - Show/hide fields based on conditions set in Statamic
 - **Built-in Security** - CSRF protection, honeypot spam detection, optional reCAPTCHA v3
 - **Server-side Validation** - Full support for Statamic's (Laravel's) validation & Laravel Precognition

@@ -13,11 +13,13 @@ import '../css/frontend.css'
 // Import Alpine.js form components
 import formHandler from './formHandler.js'
 import formFields from './formFields.js'
+import wizardHandler from './wizardHandler.js'
 
 // Make components globally available for Alpine.js
 // These can be used in templates via x-data="formHandler()" or x-data="formFields(...)"
 window.formHandler = formHandler
 window.formFields = formFields
+window.wizardHandler = wizardHandler
 
 // Export for module usage
-export { formHandler, formFields }
+export { formHandler, formFields, wizardHandler }

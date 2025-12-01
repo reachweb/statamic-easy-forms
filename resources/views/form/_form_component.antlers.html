@@ -1,7 +1,14 @@
 <form
     method="{{ method }}"
     action="{{ action }}"
+    {{ if wizard }}
+    x-data="{ 
+        ...formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
+        ...wizardHandler({{ sections | count }})
+    }"
+    {{ else }}
     x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }})"
+    {{ /if }}
     x-ref="form"
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"
@@ -17,14 +24,27 @@
     </div>
     {{ /if }}
 
+    {{# Wizard Progress Indicator #}}
+    {{ if wizard }}
+    {{ partial:statamic-easy-forms::form/wizard/progress }}
+    {{ /if }}
+
     <div
         x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
         x-show="! successMessage"
-        class="space-y-6 lg:space-y-10 divide-y divide-ef-border"
+        {{ if wizard }}
+        x-init="stepFields = { {{ sections }}{{ step }}: {{ field_handles | to_json | entities }}{{ unless is_last }}, {{ /unless }}{{ /sections }} }"
+        {{ /if }}
+        class="{{ if wizard }}grid grid-cols-1{{ else }}space-y-6 lg:space-y-10 divide-y divide-ef-border{{ /if }}"
         x-transition.opacity
     >
         {{ if has_sections }}
             {{ sections }}
+                {{ if wizard }}
+                {{# WIZARD MODE: Steps with visibility toggle #}}
+                {{ partial:statamic-easy-forms::form/wizard/wizard_component }}
+                {{ else }}
+                {{# REGULAR MODE: Fieldsets #}}
                 <fieldset class="not-last:pb-6 not-last:lg:pb-10">
                     {{ if display }}
                     <legend class="text-ef-xl font-bold text-ef-label mb-1">{{ display | trans }}</legend>
@@ -40,6 +60,7 @@
                         {{ /fields }}
                     </div>
                 </fieldset>
+                {{ /if }}
             {{ /sections }}
         {{ else }}
             {{# Render fields without sections #}}
@@ -59,6 +80,11 @@
         <div class="my-1 text-center text-ef-error" x-show="'recaptcha' in errors" x-text="errors['recaptcha']" x-cloak role="alert" aria-live="polite"></div>
     </div>
 
+    {{# Wizard Navigation Buttons #}}
+    {{ if wizard }}    
+    {{ partial:statamic-easy-forms::form/wizard/buttons }}
+    {{ else }}
+    {{# Regular Submit Button #}}
     <div class="w-full pt-8 xl:pt-12" x-show="! successMessage">
         <button
             class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
@@ -70,6 +96,7 @@
             <span>{{ submit_text ?? { "Submit" | trans } }}</span>
         </button>
     </div>
+    {{ /if }}
 
     <div class="text-ef-xl text-center my-4 text-ef-text" x-show="successMessage" x-transition.opacity x-cloak role="status" aria-live="polite">
         {{ success_message ?? { "Thank you for your message! We will get back to you shortly!" | trans } }}

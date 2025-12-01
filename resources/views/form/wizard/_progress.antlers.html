@@ -1,0 +1,13 @@
+<div x-ref="wizard" class="mb-8" x-show="! successMessage" x-cloak>
+    <div class="flex justify-between items-center gap-8 mb-2">
+        <span class="text-ef-sm text-ef-text-muted shrink-0">
+            {{ "Step" | trans }} <span x-text="currentStep"></span> {{ "of" | trans }} {{ sections | count }}
+        </span>
+        <div class="w-2/3 bg-ef-subtle rounded-ef h-2">
+            <div 
+                class="bg-ef-accent h-2 rounded-ef transition-all duration-300"
+                x-bind:style="'width: ' + getProgressPercent() + '%'"
+            ></div>
+        </div>
+    </div>    
+</div>

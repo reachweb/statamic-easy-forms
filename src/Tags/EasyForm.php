@@ -32,6 +32,7 @@ class EasyForm extends Tags
      * - submit_text: Custom text for the submit button
      * - success_message: Custom text for the success message after submission
      * - precognition: Enable Laravel Precognition for real-time validation (default: false)
+     * - wizard: Enable wizard/multi-step mode, splits form by sections (default: false)
      *
      * Example with custom view:
      * {{ easyform handle="contact" view="forms/custom-contact" }}
@@ -41,6 +42,9 @@ class EasyForm extends Tags
      *
      * Example with precognition:
      * {{ easyform handle="contact" precognition="true" }}
+     *
+     * Example with wizard mode:
+     * {{ easyform handle="multi_step_form" wizard="true" precognition="true" }}
      *
      * @return string Rendered HTML
      */
