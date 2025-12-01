@@ -1,7 +1,14 @@
 <form
     method="{{ method }}"
     action="{{ action }}"
+    {{ if wizard }}
+    x-data="{ 
+        ...formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
+        ...wizardHandler({{ sections | count }})
+    }"
+    {{ else }}
     x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }})"
+    {{ /if }}
     x-ref="form"
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"
@@ -17,14 +24,68 @@
     </div>
     {{ /if }}
 
+    {{# Wizard Progress Indicator #}}
+    {{ if wizard }}
+    <div x-ref="wizard" class="mb-8" x-show="! successMessage" x-cloak>
+        <div class="flex justify-between mb-2">
+            <span class="text-ef-sm text-ef-text-muted">
+                {{ "Step" | trans }} <span x-text="currentStep"></span> {{ "of" | trans }} {{ sections | count }}
+            </span>
+            <span class="text-ef-sm text-ef-text-muted" x-text="getProgressPercent() + '%'"></span>
+        </div>
+        <div class="w-full bg-ef-border rounded-full h-2">
+            <div 
+                class="bg-ef-button-bg h-2 rounded-full transition-all duration-300"
+                x-bind:style="'width: ' + getProgressPercent() + '%'"
+            ></div>
+        </div>
+    </div>
+    {{ /if }}
+
     <div
         x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
         x-show="! successMessage"
-        class="space-y-6 lg:space-y-10 divide-y divide-ef-border"
+        {{ if wizard }}
+        x-init="stepFields = { {{ sections }}{{ step }}: {{ field_handles | to_json | entities }}{{ unless is_last }}, {{ /unless }}{{ /sections }} }"
+        {{ /if }}
+        class="space-y-6 lg:space-y-10 {{ unless wizard }}divide-y divide-ef-border{{ /unless }}"
         x-transition.opacity
     >
         {{ if has_sections }}
             {{ sections }}
+                {{ if wizard }}
+                {{# WIZARD MODE: Steps with visibility toggle #}}
+                <div 
+                    x-ref="step-{{ step }}"
+                    x-show="currentStep === {{ step }}"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-x-4"
+                    x-transition:enter-end="opacity-100 translate-x-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100"
+                    x-transition:leave-end="opacity-0"
+                    class="space-y-6"
+                    x-cloak
+                >
+                    {{# Step Header #}}
+                    {{ if display }}
+                    <div class="mb-6">
+                        <h2 class="text-ef-xl font-bold text-ef-label">{{ display | trans }}</h2>
+                        {{ if instructions }}
+                        <p class="text-ef-sm text-ef-text-muted mt-1">{{ instructions | trans }}</p>
+                        {{ /if }}
+                    </div>
+                    {{ /if }}
+
+                    {{# Step Fields #}}
+                    <div class="grid grid-cols-12 gap-6 lg:gap-8">
+                        {{ fields }}
+                            {{ partial:statamic-easy-forms::form/field_wrapper }}
+                        {{ /fields }}
+                    </div>
+                </div>
+                {{ else }}
+                {{# REGULAR MODE: Fieldsets #}}
                 <fieldset class="not-last:pb-6 not-last:lg:pb-10">
                     {{ if display }}
                     <legend class="text-ef-xl font-bold text-ef-label mb-1">{{ display | trans }}</legend>
@@ -40,6 +101,7 @@
                         {{ /fields }}
                     </div>
                 </fieldset>
+                {{ /if }}
             {{ /sections }}
         {{ else }}
             {{# Render fields without sections #}}
@@ -59,6 +121,48 @@
         <div class="my-1 text-center text-ef-error" x-show="'recaptcha' in errors" x-text="errors['recaptcha']" x-cloak role="alert" aria-live="polite"></div>
     </div>
 
+    {{ if wizard }}
+    {{# Wizard Navigation Buttons #}}
+    <div class="w-full pt-8 xl:pt-12 flex gap-4" x-show="! successMessage" x-cloak>
+        {{# Previous Button #}}
+        <button
+            type="button"
+            x-show="currentStep > 1"
+            x-on:click="goPrev()"
+            class="px-6 py-3.5 text-ef-text bg-ef-border hover:bg-ef-border/80 focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg focus:ring-ef-focus/20 transition-all duration-300 cursor-pointer"
+            x-cloak
+        >
+            {{ prev_text ?? { "Previous" | trans } }}
+        </button>
+
+        {{# Next Button #}}
+        <button
+            type="button"
+            x-show="currentStep < {{ sections | count }}"
+            x-on:click="goNext()"
+            x-bind:disabled="stepValidating"
+            class="flex-1 px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            x-cloak
+        >
+            <span x-show="!stepValidating">{{ next_text ?? { "Next" | trans } }}</span>
+            <span x-show="stepValidating" x-cloak>{{ "Validating..." | trans }}</span>
+        </button>
+
+        {{# Submit Button (Last Step Only) #}}
+        <button
+            x-show="currentStep === {{ sections | count }}"
+            class="flex-1 px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
+            x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
+            type="submit"
+            x-bind:disabled="disableSubmit"            
+            x-bind:aria-busy="disableSubmit"
+            x-cloak
+        >
+            <span>{{ submit_text ?? { "Submit" | trans } }}</span>
+        </button>
+    </div>
+    {{ else }}
+    {{# Regular Submit Button #}}
     <div class="w-full pt-8 xl:pt-12" x-show="! successMessage">
         <button
             class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
@@ -70,6 +174,7 @@
             <span>{{ submit_text ?? { "Submit" | trans } }}</span>
         </button>
     </div>
+    {{ /if }}
 
     <div class="text-ef-xl text-center my-4 text-ef-text" x-show="successMessage" x-transition.opacity x-cloak role="status" aria-live="polite">
         {{ success_message ?? { "Thank you for your message! We will get back to you shortly!" | trans } }}

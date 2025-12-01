@@ -69,9 +69,20 @@ trait HandlesForms
                     'display' => $section['display'] ?? null,
                     'instructions' => $section['instructions'] ?? null,
                     'fields' => $processedSectionFields,
+                    'field_handles' => array_column($processedSectionFields, 'handle'),
                 ];
             }
         }
+
+        // Add step metadata for wizard mode
+        $totalSteps = count($sections);
+        foreach ($sections as $index => &$section) {
+            $section['step'] = $index + 1;
+            $section['total_steps'] = $totalSteps;
+            $section['is_first'] = $index === 0;
+            $section['is_last'] = $index === $totalSteps - 1;
+        }
+        unset($section);
 
         return compact('hasSections', 'sections');
     }
@@ -100,6 +111,7 @@ trait HandlesForms
             'submit_text' => $this->params->get('submit_text'),
             'success_message' => $this->params->get('success_message'),
             'precognition' => $this->params->bool('precognition', false),
+            'wizard' => $this->params->bool('wizard', false),
         ];
     }
 
