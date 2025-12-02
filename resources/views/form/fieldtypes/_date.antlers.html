@@ -449,6 +449,7 @@
             readonly
             id="{{ handle }}"
             name="{{ handle }}"
+            role="combobox"
             x-model="selectedDate"
             x-on:click="showDatepicker = !showDatepicker; if(showDatepicker) { checkPosition(); initFocusOnOpen(); }"
             x-on:keydown.space.prevent="showDatepicker = !showDatepicker; if(showDatepicker) { checkPosition(); initFocusOnOpen(); }"
