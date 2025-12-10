@@ -55,7 +55,8 @@
         <button
             type="button"
             id="{{ handle }}"
-            class="bg-ef-input-bg border border-ef-dropdown-border text-ef-input-text rounded-ef focus:ring-ef-focus focus:border-ef-focus w-full p-2.5 inline-flex items-center justify-between gap-2 font-medium tracking-wide transition hover:bg-ef-dropdown-hover focus:outline-none focus:ring-2"
+            class="inline-flex w-full items-center justify-between gap-2 bg-ef-input-bg border text-ef-input-text rounded-ef p-2.5 hover:bg-ef-dropdown-hover transition-colors duration-150 focus:outline-none"
+            x-bind:class="isOpen || openedWithKeyboard ? 'border-ef-focus ring-2 ring-ef-focus' : 'border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus'"
             role="combobox"
             aria-controls="list"
             aria-haspopup="listbox"
