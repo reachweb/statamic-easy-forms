@@ -1,13 +1,13 @@
 <div>
-    <label class="inline-flex items-center cursor-pointer" for="{{ handle }}">
+    <label class="inline-flex items-center cursor-pointer" for="{{ form_id }}_{{ handle }}">
         <input
             type="checkbox"
             class="sr-only peer"
-            id="{{ handle }}"
+            id="{{ form_id }}_{{ handle }}"
             name="{{ handle }}"
             role="switch"
-            {{ if inline_label }}aria-labelledby="{{ handle }}-label"{{ /if }}
-            {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+            {{ if inline_label }}aria-labelledby="{{ form_id }}_{{ handle }}-label"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
             x-model="submitFields['{{ handle }}']"
             x-on:change="$dispatch('validate-field', '{{ handle }}')"
         >
@@ -18,7 +18,7 @@
             after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-ef-toggle-on"
         >
         </div>
-        <span class="ms-3 text-ef-text [&_a]:underline [&_a]:text-ef-accent" id="{{ handle }}-label">
+        <span class="ms-3 text-ef-text [&_a]:underline [&_a]:text-ef-accent" id="{{ form_id }}_{{ handle }}-label">
         {{ if label_override }}
             {{ label_override | markdown | strip_tags:p | replace:'<a ':'<a target="_blank" rel="noopener noreferrer" ' }}
         {{ else }}

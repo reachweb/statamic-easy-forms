@@ -207,7 +207,7 @@
             </ul>
         </div>
         <input
-            id="{{ handle }}"
+            id="{{ form_id }}_{{ handle }}"
             type="tel"
             class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-r-ef focus:ring-2 focus:ring-ef-focus focus:border-ef-focus focus:outline-none block w-full p-2.5 disabled:cursor-not-allowed disabled:opacity-75 relative focus:z-10"
             x-ref="phoneNumber"
@@ -218,7 +218,7 @@
             x-on:blur="$dispatch('validate-field', '{{ handle }}')"
             placeholder="{{ "Select country code first" | trans }}"
             x-bind:readonly="!selectedOption"
-            {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
         />
     </div>
 </div>

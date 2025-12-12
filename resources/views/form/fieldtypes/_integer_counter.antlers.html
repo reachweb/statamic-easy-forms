@@ -10,8 +10,8 @@
         x-on:dblclick.prevent
         class="flex items-center"
         role="group"
-        aria-labelledby="{{ handle }}-label"
-        {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+        aria-labelledby="{{ form_id }}_{{ handle }}-label"
+        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
     >
         <button
             type="button"
@@ -27,7 +27,7 @@
         </button>
         <input
             x-model.number="submitFields['{{ handle }}']"
-            id="{{ handle }}"
+            id="{{ form_id }}_{{ handle }}"
             name="{{ handle }}"
             type="number"
             inputmode="numeric"

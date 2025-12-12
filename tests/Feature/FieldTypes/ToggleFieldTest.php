@@ -78,7 +78,7 @@ test('toggle field can display instructions above', function () {
 
     expect($output)
         ->toContain('Receive marketing and promotional emails')
-        ->toContain('id="marketing-description"');
+        ->toContain('id="toggle_instructions_above_marketing-description"');
 });
 
 test('toggle field can display instructions below', function () {
@@ -98,7 +98,7 @@ test('toggle field can display instructions below', function () {
 
     expect($output)
         ->toContain('Get notified about important updates')
-        ->toContain('id="notifications-description"');
+        ->toContain('id="toggle_instructions_below_notifications-description"');
 });
 
 test('toggle field displays instructions by default above when position not specified', function () {
@@ -117,5 +117,5 @@ test('toggle field displays instructions by default above when position not spec
 
     expect($output)
         ->toContain('By enabling this, you accept our terms of service')
-        ->toContain('id="terms-description"');
+        ->toContain('id="toggle_instructions_default_terms-description"');
 });

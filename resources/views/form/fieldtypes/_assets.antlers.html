@@ -65,14 +65,14 @@
                 class="font-medium text-ef-accent hover:text-ef-accent-hover cursor-pointer focus-within:underline transition-colors duration-200"
             >
                 <input
-                    id="{{ handle }}"
+                    id="{{ form_id }}_{{ handle }}"
                     name="{{ handle }}"
                     type="file"
                     class="sr-only"
                     x-ref="input"
                     {{ if max_files > 1 }}multiple{{ /if }}
                     x-on:change="handleFiles($event.target.files)"
-                    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+                    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
                 />
                 {{ "Browse" | trans }}
             </label>

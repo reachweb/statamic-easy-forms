@@ -96,6 +96,7 @@ trait HandlesForms
     {
         return [
             'handle' => $form->handle(),
+            'form_id' => $this->buildFormId($form->handle()),
             'title' => $form->title(),
             'fields' => $processedFields,
             'sections' => $sections,
@@ -113,6 +114,20 @@ trait HandlesForms
             'precognition' => $this->params->bool('precognition', false),
             'wizard' => $this->params->bool('wizard', false),
         ];
+    }
+
+    /**
+     * Build the form ID used for HTML element IDs.
+     *
+     * If an 'id' parameter is provided, it will be appended to the form handle
+     * to create a unique identifier (e.g., "contact_header"). This allows
+     * multiple instances of the same form on a single page.
+     */
+    protected function buildFormId(string $handle): string
+    {
+        $id = $this->params->get('id');
+
+        return $id ? "{$handle}_{$id}" : $handle;
     }
 
     /**

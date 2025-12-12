@@ -2,11 +2,11 @@
     x-mask="99:99"
     placeholder="{{ 'hh:mm' | trans }}"
     class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full p-2.5"
-    id="{{ handle }}"
+    id="{{ form_id }}_{{ handle }}"
     name="{{ handle }}"
     type="text"
     inputmode="numeric"
-    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
     autocomplete="off"
     x-model="submitFields['{{ handle }}']"
     x-on:blur="$dispatch('validate-field', '{{ handle }}')"

@@ -1,9 +1,9 @@
 <textarea
     class="form-textarea min-h-32 block p-2.5 w-full text-ef-input-text bg-ef-input-bg rounded-ef border border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none"
-    id="{{ handle }}"
+    id="{{ form_id }}_{{ handle }}"
     name="{{ handle }}"
     placeholder="{{ placeholder ?? '' | trans }}"
-    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
     autocomplete="off"
     x-model="submitFields['{{ handle }}']"
     x-on:blur="$dispatch('validate-field', '{{ handle }}')">

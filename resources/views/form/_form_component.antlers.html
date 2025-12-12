@@ -2,12 +2,12 @@
     method="{{ method }}"
     action="{{ action }}"
     {{ if wizard }}
-    x-data="{ 
-        ...formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
+    x-data="{
+        ...formHandler('{{ handle }}', '{{ form_id }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
         ...wizardHandler({{ sections | count }})
     }"
     {{ else }}
-    x-data="formHandler('{{ handle }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }})"
+    x-data="formHandler('{{ handle }}', '{{ form_id }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }})"
     {{ /if }}
     x-ref="form"
     x-on:submit.prevent="formSubmit"
@@ -19,8 +19,8 @@
     {{# Honeypot field #}}
     {{ if honeypot }}
     <div class="hidden" aria-hidden="true">
-        <label for="{{ honeypot }}">{{ display | trans }}</label>
-        <input type="text" id="{{ honeypot }}" name="{{ honeypot }}" tabindex="-1" autocomplete="off">
+        <label for="{{ form_id }}_{{ honeypot }}">{{ display | trans }}</label>
+        <input type="text" id="{{ form_id }}_{{ honeypot }}" name="{{ honeypot }}" tabindex="-1" autocomplete="off">
     </div>
     {{ /if }}
 

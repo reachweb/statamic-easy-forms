@@ -27,7 +27,7 @@ test('assets field renders correctly', function () {
     expect($output)
         ->toContain('name="attachments"')
         ->toContain('type="file"')
-        ->toContain('id="attachments"');
+        ->toContain('id="assets_test_attachments"');
 });
 
 test('assets field with multiple files enabled', function () {
@@ -144,7 +144,7 @@ test('assets field includes instructions', function () {
 
     expect($output)
         ->toContain('PDF, DOC, or DOCX only (max 5MB)')
-        ->toContain('aria-describedby="docs-description"');
+        ->toContain('aria-describedby="instructed_assets_docs-description"');
 });
 
 test('assets field shows file counter for multiple files', function () {

@@ -1,6 +1,7 @@
-export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteKey = null, precognitionEnabled = false) {
+export default function formHandler(formHandle = 'formSubmitted', formId = null, recaptchaSiteKey = null, precognitionEnabled = false) {
     return {
         formHandle: formHandle,
+        formId: formId || formHandle,
         recaptchaSiteKey: recaptchaSiteKey,
         precognitionEnabled: precognitionEnabled,
         submitData: {},
@@ -221,17 +222,20 @@ export default function formHandler(formHandle = 'formSubmitted', recaptchaSiteK
         },
 
         scrollToFirstError() {
-            const errorsToCheck = this.precognitionEnabled && this.precogForm 
-                ? this.precogForm.errors 
+            const errorsToCheck = this.precognitionEnabled && this.precogForm
+                ? this.precogForm.errors
                 : this.errors;
-                
+
             if (Object.keys(errorsToCheck).length === 0) return
 
             const firstErrorHandle = Object.keys(errorsToCheck)[0]
 
+            // Build the form-scoped field ID
+            const fieldId = `${this.formId}_${firstErrorHandle}`
+
             // Find field by label or fallback to input element
-            const label = this.$refs.form.querySelector(`label[for="${firstErrorHandle}"]`)
-            const fieldElement = label ? label.closest('div') : this.$refs.form.querySelector(`#${firstErrorHandle}`)
+            const label = this.$refs.form.querySelector(`label[for="${fieldId}"]`)
+            const fieldElement = label ? label.closest('div') : this.$refs.form.querySelector(`#${fieldId}`)
 
             if (!fieldElement) return
 

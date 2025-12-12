@@ -26,6 +26,7 @@ class EasyForm extends Tags
      *
      * Available parameters:
      * - handle (required): The form handle (also used as the formHandler identifier for events)
+     * - id: Optional unique identifier for multiple instances of the same form on a page
      * - view: Custom view template to use (default: "form/_form_component")
      * - hide_fields: Array of field handles to hide (e.g., hide_fields="field1|field2")
      * - prepopulated_data: Array of field values to prepopulate
@@ -45,6 +46,10 @@ class EasyForm extends Tags
      *
      * Example with wizard mode:
      * {{ easyform handle="multi_step_form" wizard="true" precognition="true" }}
+     *
+     * Example with multiple instances of the same form:
+     * {{ easyform handle="contact" id="header" }}
+     * {{ easyform handle="contact" id="footer" }}
      *
      * @return string Rendered HTML
      */

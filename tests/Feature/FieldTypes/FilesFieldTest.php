@@ -26,7 +26,7 @@ test('files field renders correctly', function () {
     expect($output)
         ->toContain('name="document"')
         ->toContain('type="file"')
-        ->toContain('id="document"');
+        ->toContain('id="files_test_document"');
 });
 
 test('files field with single file (default)', function () {
@@ -127,7 +127,7 @@ test('files field includes instructions with aria', function () {
     $output = renderEasyFormTag('instructed_files');
 
     expect($output)
-        ->toContain('aria-describedby="certificate-description"');
+        ->toContain('aria-describedby="instructed_files_certificate-description"');
 });
 
 test('files field has Alpine.js data binding', function () {
@@ -202,7 +202,7 @@ test('files field is accessible', function () {
     $output = renderEasyFormTag('accessible_files');
 
     expect($output)
-        ->toContain('id="accessible_upload"')
+        ->toContain('id="accessible_files_accessible_upload"')
         ->toContain('aria-describedby');
 });
 

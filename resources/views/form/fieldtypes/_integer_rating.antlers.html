@@ -7,17 +7,17 @@
     x-init="stars = Array.from({ length: maxVal - minVal + 1 }, (_, i) => minVal + i)"
     x-on:change="$dispatch('validate-field', '{{ handle }}')"
     class="flex items-center gap-1"
-    {{ if has_own_instructions }}aria-describedby="{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
 >
     <legend class="sr-only">{{ display ?? handle }}</legend>
     <template x-for="star in stars" :key="star">
         <label
-            :for="'{{ handle }}-star-' + star"
+            :for="'{{ form_id }}_{{ handle }}-star-' + star"
             class="transition hover:scale-125 focus-within:scale-125 focus-within:ring-2 focus-within:ring-ef-focus focus-within:ring-offset-2 rounded-ef cursor-pointer"
         >
             <input
                 x-model.number="submitFields['{{ handle }}']"
-                :id="'{{ handle }}-star-' + star"
+                :id="'{{ form_id }}_{{ handle }}-star-' + star"
                 type="radio"
                 class="sr-only"
                 name="{{ handle }}"

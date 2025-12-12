@@ -234,7 +234,7 @@ test('improved radio field has accessibility attributes', function () {
     expect($output)
         ->toContain('<fieldset')
         ->toContain('<legend class="sr-only">')
-        ->toContain('aria-describedby="accessible-description"');
+        ->toContain('aria-describedby="improved_a11y_accessible-description"');
 });
 
 test('improved radio field has responsive flex layout', function () {
