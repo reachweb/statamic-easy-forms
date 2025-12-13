@@ -446,7 +446,7 @@ test('form with multiple fields all have validation triggers', function () {
 
     // Count occurrences of validate-field dispatch
     $count = substr_count($output, '$dispatch(\'validate-field\'');
-    
+
     // Should have at least 4 dispatches (one per field) plus the form listener
     expect($count)->toBeGreaterThanOrEqual(4);
 });
