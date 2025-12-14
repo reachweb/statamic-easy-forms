@@ -7,6 +7,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         submitData: {},
         errors: {},
         fatalError: false,
+        sessionExpired: false,
         disableSubmit: false,
         successMessage: false,
         hasReCaptcha: !!recaptchaSiteKey,
@@ -188,7 +189,10 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
 
         async handleErrors(response) {
             try {
-                if (response.status === 500) {
+                if (response.status === 419) {
+                    // CSRF token expired / session expired
+                    this.sessionExpired = true
+                } else if (response.status === 500) {
                     this.fatalError = true
                 } else {
                     const errorData = await response.json()
@@ -203,7 +207,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, formHandle: this.formHandle, formId: this.formId }
+                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, sessionExpired: this.sessionExpired, formHandle: this.formHandle, formId: this.formId }
                 }))
 
                 // Scroll to first error field if outside of viewport
@@ -217,7 +221,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event for parse errors too
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { errors: {}, fatalError: true, formHandle: this.formHandle, formId: this.formId }
+                    detail: { errors: {}, fatalError: true, sessionExpired: false, formHandle: this.formHandle, formId: this.formId }
                 }))
             }
         },
@@ -256,6 +260,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         clearErrors() {
             this.errors = {}
             this.fatalError = false
+            this.sessionExpired = false
 
             // Clear precognition errors if enabled
             if (this.precognitionEnabled && this.precogForm) {

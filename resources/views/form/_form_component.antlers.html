@@ -76,6 +76,9 @@
         <div class="my-1 text-center text-ef-error" x-show="fatalError" x-cloak role="alert" aria-live="assertive">
             {{ "There is a technical problem with our form. Please contact us using email." | trans }}
         </div>
+        <div class="my-1 text-center text-ef-error" x-show="sessionExpired" x-cloak role="alert" aria-live="assertive">
+            {{ "Your session has expired. Please refresh the page and try again." | trans }}
+        </div>
         {{# Display reCAPTCHA and other form-level errors #}}
         <div class="my-1 text-center text-ef-error" x-show="'recaptcha' in errors" x-text="errors['recaptcha']" x-cloak role="alert" aria-live="polite"></div>
     </div>
