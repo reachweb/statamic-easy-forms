@@ -172,7 +172,8 @@ export default function wizardHandler(totalSteps) {
                 detail: {
                     currentStep: this.currentStep,
                     totalSteps: this.totalSteps,
-                    formHandle: this.formHandle
+                    formHandle: this.formHandle,
+                    formId: this.formId
                 }
             }));
         }

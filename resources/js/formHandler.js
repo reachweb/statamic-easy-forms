@@ -84,7 +84,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             // Dispatch submit event
             this.$refs.form.dispatchEvent(new CustomEvent('form:submit', {
                 bubbles: true,
-                detail: { submitData: this.submitData, formHandle: this.formHandle }
+                detail: { submitData: this.submitData, formHandle: this.formHandle, formId: this.formId }
             }))
 
             try {
@@ -103,7 +103,8 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                             detail: {
                                 error: 'ReCAPTCHA verification failed. Please refresh the page.',
                                 fatalError: true,
-                                formHandle: this.formHandle
+                                formHandle: this.formHandle,
+                                formId: this.formId
                             }
                         }))
                         return
@@ -134,7 +135,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { error: error.message, fatalError: true, formHandle: this.formHandle }
+                    detail: { error: error.message, fatalError: true, formHandle: this.formHandle, formId: this.formId }
                 }))
             } finally {
                 // Always reset submission state
@@ -180,7 +181,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch success event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:success', {
                     bubbles: true,
-                    detail: { data: data, submitData: this.submitData, formHandle: this.formHandle }
+                    detail: { data: data, submitData: this.submitData, formHandle: this.formHandle, formId: this.formId }
                 }))
             }
         },
@@ -202,7 +203,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, formHandle: this.formHandle }
+                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, formHandle: this.formHandle, formId: this.formId }
                 }))
 
                 // Scroll to first error field if outside of viewport
@@ -216,7 +217,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event for parse errors too
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { errors: {}, fatalError: true, formHandle: this.formHandle }
+                    detail: { errors: {}, fatalError: true, formHandle: this.formHandle, formId: this.formId }
                 }))
             }
         },
