@@ -88,12 +88,11 @@
     {{ partial:statamic-easy-forms::form/wizard/buttons }}
     {{ else }}
     {{# Regular Submit Button #}}
-    <div class="w-full pt-8 xl:pt-12" x-show="! successMessage">
+    <div class="w-full pt-8 xl:pt-12" x-show="! successMessage" x-cloak>
         <button
-            class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 transition-all duration-300 cursor-pointer"
-            x-bind:class="{ 'cursor-not-allowed opacity-50': disableSubmit }"
+            class="relative w-full px-6 py-3.5 text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg-hover focus:ring-4 focus:outline-none font-bold rounded-ef text-ef-lg xl:text-ef-xl focus:ring-ef-focus/20 text-center disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 cursor-pointer"
             type="submit"
-            x-bind:disabled="disableSubmit"            
+            x-bind:disabled="disableSubmit"
             x-bind:aria-busy="disableSubmit"
         >
             <span>{{ submit_text ?? { "Submit" | trans } }}</span>
