@@ -164,6 +164,16 @@ trait HandlesForms
     {
         $view = $this->params->get('view', 'form/_form_component');
 
+        // Prepend form/ if not there
+        if (! str_starts_with($view, 'form/')) {
+            $view = 'form/'.$view;
+        }
+
+        // Add underscore prefix if not there
+        if (! str_contains($view, '/_')) {
+            $view = str_replace('form/', 'form/_', $view);
+        }
+
         return view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()
             ->render();
