@@ -105,7 +105,10 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             const urlParams = new URLSearchParams(window.location.search)
             for (const [name, value] of urlParams) {
                 if (trackedParams.includes(name.toLowerCase())) {
-                    this.setCookie('ef_tracking_id', value, 30)
+                    // Validate tracking ID: max 500 chars, alphanumeric with common tracking ID characters
+                    if (value.length <= 500 && /^[\w\-_.]+$/.test(value)) {
+                        this.setCookie('ef_tracking_id', value, 30)
+                    }
                     break
                 }
             }
@@ -113,7 +116,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
         setCookie(name, value, days) {
             const expires = new Date(Date.now() + days * 864e5).toUTCString()
-            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax`
+            const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`
         },
 
         getCookie(name) {
