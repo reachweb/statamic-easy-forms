@@ -7,6 +7,10 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         
         init() {
             this.honeypot = honeypot
+
+            // Capture tracking params from URL and store in cookie
+            this.captureTrackingParams()
+
             this.fields = fields.filter(field => field.input_type !== 'hidden')
                               .filter(field => !hideFields.includes(field.handle))
             this.submitFields = this.initializeFields(fields)
@@ -62,6 +66,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     defaultValue = null
                 } else if (field.type === 'checkboxes') {
                     defaultValue = field.default || []
+                } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
+                    // Auto-populate tracking_id from stored cookie
+                    defaultValue = this.getCookie('ef_tracking_id') || field.default || ''
                 } else {
                     defaultValue = field.default || ''
                 }
@@ -70,7 +77,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             }, {})
         },
 
-        loadPrepopulatedData(data) {            
+        loadPrepopulatedData(data) {
             // Create a new object with the prepopulated data to ensure reactivity
             const updatedFields = { ...this.submitFields }
             Object.keys(data).forEach(key => {
@@ -78,8 +85,48 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     updatedFields[key] = data[key]
                 }
             })
-            
+
             this.submitFields = updatedFields
+        },
+
+        /**
+         * Capture URL tracking parameters and store in cookie.
+         * Default params: gclid, gbraid, wbraid (Google Ads)
+         * Custom params can be set via data-track-params attribute on form element
+         */
+        captureTrackingParams() {
+            const defaultParams = ['gclid', 'gbraid', 'wbraid']
+
+            // Check for custom params on form element
+            const formEl = this.$el?.closest('form')
+            const customParams = formEl?.dataset?.trackParams?.split(',').map(p => p.trim().toLowerCase())
+            const trackedParams = customParams?.length ? customParams : defaultParams
+
+            const urlParams = new URLSearchParams(window.location.search)
+            for (const [name, value] of urlParams) {
+                if (trackedParams.includes(name.toLowerCase())) {
+                    // Validate tracking ID: max 500 chars, alphanumeric with common tracking ID characters
+                    if (value.length <= 500 && /^[\w\-_.]+$/.test(value)) {
+                        this.setCookie('ef_tracking_id', value, 30)
+                    }
+                    break
+                }
+            }
+        },
+
+        setCookie(name, value, days) {
+            const expires = new Date(Date.now() + days * 864e5).toUTCString()
+            const secure = window.location.protocol === 'https:' ? '; Secure' : ''
+            document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Lax${secure}`
+        },
+
+        getCookie(name) {
+            const value = `; ${document.cookie}`
+            const parts = value.split(`; ${name}=`)
+            if (parts.length === 2) {
+                return decodeURIComponent(parts.pop().split(';').shift())
+            }
+            return null
         },
     }
 }
