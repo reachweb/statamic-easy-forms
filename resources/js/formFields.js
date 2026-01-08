@@ -67,8 +67,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 } else if (field.type === 'checkboxes') {
                     defaultValue = field.default || []
                 } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
-                    // Auto-populate tracking_id from stored cookie
-                    defaultValue = this.getCookie('ef_tracking_id') || field.default || ''
+                    // Auto-populate tracking_id: URL first (immediate), then cookie (returning visitors)
+                    defaultValue = this.getTrackingId() || field.default || ''
                 } else {
                     defaultValue = field.default || ''
                 }
@@ -90,27 +90,55 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         /**
-         * Capture URL tracking parameters and store in cookie.
-         * Default params: gclid, gbraid, wbraid (Google Ads)
-         * Custom params can be set via data-track-params attribute on form element
+         * Get tracking ID from URL (first priority) or cookie (returning visitors).
          */
-        captureTrackingParams() {
-            const defaultParams = ['gclid', 'gbraid', 'wbraid']
+        getTrackingId() {
+            const urlValue = this.getTrackingIdFromUrl()
+            if (urlValue) {
+                return urlValue
+            }
 
-            // Check for custom params on form element
-            const formEl = this.$el?.closest('form')
-            const customParams = formEl?.dataset?.trackParams?.split(',').map(p => p.trim().toLowerCase())
-            const trackedParams = customParams?.length ? customParams : defaultParams
+            return this.getCookie('ef_tracking_id')
+        },
 
+        /**
+         * Get tracking ID from URL parameters.
+         */
+        getTrackingIdFromUrl() {
+            const trackedParams = this.getTrackedParams()
             const urlParams = new URLSearchParams(window.location.search)
+
             for (const [name, value] of urlParams) {
                 if (trackedParams.includes(name.toLowerCase())) {
-                    // Validate tracking ID: max 500 chars, alphanumeric with common tracking ID characters
+                    // Validate: max 500 chars, alphanumeric with common tracking ID characters
                     if (value.length <= 500 && /^[\w\-_.]+$/.test(value)) {
-                        this.setCookie('ef_tracking_id', value, 30)
+                        return value
                     }
                     break
                 }
+            }
+            return null
+        },
+
+        /**
+         * Get the list of tracked parameters.
+         * Default: gclid, gbraid, wbraid (Google Ads)
+         * Custom params can be set via data-track-params attribute on form element
+         */
+        getTrackedParams() {
+            const defaultParams = ['gclid', 'gbraid', 'wbraid']
+            const formEl = this.$el?.closest('form')
+            const customParams = formEl?.dataset?.trackParams?.split(',').map(p => p.trim().toLowerCase())
+            return customParams?.length ? customParams : defaultParams
+        },
+
+        /**
+         * Capture URL tracking parameters and store in cookie for returning visitors.
+         */
+        captureTrackingParams() {
+            const value = this.getTrackingIdFromUrl()
+            if (value) {
+                this.setCookie('ef_tracking_id', value, 30)
             }
         },
 
