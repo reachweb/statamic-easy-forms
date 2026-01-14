@@ -28,9 +28,8 @@
     {{ if wizard }}
     {{ partial:statamic-easy-forms::form/wizard/progress }}
     {{ /if }}
-
     <div
-        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ prepopulated_data | to_json | entities ?? '[]' }})"
+        x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ (prepopulated_data | to_json | entities) ?? '[]' }})"
         x-show="! successMessage"
         {{ if wizard }}
         x-init="stepFields = { {{ sections }}{{ step }}: {{ field_handles | to_json | entities }}{{ unless is_last }}, {{ /unless }}{{ /sections }} }"
