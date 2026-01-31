@@ -4,7 +4,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         fields: [],
         fieldsMap: {},
         honeypot: '',
-        
+        TRACKING_COOKIE_PREFIX: 'ef_track_',
+        COOKIE_EXPIRY_DAYS: 30,
+
         init() {
             this.honeypot = honeypot
 
@@ -90,34 +92,68 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         /**
-         * Get tracking ID from URL (first priority) or cookie (returning visitors).
+         * Get tracking ID from URL params merged with cookies.
+         * Returns formatted query string: gclid=abc123&gbraid=xyz456
          */
         getTrackingId() {
-            const urlValue = this.getTrackingIdFromUrl()
-            if (urlValue) {
-                return urlValue
-            }
+            const urlParams = this.getAllTrackingParamsFromUrl()
+            const cookieParams = this.getAllTrackingCookies()
 
-            return this.getCookie('ef_tracking_id')
+            // URL params take precedence, merge with cookies
+            const merged = { ...cookieParams, ...urlParams }
+
+            return this.formatTrackingValue(merged)
         },
 
         /**
-         * Get tracking ID from URL parameters.
+         * Get all tracking parameters from URL.
+         * Returns object: { gclid: 'abc123', gbraid: 'xyz456' }
          */
-        getTrackingIdFromUrl() {
+        getAllTrackingParamsFromUrl() {
             const trackedParams = this.getTrackedParams()
             const urlParams = new URLSearchParams(window.location.search)
+            const result = {}
 
             for (const [name, value] of urlParams) {
-                if (trackedParams.includes(name.toLowerCase())) {
+                const normalizedName = name.toLowerCase()
+                if (trackedParams.includes(normalizedName)) {
                     // Validate: max 500 chars, alphanumeric with common tracking ID characters
                     if (value.length <= 500 && /^[\w\-_.]+$/.test(value)) {
-                        return value
+                        result[normalizedName] = value
                     }
-                    break
                 }
             }
-            return null
+            return result
+        },
+
+        /**
+         * Get all tracking cookies.
+         * Returns object: { gclid: 'abc123', gbraid: 'xyz456' }
+         */
+        getAllTrackingCookies() {
+            const result = {}
+            const trackedParams = this.getTrackedParams()
+
+            trackedParams.forEach(paramName => {
+                const value = this.getCookie(`${this.TRACKING_COOKIE_PREFIX}${paramName}`)
+                if (value) {
+                    result[paramName] = value
+                }
+            })
+
+            return result
+        },
+
+        /**
+         * Format tracking params as query string: gclid=abc123&gbraid=xyz456
+         */
+        formatTrackingValue(params) {
+            const entries = Object.entries(params)
+            if (entries.length === 0) return ''
+
+            return entries
+                .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+                .join('&')
         },
 
         /**
@@ -133,13 +169,15 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         /**
-         * Capture URL tracking parameters and store in cookie for returning visitors.
+         * Capture URL tracking parameters and store each in its own cookie.
+         * Cookie names: ef_track_gclid, ef_track_gbraid, etc.
          */
         captureTrackingParams() {
-            const value = this.getTrackingIdFromUrl()
-            if (value) {
-                this.setCookie('ef_tracking_id', value, 30)
-            }
+            const urlParams = this.getAllTrackingParamsFromUrl()
+
+            Object.entries(urlParams).forEach(([name, value]) => {
+                this.setCookie(`${this.TRACKING_COOKIE_PREFIX}${name}`, value, this.COOKIE_EXPIRY_DAYS)
+            })
         },
 
         setCookie(name, value, days) {
