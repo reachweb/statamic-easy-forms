@@ -3,6 +3,7 @@
 namespace Reach\StatamicEasyForms;
 
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
+use Reach\StatamicEasyForms\Tags\EmailField;
 use Statamic\Events\FormSubmitted;
 use Statamic\Fieldtypes\Integer;
 use Statamic\Fieldtypes\Radio;
@@ -13,6 +14,10 @@ use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
 {
+    protected $tags = [
+        EmailField::class,
+    ];
+
     protected $publishables = [
         __DIR__.'/../dist' => '',
     ];

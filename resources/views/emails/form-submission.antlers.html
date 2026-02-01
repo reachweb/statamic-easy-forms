@@ -1,4 +1,3 @@
-{{ real_url = config:app:url }}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -39,36 +38,9 @@
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
                                 
                                 {{ fields }}
-                                {{ unless fieldtype == 'section' }}
-
-                                {{ if value }}
-                                <tr>
-                                    <td width="35%" valign="middle" style="padding: 12px 10px 12px 0; border-bottom: 1px solid #eeeeee;">
-                                        <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
-                                            {{ display }}
-                                        </p>
-                                    </td>
-
-                                    <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
-                                        <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                            {{ if fieldtype === 'assets' }}
-                                                <a href="{{ real_url }}/cp/forms/{{ form:handle }}/submissions/{{ id }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
-                                                    Login to view file(s) →
-                                                </a>
-                                            {{ /if }}
-                                            {{ if value | is_array }}
-                                                {{ value }}
-                                                    {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
-                                                {{ /value }}
-                                            {{ else }}
-                                                {{ value:label ?? label ?? value ?? key | entities }}
-                                            {{ /if }}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {{ /if }}
-
-                                {{ /unless }}
+                                    {{ unless fieldtype == 'section' }}
+                                        {{ email_field }}
+                                    {{ /unless }}
                                 {{ /fields }}
 
                             </table>

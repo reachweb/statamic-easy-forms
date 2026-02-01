@@ -179,3 +179,51 @@ function renderEasyFormTag(string $handle, array $params = []): string
 
     return $tag->index();
 }
+
+/**
+ * Create email field data for testing.
+ *
+ * @param  string  $display  The field display name
+ * @param  mixed  $value  The field value
+ * @param  string  $fieldtype  The field type (default: text)
+ * @param  array  $config  Additional field configuration
+ */
+function createEmailFieldData(string $display, mixed $value, string $fieldtype = 'text', array $config = []): array
+{
+    return array_filter([
+        'display' => $display,
+        'value' => $value,
+        'fieldtype' => $fieldtype,
+        'config' => ! empty($config) ? $config : null,
+    ], fn ($v) => $v !== null);
+}
+
+/**
+ * Create group field data for email testing.
+ *
+ * @param  string  $display  The group field display name
+ * @param  array  $nestedFields  Array of nested field definitions [['handle' => 'x', 'display' => 'X', 'type' => 'text'], ...]
+ * @param  array  $values  Associative array of field handle => value pairs
+ */
+function createGroupFieldData(string $display, array $nestedFields, array $values): array
+{
+    $configFields = [];
+    foreach ($nestedFields as $field) {
+        $configFields[] = [
+            'handle' => $field['handle'],
+            'field' => [
+                'display' => $field['display'] ?? ucfirst($field['handle']),
+                'type' => $field['type'] ?? 'text',
+            ],
+        ];
+    }
+
+    return [
+        'display' => $display,
+        'value' => $values,
+        'fieldtype' => 'group',
+        'config' => [
+            'fields' => $configFields,
+        ],
+    ];
+}
