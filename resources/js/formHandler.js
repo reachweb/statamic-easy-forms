@@ -149,14 +149,20 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             const formData = new FormData()
 
             Object.entries(this.submitData).forEach(([key, value]) => {
+                // Convert dotted notation to bracket notation for nested fields (e.g., group fields)
+                // "parent.child" becomes "parent[child]"
+                const formKey = key.includes('.')
+                    ? key.replace(/\.([^.]+)/g, '[$1]')
+                    : key
+
                 if (value instanceof FileList) {
-                    Array.from(value).forEach(file => formData.append(`${key}[]`, file))
+                    Array.from(value).forEach(file => formData.append(`${formKey}[]`, file))
                 } else if (value instanceof File) {
-                    formData.append(key, value)
+                    formData.append(formKey, value)
                 } else if (Array.isArray(value)) {
-                    value.forEach(item => formData.append(`${key}[]`, item))
+                    value.forEach(item => formData.append(`${formKey}[]`, item))
                 } else if (value !== null && value !== undefined) {
-                    formData.append(key, value)
+                    formData.append(formKey, value)
                 }
             })
 
@@ -236,7 +242,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             const firstErrorHandle = Object.keys(errorsToCheck)[0]
 
             // Build the form-scoped field ID
-            const fieldId = `${this.formId}_${firstErrorHandle}`
+            // Convert dotted notation to underscore for nested fields (e.g., "parent.child" -> "parent_child")
+            const fieldIdSuffix = firstErrorHandle.replace(/\./g, '_')
+            const fieldId = `${this.formId}_${fieldIdSuffix}`
 
             // Find field by label or fallback to input element
             const label = this.$refs.form.querySelector(`label[for="${fieldId}"]`)

@@ -20,6 +20,12 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             // Create a second map for quick field lookup by handle of all fields
             this.fieldsMap = fields.reduce((acc, field) => {
                 acc[field.handle] = field;
+                // Also add nested fields from groups with their full key
+                if (field.type === 'group' && field.group_fields) {
+                    field.group_fields.forEach(nestedField => {
+                        acc[nestedField.field_key] = nestedField;
+                    })
+                }
                 return acc;
             }, {})
 
@@ -62,21 +68,32 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
         initializeFields(fields) {
             return fields.reduce((acc, field) => {
-                // Initialize different field types with appropriate defaults
-                let defaultValue
-                if (field.type === 'assets') {
-                    defaultValue = null
-                } else if (field.type === 'checkboxes') {
-                    defaultValue = field.default || []
-                } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
-                    // Auto-populate tracking_id: URL first (immediate), then cookie (returning visitors)
-                    defaultValue = this.getTrackingId() || field.default || ''
-                } else {
-                    defaultValue = field.default || ''
+                // Handle group fields - initialize nested fields with dot notation
+                if (field.type === 'group' && field.group_fields) {
+                    field.group_fields.forEach(nestedField => {
+                        const nestedHandle = `${field.handle}.${nestedField.handle}`
+                        acc[nestedHandle] = this.getFieldDefaultValue(nestedField)
+                    })
+                    return acc
                 }
-                acc[field.handle] = defaultValue;
-                return acc;
+
+                // Initialize different field types with appropriate defaults
+                acc[field.handle] = this.getFieldDefaultValue(field)
+                return acc
             }, {})
+        },
+
+        getFieldDefaultValue(field) {
+            if (field.type === 'assets') {
+                return null
+            } else if (field.type === 'checkboxes') {
+                return field.default || []
+            } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
+                // Auto-populate tracking_id: URL first (immediate), then cookie (returning visitors)
+                return this.getTrackingId() || field.default || ''
+            } else {
+                return field.default || ''
+            }
         },
 
         loadPrepopulatedData(data) {

@@ -2,7 +2,7 @@
     x-data="{
         options: {{ options | to_json | entities }},
         comboboxData: {{ options | to_json | entities }},
-        fieldHandle: '{{ handle }}',
+        fieldHandle: '{{ field_key ?? handle }}',
         isOpen: false,
         openUpwards: false,
         openedWithKeyboard: false,
@@ -207,18 +207,19 @@
             </ul>
         </div>
         <input
-            id="{{ form_id }}_{{ handle }}"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            name="{{ field_name ?? handle }}"
             type="tel"
             class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-r-ef focus:ring-2 focus:ring-ef-focus focus:border-ef-focus focus:outline-none block w-full p-2.5 disabled:cursor-not-allowed disabled:opacity-75 relative focus:z-10"
             x-ref="phoneNumber"
             autocomplete="tel"
-            x-model="submitFields['{{ handle }}']"
+            x-model="submitFields['{{ field_key ?? handle }}']"
             x-on:keydown="handleDeletion($event)"
             x-on:input="handleInput($event)"
-            x-on:blur="$dispatch('validate-field', '{{ handle }}')"
+            x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
             placeholder="{{ "Select country code first" | trans }}"
             x-bind:readonly="!selectedOption"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
         />
     </div>
 </div>

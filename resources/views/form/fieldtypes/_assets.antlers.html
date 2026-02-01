@@ -24,9 +24,9 @@
 
         updateFormData() {
             if (this.maxFiles === 1) {
-                submitFields['{{ handle }}'] = this.files[0] || null
+                submitFields['{{ field_key ?? handle }}'] = this.files[0] || null
             } else {
-                submitFields['{{ handle }}'] = this.files.length > 0 ? this.files : null
+                submitFields['{{ field_key ?? handle }}'] = this.files.length > 0 ? this.files : null
             }
         },
 
@@ -65,14 +65,14 @@
                 class="font-medium text-ef-accent hover:text-ef-accent-hover cursor-pointer focus-within:underline transition-colors duration-200"
             >
                 <input
-                    id="{{ form_id }}_{{ handle }}"
-                    name="{{ handle }}"
+                    id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+                    name="{{ field_name ?? handle }}"
                     type="file"
                     class="sr-only"
                     x-ref="input"
                     {{ if max_files > 1 }}multiple{{ /if }}
                     x-on:change="handleFiles($event.target.files)"
-                    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+                    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
                 />
                 {{ "Browse" | trans }}
             </label>

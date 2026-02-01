@@ -1,11 +1,11 @@
 <input
     class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full p-2.5"
-    id="{{ form_id }}_{{ handle }}"
-    name="{{ handle }}"
+    id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+    name="{{ field_name ?? handle }}"
     placeholder="{{ placeholder ?? '' | trans }}"
     type="{{ input_type ?? 'text' }}"
     {{ if autocomplete }}autocomplete="{{ autocomplete }}"{{ /if }}
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
-    x-model="submitFields['{{ handle }}']"
-    x-on:blur="$dispatch('validate-field', '{{ handle }}')"
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+    x-model="submitFields['{{ field_key ?? handle }}']"
+    x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
 >
