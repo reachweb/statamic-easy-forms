@@ -49,19 +49,23 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             })
         },
 
-        // Method to check if a field should be shown
+        // Method to check if a field should be shown based on Statamic conditions
         shouldShowField(fieldHandle) {
             const field = this.fieldsMap[fieldHandle]
             if (!field) return false
 
-            // Fallback if Statamic conditions aren't available
+            // If no conditions defined, show the field
+            if (!field.if && !field.unless && !field.show_when && !field.hide_when) {
+                return true
+            }
+
             try {
                 if (typeof window.Statamic === 'undefined' || !window.Statamic?.$conditions?.showField) {
                     return true
                 }
-                return window.Statamic.$conditions.showField(field, this.submitFields)
+                return window.Statamic.$conditions.showField(field, this.submitFields, fieldHandle)
             } catch (error) {
-                // If Statamic is not available or throws an error, show all fields
+                // If Statamic conditions fail, show the field
                 return true
             }
         },
