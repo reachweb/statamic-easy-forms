@@ -1,10 +1,10 @@
 <div
-    class="{{ if honeypot === handle || input_type === 'hidden' }}hidden{{ /if }} {{ if width === 50 }}col-span-12 md:col-span-6{{ elseif width === 33 }}col-span-12 md:col-span-4{{ elseif width === 25 }}col-span-12 md:col-span-3{{ else }}col-span-12{{ /if }}"
+    class="{{ if honeypot == handle || input_type == 'hidden' }}hidden{{ /if }} {{ if width == 50 }}col-span-12 md:col-span-6{{ elseif width == 33 }}col-span-12 md:col-span-4{{ elseif width == 25 }}col-span-12 md:col-span-3{{ else }}col-span-12{{ /if }}"
     x-show="shouldShowField('{{ field_key ?? handle }}')"
 >
-    {{ unless type === 'toggle' || type === 'spacer' || type === 'group' }}
-    <div class="flex items-center mb-2" {{ if type === 'integer' && integer_template === 'counter' }}id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label"{{ /if }}>
-        {{ if type === 'checkboxes' || type === 'radio' || (type === 'integer' && integer_template === 'rating') }}
+    {{ unless type == 'toggle' || type == 'spacer' || type == 'group' }}
+    <div class="flex items-center mb-2" {{ if type == 'integer' && integer_template == 'counter' }}id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label"{{ /if }}>
+        {{ if type == 'checkboxes' || type == 'radio' || (type == 'integer' && integer_template == 'rating') }}
         <span class="block font-semibold text-ef text-ef-label">
         {{ else }}
         <label class="block font-semibold text-ef text-ef-label" for="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}">
@@ -16,7 +16,7 @@
             {{ if append }}
             <span class="text-ef-text-muted">{{ append | trans }}</span>
             {{ /if }}
-        {{ if type === 'checkboxes' || type === 'radio' || (type === 'integer' && integer_template === 'rating') }}
+        {{ if type == 'checkboxes' || type == 'radio' || (type == 'integer' && integer_template == 'rating') }}
         </span>
         {{ else }}
         </label>
@@ -29,7 +29,7 @@
     </div>
     {{ /unless }}
 
-    {{ if has_own_instructions && instructions && (instructions_position === 'above' || ! instructions_position) && type !== 'spacer' }}
+    {{ if has_own_instructions && instructions && (instructions_position == 'above' || ! instructions_position) && type != 'spacer' }}
     <div id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description" class="mb-3 text-ef text-ef-text">
         {{ instructions | trans }}
     </div>
@@ -56,17 +56,17 @@
     {{ /if }}
 
     {{# Integer #}}
-    {{ if type == 'integer' && (integer_template === 'simple' || !integer_template) }}
+    {{ if type == 'integer' && (integer_template == 'simple' || !integer_template) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
     {{ /if }}
 
     {{# Integer Counter #}}
-    {{ if type == 'integer' && integer_template === 'counter' }}
+    {{ if type == 'integer' && integer_template == 'counter' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer_counter }}
     {{ /if }}
 
     {{# Integer Rating #}}
-    {{ if type == 'integer' && integer_template === 'rating' }}
+    {{ if type == 'integer' && integer_template == 'rating' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer_rating }}
     {{ /if }}
 
@@ -111,7 +111,7 @@
     {{ /if }}
 
     {{# Dictionary #}}
-    {{ if type == 'dictionary' && dictionary !== 'country_phone_codes' }}
+    {{ if type == 'dictionary' && dictionary != 'country_phone_codes' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/dictionary }}
     {{ /if }}
 
@@ -130,7 +130,7 @@
         {{ partial:statamic-easy-forms::form/fieldtypes/group }}
     {{ /if }}
 
-    {{ if has_own_instructions && instructions && instructions_position === 'below' && type !== 'spacer' }}
+    {{ if has_own_instructions && instructions && instructions_position == 'below' && type != 'spacer' }}
     <div id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description" class="mt-3 text-ef text-ef-text">
         {{ instructions | trans }}
     </div>
