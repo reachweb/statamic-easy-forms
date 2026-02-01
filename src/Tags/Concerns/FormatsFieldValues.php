@@ -13,21 +13,21 @@ trait FormatsFieldValues
      */
     protected function formatValue(mixed $value, string $fieldtype = 'text'): string
     {
+        // Unwrap Statamic Value objects first
+        $value = $this->unwrapValue($value);
+
         if ($value === null || $value === '' || (is_array($value) && empty($value))) {
             return '';
         }
 
-        // Handle boolean values
         if (is_bool($value)) {
             return $value ? 'Yes' : '';
         }
 
-        // Handle arrays (checkboxes, multi-select, etc.)
         if (is_array($value)) {
             return $this->formatArrayValue($value);
         }
 
-        // Handle objects with label/value properties
         if (is_object($value)) {
             return $this->extractLabelFromObject($value);
         }
@@ -47,6 +47,9 @@ trait FormatsFieldValues
         $values = [];
 
         foreach ($array as $item) {
+            // Unwrap Statamic Value objects
+            $item = $this->unwrapValue($item);
+
             if (is_array($item)) {
                 $label = $item['label'] ?? $item['value'] ?? $item['key'] ?? null;
                 if ($label !== null) {

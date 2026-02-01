@@ -92,6 +92,9 @@ class EmailField extends Tags
      */
     protected function isEmpty(mixed $value): bool
     {
+        // Unwrap Statamic Value objects first
+        $value = $this->unwrapValue($value);
+
         return $value === null
             || $value === ''
             || $value === false
