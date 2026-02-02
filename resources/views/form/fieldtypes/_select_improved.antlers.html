@@ -37,7 +37,7 @@
         selectOption(optionKey) {
             this.selectedOptions = [optionKey];
             this.isOpen = false;
-            this.$dispatch('validate-field', '{{ handle }}');
+            this.$dispatch('validate-field', '{{ field_key ?? handle }}');
         },
         getFilteredOptions(query) {
             if (!query) {
@@ -62,9 +62,9 @@
                 return option ? (option.value || option.key) : value;
             });
             {{ if multiple }}
-                submitFields['{{ handle }}'] = this.selectedOptions;
+                submitFields['{{ field_key ?? handle }}'] = this.selectedOptions;
             {{ else }}
-                submitFields['{{ handle }}'] = this.selectedOptions[0] || '';
+                submitFields['{{ field_key ?? handle }}'] = this.selectedOptions[0] || '';
             {{ /if }}
         },
         resetSearch() {
@@ -128,19 +128,19 @@
         }
     }"
     x-init="init()"
-    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}') }"
+    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ field_key ?? handle }}') }"
     class="w-full flex flex-col relative"
 >
     <div class="relative w-full">
         <button
             type="button"
-            id="{{ form_id }}_{{ handle }}"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
             class="inline-flex w-full items-center justify-between whitespace-nowrap bg-ef-input-bg border text-ef-input-text rounded-ef p-2.5 hover:bg-ef-dropdown-hover transition-colors duration-150 focus:outline-none"
             x-bind:class="isOpen || openedWithKeyboard ? 'border-ef-focus ring-2 ring-ef-focus' : 'border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus'"
             role="combobox"
             aria-haspopup="listbox"
             aria-controls="itemsListbox"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
             x-on:click="isOpen = !isOpen; checkPosition()"
             x-on:keydown.down.prevent="openedWithKeyboard = true"
             x-on:keydown.enter.prevent="openedWithKeyboard = true"
@@ -189,7 +189,7 @@
         <div
             x-cloak
             x-show="isOpen || openedWithKeyboard"
-            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}')"
+            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ field_key ?? handle }}')"
             x-transition
             x-ref="dropdown"
             class="absolute z-30 left-0 w-full bg-ef-input-bg border border-ef-border rounded-ef overflow-hidden shadow-lg"
@@ -243,7 +243,7 @@
                         {{ if multiple }}
                             <label
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-ef-text cursor-pointer w-full"
-                                :for="'{{ form_id }}_{{ handle }}_checkboxOption_' + option.key"
+                                :for="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_checkboxOption_' + option.key"
                             >
                                 <div class="relative flex items-center">
                                     <input
@@ -253,7 +253,7 @@
                                         x-on:keydown.enter.prevent="$el.checked = !$el.checked; handleOptionToggle($el)"
                                         :checked="selectedOptions.includes(option.key)"
                                         :value="option.key"
-                                        :id="'{{ form_id }}_{{ handle }}_checkboxOption_' + option.key"
+                                        :id="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_checkboxOption_' + option.key"
                                     />
                                 </div>
                                 <span x-text="option.value || option.key"></span>

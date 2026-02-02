@@ -2,7 +2,7 @@
     x-data="{
         options: {{ options | to_json | entities }},
         comboboxData: {{ options | to_json | entities }},
-        fieldHandle: '{{ handle }}',
+        fieldHandle: '{{ field_key ?? handle }}',
         isOpen: false,
         openUpwards: false,
         openedWithKeyboard: false,
@@ -16,7 +16,7 @@
             this.selectedOption = index
             this.isOpen = false
             this.openedWithKeyboard = false
-            this.$dispatch('validate-field', '{{ handle }}')
+            this.$dispatch('validate-field', '{{ field_key ?? handle }}')
         },
 
         getFilteredOptions(query) {
@@ -46,21 +46,21 @@
         },
     }"
     x-modelable="selectedOption"
-    x-model="submitFields['{{ handle }}']"
+    x-model="submitFields['{{ field_key ?? handle }}']"
     class="flex w-full max-w-full flex-col gap-1"
     x-on:keydown="handleKeydownOnOptions($event)"
-    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}') }"
+    x-on:keydown.esc.window="if (isOpen || openedWithKeyboard) { isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ field_key ?? handle }}') }"
 >
     <div class="relative">
         <button
             type="button"
-            id="{{ form_id }}_{{ handle }}"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
             class="inline-flex w-full items-center justify-between gap-2 bg-ef-input-bg border text-ef-input-text rounded-ef p-2.5 hover:bg-ef-dropdown-hover transition-colors duration-150 focus:outline-none"
             x-bind:class="isOpen || openedWithKeyboard ? 'border-ef-focus ring-2 ring-ef-focus' : 'border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus'"
             role="combobox"
             aria-controls="list"
             aria-haspopup="listbox"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
             x-ref="dropdownButton"
             x-on:click="isOpen = ! isOpen; checkPosition()"
             x-on:keydown.down.prevent="openedWithKeyboard = true"
@@ -83,7 +83,7 @@
             role="listbox"
             aria-label="list"
             x-ref="dropdown"
-            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ handle }}')"
+            x-on:click.outside="isOpen = false; openedWithKeyboard = false; $dispatch('validate-field', '{{ field_key ?? handle }}')"
             x-on:keydown.down.prevent="$focus.wrap().next()"
             x-on:keydown.up.prevent="$focus.wrap().previous()"
             x-transition

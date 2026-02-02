@@ -1,5 +1,5 @@
 <div 
-    x-model="submitFields['{{ handle }}']"
+    x-model="submitFields['{{ field_key ?? handle }}']"
     x-modelable="selectedDate"
     x-data="{
         selectedDate: '',
@@ -117,7 +117,7 @@
             }
 
             this.$nextTick(() => {
-                this.$dispatch('validate-field', '{{ handle }}');
+                this.$dispatch('validate-field', '{{ field_key ?? handle }}');
             });
         },
 
@@ -266,7 +266,7 @@
             this.hoverDate = null;
             this.selectedDate = '';
             this.$nextTick(() => {
-                this.$dispatch('validate-field', '{{ handle }}');
+                this.$dispatch('validate-field', '{{ field_key ?? handle }}');
             });
         },
 
@@ -447,8 +447,8 @@
             x-ref="dateInput"
             type="text"
             readonly
-            id="{{ form_id }}_{{ handle }}"
-            name="{{ handle }}"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            name="{{ field_name ?? handle }}"
             role="combobox"
             x-model="selectedDate"
             x-on:click="showDatepicker = !showDatepicker; if(showDatepicker) { checkPosition(); initFocusOnOpen(); }"
@@ -456,7 +456,7 @@
             x-bind:aria-expanded="showDatepicker"
             aria-haspopup="dialog"
             aria-label="{{ 'Choose date' | trans }}"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
             placeholder="{{ placeholder ?? "Please select" | trans }}"
             class="form-input cursor-pointer bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full py-2.5 px-10"
         />

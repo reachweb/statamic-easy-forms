@@ -1,13 +1,13 @@
 <input
     class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full p-2.5"
-    id="{{ form_id }}_{{ handle }}"
-    name="{{ handle }}"
+    id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+    name="{{ field_name ?? handle }}"
     type="number"
     inputmode="numeric"
     {{ if min_value || min_value === 0 }}min="{{ min_value }}"{{ /if }}
     {{ if max_value || max_value === 0 }}max="{{ max_value }}"{{ /if }}
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
     autocomplete="off"
-    x-model.number="submitFields['{{ handle }}']"
-    x-on:blur="$dispatch('validate-field', '{{ handle }}')"
+    x-model.number="submitFields['{{ field_key ?? handle }}']"
+    x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
 >

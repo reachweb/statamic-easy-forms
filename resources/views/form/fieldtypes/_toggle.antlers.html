@@ -1,15 +1,15 @@
 <div>
-    <label class="inline-flex items-center cursor-pointer" for="{{ form_id }}_{{ handle }}">
+    <label class="inline-flex items-center cursor-pointer" for="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}">
         <input
             type="checkbox"
             class="sr-only peer"
-            id="{{ form_id }}_{{ handle }}"
-            name="{{ handle }}"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            name="{{ field_name ?? handle }}"
             role="switch"
-            {{ if inline_label }}aria-labelledby="{{ form_id }}_{{ handle }}-label"{{ /if }}
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
-            x-model="submitFields['{{ handle }}']"
-            x-on:change="$dispatch('validate-field', '{{ handle }}')"
+            {{ if inline_label }}aria-labelledby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+            x-model="submitFields['{{ field_key ?? handle }}']"
+            x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
         >
         <div
             class="relative shrink-0 w-11 h-6 bg-ef-toggle-off peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-ef-focus/60
@@ -18,7 +18,7 @@
             after:border after:rounded-full after:w-5 after:h-5 after:transition-all peer-checked:bg-ef-toggle-on"
         >
         </div>
-        <span class="ms-3 text-ef-text [&_a]:underline [&_a]:text-ef-accent" id="{{ form_id }}_{{ handle }}-label">
+        <span class="ms-3 text-ef-text [&_a]:underline [&_a]:text-ef-accent" id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label">
         {{ if label_override }}
             {{ label_override | markdown | strip_tags:p | replace:'<a ':'<a target="_blank" rel="noopener noreferrer" ' }}
         {{ else }}

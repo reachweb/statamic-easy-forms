@@ -1,0 +1,11 @@
+<fieldset class="border border-ef-border rounded-ef p-4 lg:p-6">
+    {{ if display }}
+    <legend class="px-2 font-semibold text-ef text-ef-label">{{ display | trans }}</legend>
+    {{ /if }}
+
+    <div class="grid grid-cols-12 gap-6 lg:gap-8">
+        {{ group_fields }}
+            {{ partial:statamic-easy-forms::form/_field_wrapper }}
+        {{ /group_fields }}
+    </div>
+</fieldset>

@@ -10,8 +10,9 @@ trait HandlesFields
      * Process a field to extract needed properties and add optional flag.
      *
      * @param  \Statamic\Fields\Field  $field
+     * @param  string|null  $parentHandle  Parent handle for nested fields (e.g., group fields)
      */
-    protected function processField($field): array
+    protected function processField($field, ?string $parentHandle = null): array
     {
         // Get config defaults from the fieldtype (includes prepend, append, etc.)
         $configDefaults = Field::commonFieldOptions()->all()
@@ -37,7 +38,38 @@ trait HandlesFields
             $field->fieldtype()->extraRenderableFieldData()
         );
 
+        // Process group fields - extract nested fields
+        if ($field->type() === 'group' && ! empty($fieldData['fields'])) {
+            $fieldData['group_fields'] = $this->processGroupFields(
+                $fieldData['fields'],
+                $field->handle()
+            );
+        }
+
+        // Add parent handle for nested fields (used in templates for name prefixing)
+        if ($parentHandle) {
+            $fieldData['parent_handle'] = $parentHandle;
+        }
+
         return $fieldData;
+    }
+
+    /**
+     * Process nested fields within a group field.
+     */
+    protected function processGroupFields(array $fields, string $parentHandle): array
+    {
+        return collect($fields)->map(function (array $fieldConfig) use ($parentHandle) {
+            $handle = $fieldConfig['handle'];
+            $nestedField = new Field($handle, $fieldConfig['field']);
+            $processed = $this->processField($nestedField);
+
+            return array_merge($processed, [
+                'parent_handle' => $parentHandle,
+                'field_name' => "{$parentHandle}[{$handle}]",
+                'field_key' => "{$parentHandle}.{$handle}",
+            ]);
+        })->all();
     }
 
     /**

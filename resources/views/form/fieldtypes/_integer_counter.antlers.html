@@ -10,14 +10,14 @@
         x-on:dblclick.prevent
         class="flex items-center"
         role="group"
-        aria-labelledby="{{ form_id }}_{{ handle }}-label"
-        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ handle }}-description"{{ /if }}
+        aria-labelledby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label"
+        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
     >
         <button
             type="button"
-            x-on:click="submitFields['{{ handle }}'] = Math.max(minVal, Number(submitFields['{{ handle }}']) - incrementAmount); $dispatch('validate-field', '{{ handle }}')"
-            :disabled="Number(submitFields['{{ handle }}']) <= minVal"
-            :class="Number(submitFields['{{ handle }}']) <= minVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
+            x-on:click="submitFields['{{ field_key ?? handle }}'] = Math.max(minVal, Number(submitFields['{{ field_key ?? handle }}']) - incrementAmount); $dispatch('validate-field', '{{ field_key ?? handle }}')"
+            :disabled="Number(submitFields['{{ field_key ?? handle }}']) <= minVal"
+            :class="Number(submitFields['{{ field_key ?? handle }}']) <= minVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-l-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
             :aria-label="'{{ 'Subtract' | trans }} ' + incrementAmount"
         >
@@ -26,9 +26,9 @@
             </svg>
         </button>
         <input
-            x-model.number="submitFields['{{ handle }}']"
-            id="{{ form_id }}_{{ handle }}"
-            name="{{ handle }}"
+            x-model.number="submitFields['{{ field_key ?? handle }}']"
+            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            name="{{ field_name ?? handle }}"
             type="number"
             inputmode="numeric"
             :min="minVal"
@@ -38,9 +38,9 @@
         />
         <button
             type="button"
-            x-on:click="submitFields['{{ handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ handle }}']) + incrementAmount) : Number(submitFields['{{ handle }}']) + incrementAmount; $dispatch('validate-field', '{{ handle }}')"
-            :disabled="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal"
-            :class="maxVal !== null && Number(submitFields['{{ handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
+            x-on:click="submitFields['{{ field_key ?? handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount) : Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount; $dispatch('validate-field', '{{ field_key ?? handle }}')"
+            :disabled="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal"
+            :class="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-r-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
             :aria-label="'{{ 'Add' | trans }} ' + incrementAmount"
         >

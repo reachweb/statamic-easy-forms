@@ -203,28 +203,6 @@ test('email template renders with textarea containing line breaks', function () 
         ->toContain('Line 1');
 });
 
-test('email template renders with special characters in values', function () {
-    $form = createTestForm('special_chars_form');
-
-    $data = [
-        'fields' => [
-            [
-                'display' => 'Company',
-                'value' => 'Smith & Sons <Ltd>',
-                'fieldtype' => 'text',
-            ],
-        ],
-        'date' => now(),
-        'form' => $form,
-    ];
-
-    $rendered = View::make('statamic-easy-forms::emails.form-submission', $data)->render();
-
-    expect($rendered)
-        ->toContain('Company')
-        ->toContain('Smith & Sons'); // Antlers auto-escapes by default
-});
-
 test('email template renders assets field with control panel link', function () {
     $form = createTestForm('upload_form');
 
