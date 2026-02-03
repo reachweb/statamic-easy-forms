@@ -4,11 +4,13 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         fields: [],
         fieldsMap: {},
         honeypot: '',
+        hideFields: [],
         TRACKING_COOKIE_PREFIX: 'ef_track_',
         COOKIE_EXPIRY_DAYS: 30,
 
         init() {
             this.honeypot = honeypot
+            this.hideFields = hideFields || []
 
             // Capture tracking params from URL and store in cookie
             this.captureTrackingParams()
@@ -53,6 +55,11 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         shouldShowField(fieldHandle) {
             const field = this.fieldsMap[fieldHandle]
             if (!field) return false
+
+            // Check if field is in the hideFields array (from hide_fields tag parameter)
+            if (this.hideFields.includes(fieldHandle)) {
+                return false
+            }
 
             // If no conditions defined, show the field
             if (!field.if && !field.unless && !field.show_when && !field.hide_when) {
