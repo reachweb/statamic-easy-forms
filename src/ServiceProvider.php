@@ -4,6 +4,7 @@ namespace Reach\StatamicEasyForms;
 
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
+use Statamic\Fieldtypes\Grid;
 use Statamic\Fieldtypes\Integer;
 use Statamic\Fieldtypes\Radio;
 use Statamic\Fieldtypes\Select;
@@ -27,6 +28,9 @@ class ServiceProvider extends AddonServiceProvider
         }
 
         $this->addConfigOptions();
+
+        // Enable Grid fieldtype for forms (for repeater functionality)
+        Grid::makeSelectableInForms();
 
         // Load views from the resources/views directory
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-easy-forms');
@@ -209,6 +213,18 @@ class ServiceProvider extends AddonServiceProvider
                 'if' => [
                     'integer_template' => 'is counter',
                 ],
+            ],
+        ]);
+
+        Grid::appendConfigFields([
+            'easy_forms' => [
+                'type' => 'section',
+                'display' => 'Easy Forms',
+            ],
+            'fixed_rows' => [
+                'type' => 'integer',
+                'display' => 'Fixed rows',
+                'instructions' => 'Render exactly this many rows with no add/remove buttons. Overrides min/max.',
             ],
         ]);
     }

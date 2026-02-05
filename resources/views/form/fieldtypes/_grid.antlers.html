@@ -1,0 +1,56 @@
+{{# Grid Field Template - Uses template cloning approach #}}
+<div class="ef-grid mt-6">
+
+    {{# Hidden template row with __INDEX__ placeholders - JS will clone this #}}
+    <template data-grid-template="{{ handle }}">
+        <fieldset class="border border-ef-border rounded-ef p-4 lg:p-6 relative mb-6" data-grid-row="__INDEX__">
+            {{# Row number badge #}}
+            <div class="absolute -top-3 left-4 bg-ef-button-bg py-1 px-3 rounded-ef text-ef text-white">
+                #<span class="row-number">1</span>
+            </div>
+
+            {{# Remove button (unless fixed_items) #}}
+            {{ unless is_fixed }}
+            <button
+                type="button"
+                class="absolute -top-3 right-4 bg-ef-error py-1 px-3 rounded-ef text-ef text-white cursor-pointer hover:bg-ef-error/90 focus:ring-2 focus:ring-ef-error focus:outline-none"
+                x-on:click="removeGridRow('{{ handle }}', $el.closest('[data-grid-row]').dataset.gridRow)"
+                x-show="canRemoveGridRow('{{ handle }}')"
+            >
+                {{ "Remove" | trans }}
+            </button>
+            {{ /unless }}
+
+            {{# Row fields - rendered server-side with __INDEX__ placeholders #}}
+            <div class="grid grid-cols-12 gap-6 lg:gap-8">
+                {{ grid_fields }}
+                    {{ partial:statamic-easy-forms::form/_field_wrapper }}
+                {{ /grid_fields }}
+            </div>
+        </fieldset>
+    </template>
+
+    {{# Container for cloned rows #}}
+    <div
+        data-grid-rows="{{ handle }}"
+        x-init="
+            const rowCount = submitFields['_grid_count_{{ handle }}'] || {{ fixed_rows ?? min_rows ?? 1 }};
+            for (let i = 0; i < rowCount; i++) {
+                cloneGridRow('{{ handle }}', i);
+            }
+        "
+    ></div>
+
+    {{# Add row button (unless fixed_items) #}}
+    {{ unless is_fixed }}
+    <button
+        type="button"
+        class="px-4 py-2 text-ef font-medium text-ef-button-text bg-ef-button-bg hover:bg-ef-button-bg/80 rounded-ef cursor-pointer focus:ring-2 focus:ring-ef-focus focus:outline-none"
+        x-on:click="addGridRow('{{ handle }}')"
+        x-show="canAddGridRow('{{ handle }}')"
+    >
+        {{ add_row_text | trans }}
+    </button>
+    {{ /unless }}
+
+</div>
