@@ -125,6 +125,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         getFieldDefaultValue(field) {
             if (field.type === 'assets') {
                 return null
+            } else if (field.type === 'toggle') {
+                return field.default ?? false
             } else if (field.type === 'checkboxes') {
                 return field.default || []
             } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
@@ -253,16 +255,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
         // Grid field methods
 
-        /**
-         * Create a new grid row with default values.
-         */
-        createGridRow(gridFields) {
-            const row = {}
-            gridFields.forEach(field => {
-                row[field.handle] = this.getFieldDefaultValue(field)
-            })
-            return row
-        },
+        // Attributes that may contain __INDEX__ placeholders or row indices
+        gridIndexedAttrs: ['id', 'name', 'for', 'aria-describedby', 'x-data', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'],
 
         /**
          * Add a row to a grid field.
@@ -318,8 +312,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             this.submitFields[countKey] = currentCount - 1
 
-            // Remove DOM row and update remaining row indices
-            this.removeGridRowDOM(handle, index)
+            // Rebuild all DOM rows so Alpine creates fresh, correct bindings
+            this.rebuildGridRows(handle)
         },
 
         /**
@@ -339,9 +333,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         canRemoveGridRow(handle) {
             const field = this.fieldsMap[handle]
             if (!field?.grid_fields || field.is_fixed) return false
-            if (!field.min_rows) return true
+            const minRows = field.min_rows || 1
             const currentCount = this.submitFields[`_grid_count_${handle}`] || 0
-            return currentCount > field.min_rows
+            return currentCount > minRows
         },
 
         /**
@@ -360,7 +354,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             row.querySelectorAll('*').forEach(el => {
                 // Replace in attributes
-                ;['id', 'name', 'for', 'aria-describedby', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'].forEach(attr => {
+                ;this.gridIndexedAttrs.forEach(attr => {
                     if (el.hasAttribute(attr)) {
                         el.setAttribute(attr, replaceIndex(el.getAttribute(attr)))
                     }
@@ -378,50 +372,23 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         /**
-         * Remove a grid row from DOM and re-index remaining rows.
+         * Rebuild all grid rows from scratch.
+         * This ensures Alpine creates fresh bindings with the correct indices,
+         * avoiding stale bindings that occur when DOM attributes are updated
+         * on already-initialized Alpine components.
          */
-        removeGridRowDOM(handle, removedIndex) {
+        rebuildGridRows(handle) {
             const container = document.querySelector(`[data-grid-rows="${handle}"]`)
             if (!container) return
 
-            // Remove the row
-            const rowToRemove = container.querySelector(`[data-grid-row="${removedIndex}"]`)
-            if (rowToRemove) {
-                rowToRemove.remove()
+            // Remove all existing rows (Alpine auto-cleans up via MutationObserver)
+            container.innerHTML = ''
+
+            // Re-clone all rows from template with correct indices
+            const count = this.submitFields[`_grid_count_${handle}`] || 0
+            for (let i = 0; i < count; i++) {
+                this.cloneGridRow(handle, i)
             }
-
-            // Re-index remaining rows
-            const remainingRows = container.querySelectorAll('[data-grid-row]')
-            remainingRows.forEach((row, newIndex) => {
-                const oldIndex = parseInt(row.getAttribute('data-grid-row'))
-                if (oldIndex > removedIndex) {
-                    // Update data attribute
-                    row.setAttribute('data-grid-row', newIndex)
-
-                    // Update row number display
-                    const rowNumber = row.querySelector('.row-number')
-                    if (rowNumber) {
-                        rowNumber.textContent = newIndex + 1
-                    }
-
-                    // Update all attributes that contain the old index
-                    const oldPattern = new RegExp(`${handle}\\.${oldIndex}\\.`, 'g')
-                    const oldBracketPattern = new RegExp(`${handle}\\[${oldIndex}\\]`, 'g')
-                    const newDot = `${handle}.${newIndex}.`
-                    const newBracket = `${handle}[${newIndex}]`
-
-                    row.querySelectorAll('*').forEach(el => {
-                        ;['id', 'name', 'for', 'aria-describedby', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'].forEach(attr => {
-                            if (el.hasAttribute(attr)) {
-                                let val = el.getAttribute(attr)
-                                val = val.replace(oldPattern, newDot)
-                                val = val.replace(oldBracketPattern, newBracket)
-                                el.setAttribute(attr, val)
-                            }
-                        })
-                    })
-                }
-            })
         },
     }
 }
