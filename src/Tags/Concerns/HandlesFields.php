@@ -6,6 +6,15 @@ use Statamic\Fields\Field;
 
 trait HandlesFields
 {
+    protected array $gridRowOverrides = [];
+
+    /**
+     * Set grid row count overrides from the grid_rows tag parameter.
+     */
+    protected function setGridRowOverrides(array $overrides): void
+    {
+        $this->gridRowOverrides = $overrides;
+    }
     /**
      * Process a field to extract needed properties and add optional flag.
      *
@@ -57,6 +66,12 @@ trait HandlesFields
             $fieldData['fixed_rows'] = $fieldData['fixed_rows'] ?? null;
             $fieldData['is_fixed'] = ! empty($fieldData['fixed_rows']);
             $fieldData['add_row_text'] = $fieldData['add_row'] ?? __('Add Row');
+
+            // Apply grid_rows tag parameter override
+            if (isset($this->gridRowOverrides[$field->handle()])) {
+                $fieldData['fixed_rows'] = (int) $this->gridRowOverrides[$field->handle()];
+                $fieldData['is_fixed'] = true;
+            }
         }
 
         // Add parent handle for nested fields (used in templates for name prefixing)
