@@ -256,7 +256,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         // Grid field methods
 
         // Attributes that may contain __INDEX__ placeholders or row indices
-        gridIndexedAttrs: ['id', 'name', 'for', 'aria-describedby', 'x-data', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'],
+        gridIndexedAttrs: ['id', 'name', 'for', 'aria-describedby', 'aria-labelledby', 'x-data', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'],
 
         /**
          * Add a row to a grid field.

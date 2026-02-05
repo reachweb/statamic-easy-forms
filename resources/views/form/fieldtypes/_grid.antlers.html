@@ -9,7 +9,7 @@
                 #<span class="row-number">1</span>
             </div>
 
-            {{# Remove button (unless fixed_items) #}}
+            {{# Remove button (unless is_fixed) #}}
             {{ unless is_fixed }}
             <button
                 type="button"
@@ -41,7 +41,7 @@
         "
     ></div>
 
-    {{# Add row button (unless fixed_items) #}}
+    {{# Add row button (unless is_fixed) #}}
     {{ unless is_fixed }}
     <button
         type="button"

@@ -27,10 +27,10 @@ class ServiceProvider extends AddonServiceProvider
             ];
         }
 
-        $this->addConfigOptions();
-
         // Enable Grid fieldtype for forms (for repeater functionality)
         Grid::makeSelectableInForms();
+
+        $this->addConfigOptions();
 
         // Load views from the resources/views directory
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'statamic-easy-forms');

@@ -1,4 +1,5 @@
-<div 
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+<div
     x-model="submitFields['{{ field_key ?? handle }}']"
     x-modelable="selectedDate"
     x-data="{
@@ -447,7 +448,7 @@
             x-ref="dateInput"
             type="text"
             readonly
-            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            id="{{ form_id }}_{{ field_id }}"
             name="{{ field_name ?? handle }}"
             role="combobox"
             x-model="selectedDate"
@@ -456,7 +457,7 @@
             x-bind:aria-expanded="showDatepicker"
             aria-haspopup="dialog"
             aria-label="{{ 'Choose date' | trans }}"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
             placeholder="{{ placeholder ?? "Please select" | trans }}"
             class="form-input cursor-pointer bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full py-2.5 px-10"
         />

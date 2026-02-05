@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <div
     x-data="{
         minVal: {{ if min_value || min_value === 0 }}{{ min_value }}{{ else }}0{{ /if }},
@@ -10,8 +11,8 @@
         x-on:dblclick.prevent
         class="flex items-center"
         role="group"
-        aria-labelledby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-label"
-        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+        aria-labelledby="{{ form_id }}_{{ field_id }}-label"
+        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
     >
         <button
             type="button"
@@ -27,7 +28,7 @@
         </button>
         <input
             x-model.number="submitFields['{{ field_key ?? handle }}']"
-            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            id="{{ form_id }}_{{ field_id }}"
             name="{{ field_name ?? handle }}"
             type="number"
             inputmode="numeric"

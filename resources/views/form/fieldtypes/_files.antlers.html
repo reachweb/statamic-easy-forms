@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <div
     class="relative flex w-full flex-col gap-1"
     x-data="{
@@ -14,12 +15,12 @@
     }"
 >
     <input
-        id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+        id="{{ form_id }}_{{ field_id }}"
         name="{{ field_name ?? handle }}"
         type="file"
         class="w-full overflow-clip rounded-ef border border-ef-border bg-ef-input-bg text-ef text-ef-input-text file:mr-4 file:border-none file:bg-ef-subtle file:px-4 file:py-2 file:font-medium file:text-ef-text focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none"
         {{ if max_files > 1 }}multiple{{ /if }}
-        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
         x-ref="fileInput"
         x-on:change="handleFileChange($event)"
     />
