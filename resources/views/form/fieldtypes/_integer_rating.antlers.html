@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <fieldset
     x-data="{
         minVal: {{ if min_value || min_value === 0 }}{{ min_value }}{{ else }}1{{ /if }},
@@ -7,17 +8,17 @@
     x-init="stars = Array.from({ length: maxVal - minVal + 1 }, (_, i) => minVal + i)"
     x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
     class="flex items-center gap-1"
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
 >
     <legend class="sr-only">{{ display ?? handle }}</legend>
     <template x-for="star in stars" :key="star">
         <label
-            :for="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-star-' + star"
+            :for="'{{ form_id }}_{{ field_id }}-star-' + star"
             class="transition hover:scale-125 focus-within:scale-125 focus-within:ring-2 focus-within:ring-ef-focus focus-within:ring-offset-2 rounded-ef cursor-pointer"
         >
             <input
                 x-model.number="submitFields['{{ field_key ?? handle }}']"
-                :id="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-star-' + star"
+                :id="'{{ form_id }}_{{ field_id }}-star-' + star"
                 type="radio"
                 class="sr-only"
                 name="{{ field_name ?? handle }}"

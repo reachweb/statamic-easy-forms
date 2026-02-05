@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <fieldset
     class="flex flex-col md:flex-row gap-2"
     x-data="{
@@ -6,18 +7,18 @@
     x-modelable="selected"
     x-model="submitFields['{{ field_key ?? handle }}']"
     x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
 >
     <legend class="sr-only">{{ display ?? handle }}</legend>
     {{ foreach:options }}
         <label
-            for="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_{{ key }}"
+            for="{{ form_id }}_{{ field_id }}_{{ key }}"
             class="flex w-full md:flex-1 items-center justify-center gap-2 py-2.5 px-4 text-center text-ef font-medium rounded-ef
             bg-ef-input-bg border border-ef-border mr-0 md:mr-4 last:mr-0 cursor-pointer transition-colors duration-500
             has-checked:bg-ef-checkbox-checked! has-checked:text-ef-text-white has-focus:ring-2 has-focus:ring-ef-focus has-focus:ring-offset-2"
         >
             <input
-                id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_{{ key }}"
+                id="{{ form_id }}_{{ field_id }}_{{ key }}"
                 type="radio"
                 name="{{ field_name ?? handle }}"
                 value="{{ key }}"

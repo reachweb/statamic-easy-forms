@@ -76,6 +76,41 @@
                                                     {{ /if }}
                                                 {{ /config:fields }}
                                             {{ /if }}
+                                        {{# Grid fields need special handling - array of rows #}}
+                                        {{ elseif fieldtype == 'grid' }}
+                                            {{ if value }}
+                                                {{# Grid header #}}
+                                                <tr>
+                                                    <td colspan="2" style="padding: 16px 0 8px 0;">
+                                                        <p style="margin: 0; font-size: 13px; font-weight: bold; color: #2d7a7d; letter-spacing: 0.5px; text-transform: uppercase;">
+                                                            {{ display }}
+                                                        </p>
+                                                    </td>
+                                                </tr>
+                                                {{# Iterate over grid rows using scope to preserve row data #}}
+                                                {{ value scope="row" }}
+                                                    <tr>
+                                                        <td colspan="2" style="padding: 8px 0 8px 15px; border-bottom: 1px solid #eeeeee;">
+                                                            {{# Iterate over config fields to get proper display names #}}
+                                                            {{ config:fields }}
+                                                                {{ nested_value = row[handle] }}
+                                                                {{ if nested_value }}
+                                                                    <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
+                                                                        <span style="color: #888888;">{{ field:display ?? handle | deslugify | ucfirst }}:</span>
+                                                                        {{ if nested_value | is_array }}
+                                                                            {{ nested_value }}
+                                                                                {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
+                                                                            {{ /nested_value }}
+                                                                        {{ else }}
+                                                                            {{ nested_value | entities }}
+                                                                        {{ /if }}
+                                                                    </p>
+                                                                {{ /if }}
+                                                            {{ /config:fields }}
+                                                        </td>
+                                                    </tr>
+                                                {{ /value }}
+                                            {{ /if }}
                                         {{ elseif value }}
                                             {{# Standard fields #}}
                                             <tr>

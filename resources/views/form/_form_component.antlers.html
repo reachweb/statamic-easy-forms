@@ -19,7 +19,7 @@
     {{# Honeypot field #}}
     {{ if honeypot }}
     <div class="hidden" aria-hidden="true">
-        <label for="{{ form_id }}_{{ honeypot }}">{{ display | trans }}</label>
+        <label for="{{ form_id }}_{{ honeypot }}">{{ honeypot }}</label>
         <input type="text" id="{{ form_id }}_{{ honeypot }}" name="{{ honeypot }}" tabindex="-1" autocomplete="off">
     </div>
     {{ /if }}

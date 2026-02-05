@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <div
     x-data="{
         allOptions: {{ options | to_json | entities ?? '[]' }},
@@ -134,13 +135,13 @@
     <div class="relative w-full">
         <button
             type="button"
-            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            id="{{ form_id }}_{{ field_id }}"
             class="inline-flex w-full items-center justify-between whitespace-nowrap bg-ef-input-bg border text-ef-input-text rounded-ef p-2.5 hover:bg-ef-dropdown-hover transition-colors duration-150 focus:outline-none"
             x-bind:class="isOpen || openedWithKeyboard ? 'border-ef-focus ring-2 ring-ef-focus' : 'border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus'"
             role="combobox"
             aria-haspopup="listbox"
             aria-controls="itemsListbox"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
             x-on:click="isOpen = !isOpen; checkPosition()"
             x-on:keydown.down.prevent="openedWithKeyboard = true"
             x-on:keydown.enter.prevent="openedWithKeyboard = true"
@@ -243,7 +244,7 @@
                         {{ if multiple }}
                             <label
                                 class="flex items-center gap-2 px-4 py-2 text-sm text-ef-text cursor-pointer w-full"
-                                :for="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_checkboxOption_' + option.key"
+                                :for="'{{ form_id }}_{{ field_id }}_checkboxOption_' + option.key"
                             >
                                 <div class="relative flex items-center">
                                     <input
@@ -253,7 +254,7 @@
                                         x-on:keydown.enter.prevent="$el.checked = !$el.checked; handleOptionToggle($el)"
                                         :checked="selectedOptions.includes(option.key)"
                                         :value="option.key"
-                                        :id="'{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_checkboxOption_' + option.key"
+                                        :id="'{{ form_id }}_{{ field_id }}_checkboxOption_' + option.key"
                                     />
                                 </div>
                                 <span x-text="option.value || option.key"></span>

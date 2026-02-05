@@ -149,8 +149,12 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             const formData = new FormData()
 
             Object.entries(this.submitData).forEach(([key, value]) => {
+                // Skip internal grid count trackers
+                if (key.startsWith('_grid_count_')) return
+
                 // Convert dotted notation to bracket notation for nested fields (e.g., group fields)
                 // "parent.child" becomes "parent[child]"
+                // "grid.0.field" becomes "grid[0][field]"
                 const formKey = key.includes('.')
                     ? key.replace(/\.([^.]+)/g, '[$1]')
                     : key

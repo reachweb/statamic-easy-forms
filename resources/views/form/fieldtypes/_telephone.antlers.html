@@ -1,3 +1,4 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <div
     x-data="{
         options: {{ options | to_json | entities }},
@@ -207,7 +208,7 @@
             </ul>
         </div>
         <input
-            id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+            id="{{ form_id }}_{{ field_id }}"
             name="{{ field_name ?? handle }}"
             type="tel"
             class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-r-ef focus:ring-2 focus:ring-ef-focus focus:border-ef-focus focus:outline-none block w-full p-2.5 disabled:cursor-not-allowed disabled:opacity-75 relative focus:z-10"
@@ -219,7 +220,7 @@
             x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
             placeholder="{{ "Select country code first" | trans }}"
             x-bind:readonly="!selectedOption"
-            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+            {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
         />
     </div>
 </div>

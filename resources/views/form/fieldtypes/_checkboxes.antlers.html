@@ -1,16 +1,17 @@
-<fieldset class="grid grid-cols-1 lg:grid-cols-2 gap-2" x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')" {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}>
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+<fieldset class="grid grid-cols-1 lg:grid-cols-2 gap-2" x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')" {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}>
     <legend class="sr-only">{{ display ?? handle }}</legend>
     {{ foreach:options }}
         <div class="flex items-center">
             <input
                 type="checkbox"
                 class="form-checkbox w-5 h-5 text-ef-checkbox-checked bg-ef-checkbox-bg border-ef-checkbox-border rounded-ef-sm focus:ring-ef-focus focus:ring-2"
-                id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_{{ key }}"
+                id="{{ form_id }}_{{ field_id }}_{{ key }}"
                 name="{{ field_name ?? handle }}[]"
                 value="{{ key }}"
                 x-model="submitFields['{{ field_key ?? handle }}']"
             >
-            <label class="ml-2 text-ef-text cursor-pointer" for="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}_{{ key }}">
+            <label class="ml-2 text-ef-text cursor-pointer" for="{{ form_id }}_{{ field_id }}_{{ key }}">
                 {{ value }}
             </label>
         </div>

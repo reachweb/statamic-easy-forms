@@ -1,11 +1,12 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <select
     x-model="submitFields['{{ field_key ?? handle }}']"
     x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
-    id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+    id="{{ form_id }}_{{ field_id }}"
     name="{{ field_name ?? handle }}{{ if multiple }}[]{{ /if }}"
     {{ if multiple }}multiple{{ /if }}
     class="{{ unless multiple }} form-select {{ /unless }} bg-ef-input-bg border border-ef-border text-ef-input-text rounded-ef focus:border-ef-focus focus:ring-0 focus:outline-none block w-full p-2.5"
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
 >
     {{ unless multiple }}
     <option value="" disabled>{{ placeholder ?? "Please select" | trans }}</option>

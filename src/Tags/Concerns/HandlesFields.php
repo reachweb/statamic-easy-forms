@@ -6,6 +6,15 @@ use Statamic\Fields\Field;
 
 trait HandlesFields
 {
+    protected array $gridRowOverrides = [];
+
+    /**
+     * Set grid row count overrides from the grid_rows tag parameter.
+     */
+    protected function setGridRowOverrides(array $overrides): void
+    {
+        $this->gridRowOverrides = $overrides;
+    }
     /**
      * Process a field to extract needed properties and add optional flag.
      *
@@ -46,6 +55,25 @@ trait HandlesFields
             );
         }
 
+        // Process grid fields - extract nested fields with __INDEX__ placeholders
+        if ($field->type() === 'grid' && ! empty($fieldData['fields'])) {
+            $fieldData['grid_fields'] = $this->processGridFields(
+                $fieldData['fields'],
+                $field->handle()
+            );
+            $fieldData['min_rows'] = $fieldData['min_rows'] ?? 1;
+            $fieldData['max_rows'] = $fieldData['max_rows'] ?? null;
+            $fieldData['fixed_rows'] = $fieldData['fixed_rows'] ?? null;
+            $fieldData['is_fixed'] = ! empty($fieldData['fixed_rows']);
+            $fieldData['add_row_text'] = $fieldData['add_row'] ?? __('Add Row');
+
+            // Apply grid_rows tag parameter override
+            if (isset($this->gridRowOverrides[$field->handle()])) {
+                $fieldData['fixed_rows'] = (int) $this->gridRowOverrides[$field->handle()];
+                $fieldData['is_fixed'] = true;
+            }
+        }
+
         // Add parent handle for nested fields (used in templates for name prefixing)
         if ($parentHandle) {
             $fieldData['parent_handle'] = $parentHandle;
@@ -68,6 +96,25 @@ trait HandlesFields
                 'parent_handle' => $parentHandle,
                 'field_name' => "{$parentHandle}[{$handle}]",
                 'field_key' => "{$parentHandle}.{$handle}",
+            ]);
+        })->all();
+    }
+
+    /**
+     * Process nested fields within a grid field.
+     * Uses __INDEX__ placeholders that JavaScript will replace with actual row indices.
+     */
+    protected function processGridFields(array $fields, string $parentHandle): array
+    {
+        return collect($fields)->map(function (array $fieldConfig) use ($parentHandle) {
+            $handle = $fieldConfig['handle'];
+            $nestedField = new Field($handle, $fieldConfig['field']);
+            $processed = $this->processField($nestedField);
+
+            return array_merge($processed, [
+                'parent_handle' => $parentHandle,
+                'field_name' => "{$parentHandle}[__INDEX__][{$handle}]",
+                'field_key' => "{$parentHandle}.__INDEX__.{$handle}",
             ]);
         })->all();
     }

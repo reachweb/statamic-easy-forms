@@ -1,9 +1,10 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <textarea
     class="form-textarea min-h-32 block p-2.5 w-full text-ef-input-text bg-ef-input-bg rounded-ef border border-ef-border focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none"
-    id="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}"
+    id="{{ form_id }}_{{ field_id }}"
     name="{{ field_name ?? handle }}"
     placeholder="{{ placeholder ?? '' | trans }}"
-    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ if parent_handle }}{{ parent_handle }}_{{ /if }}{{ handle }}-description"{{ /if }}
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
     autocomplete="off"
     x-model="submitFields['{{ field_key ?? handle }}']"
     x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')">
