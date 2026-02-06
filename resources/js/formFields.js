@@ -175,8 +175,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             for (const [name, value] of urlParams) {
                 const normalizedName = name.toLowerCase()
                 if (trackedParams.includes(normalizedName)) {
-                    // Validate: max 500 chars, alphanumeric with common tracking ID characters
-                    if (value.length <= 500 && /^[\w\-_.]+$/.test(value)) {
+                    // Validate: max 200 chars, alphanumeric with common tracking ID characters
+                    if (value.length <= 200 && /^[\w\-_.]+$/.test(value)) {
                         result[normalizedName] = value
                     }
                 }

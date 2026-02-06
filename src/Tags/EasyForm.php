@@ -48,7 +48,16 @@ class EasyForm extends Tags
         }
 
         $sectionsData = $this->processSections($blueprint);
-        $fields = $this->processAllFields($blueprint);
+
+        // If we have sections, collect fields from them instead of reprocessing
+        if ($sectionsData['hasSections']) {
+            $fields = collect($sectionsData['sections'])
+                ->flatMap(fn ($section) => $section['fields'])
+                ->values()
+                ->all();
+        } else {
+            $fields = $this->processAllFields($blueprint);
+        }
 
         $data = $this->prepareViewData(
             $form,

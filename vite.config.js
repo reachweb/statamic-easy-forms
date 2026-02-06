@@ -17,6 +17,9 @@ const mainConfig = defineConfig({
             formats: ['iife'],
         },
     },
+    esbuild: {
+        drop: ['console', 'debugger'],
+    },
 })
 
 export default mainConfig

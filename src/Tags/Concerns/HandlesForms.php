@@ -104,7 +104,7 @@ trait HandlesForms
             'honeypot' => $form->honeypot(),
             'action' => $form->actionUrl(),
             'method' => 'POST',
-            'recaptcha_site_key' => env('RECAPTCHA_SITE_KEY'),
+            'recaptcha_site_key' => config('easy-forms.recaptcha.site_key'),
 
             // Tag parameters
             'hide_fields' => $this->parseHideFields($this->params->get('hide_fields', '')),
@@ -169,10 +169,14 @@ trait HandlesForms
             $view = 'form/'.$view;
         }
 
-        // Add underscore prefix if not there
-        if (! str_contains($view, '/_')) {
-            $view = str_replace('form/', 'form/_', $view);
+        // Add underscore prefix to filename if not already prefixed
+        $parts = explode('/', $view);
+        $filename = array_pop($parts);
+        if (! str_starts_with($filename, '_')) {
+            $filename = '_'.$filename;
         }
+        $parts[] = $filename;
+        $view = implode('/', $parts);
 
         return view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()

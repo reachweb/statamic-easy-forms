@@ -33,8 +33,8 @@ class ValidateRecaptcha
      */
     public function __construct()
     {
-        $this->secret = env('RECAPTCHA_SECRET_KEY', '');
-        $this->scoreThreshold = (float) env('RECAPTCHA_SCORE_THRESHOLD', 0.5);
+        $this->secret = config('easy-forms.recaptcha.secret_key') ?? '';
+        $this->scoreThreshold = (float) (config('easy-forms.recaptcha.score_threshold') ?? 0.5);
     }
 
     /**

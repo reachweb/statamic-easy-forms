@@ -8,6 +8,34 @@ trait HandlesFields
 {
     protected array $gridRowOverrides = [];
 
+    protected static ?\Illuminate\Support\Collection $commonFieldOptionsCache = null;
+
+    private const REQUIRED_VALIDATION_KEYS = [
+        'required',
+        'accepted',
+        'required_if',
+        'required_unless',
+        'required_with',
+        'required_with_all',
+        'required_without',
+        'required_without_all',
+        'required_array_keys',
+        'filled',
+        'present',
+    ];
+
+    /**
+     * Get cached common field options.
+     */
+    protected function getCachedCommonFieldOptions(): \Illuminate\Support\Collection
+    {
+        if (self::$commonFieldOptionsCache === null) {
+            self::$commonFieldOptionsCache = Field::commonFieldOptions()->all();
+        }
+
+        return self::$commonFieldOptionsCache;
+    }
+
     /**
      * Set grid row count overrides from the grid_rows tag parameter.
      */
@@ -24,7 +52,7 @@ trait HandlesFields
     protected function processField($field, ?string $parentHandle = null): array
     {
         // Get config defaults from the fieldtype (includes prepend, append, etc.)
-        $configDefaults = Field::commonFieldOptions()->all()
+        $configDefaults = $this->getCachedCommonFieldOptions()
             ->merge($field->fieldtype()->configFields()->all())
             ->map->get('default')
             ->filter()
@@ -137,20 +165,6 @@ trait HandlesFields
             $validate = explode('|', $validate);
         }
 
-        $requiredKeys = [
-            'required',
-            'accepted',
-            'required_if',
-            'required_unless',
-            'required_with',
-            'required_with_all',
-            'required_without',
-            'required_without_all',
-            'required_array_keys',
-            'filled',
-            'present',
-        ];
-
         // Check if any validation rule starts with a required keyword
         foreach ((array) $validate as $rule) {
             // Handle array format ['required' => true] or string format 'required'
@@ -161,7 +175,7 @@ trait HandlesFields
                 $ruleName = explode(':', $ruleName)[0];
             }
 
-            if (in_array($ruleName, $requiredKeys)) {
+            if (in_array($ruleName, self::REQUIRED_VALIDATION_KEYS)) {
                 return false;
             }
         }

@@ -13,4 +13,7 @@ export default defineConfig({
             formats: ['iife'],
         },
     },
+    esbuild: {
+        drop: ['console', 'debugger'],
+    },
 })
