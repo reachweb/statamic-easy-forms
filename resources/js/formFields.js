@@ -1,8 +1,9 @@
-export default function formFields(fields, honeypot, hideFields, prepopulatedData) {
+export default function formFields(fields, honeypot, hideFields, prepopulatedData, formId) {
     return {
         submitFields: {},
         fields: [],
         fieldsMap: {},
+        formId: formId || '',
         honeypot: '',
         hideFields: [],
         TRACKING_COOKIE_PREFIX: 'ef_track_',
@@ -255,9 +256,6 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
         // Grid field methods
 
-        // Attributes that may contain __INDEX__ placeholders or row indices
-        gridIndexedAttrs: ['id', 'name', 'for', 'aria-describedby', 'aria-labelledby', 'x-data', 'x-model', 'x-on:blur', 'x-on:change', 'x-show', 'x-text'],
-
         /**
          * Add a row to a grid field.
          */
@@ -312,6 +310,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
             this.submitFields[countKey] = currentCount - 1
 
+            // Shift errors in the parent formHandler component
+            this.$dispatch('grid-row-removed', { handle, removedIndex: index })
+
             // Rebuild all DOM rows so Alpine creates fresh, correct bindings
             this.rebuildGridRows(handle)
         },
@@ -342,24 +343,36 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
          * Clone template row in DOM and replace __INDEX__ placeholders.
          */
         cloneGridRow(handle, index) {
-            const template = document.querySelector(`[data-grid-template="${handle}"]`)
-            const container = document.querySelector(`[data-grid-rows="${handle}"]`)
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const template = document.querySelector(`[data-grid-template="${gridId}"]`)
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
             if (!template || !container) return
 
             const clone = template.content.cloneNode(true)
             const row = clone.firstElementChild
 
-            // Replace __INDEX__ with actual index in all relevant attributes and text
+            // Replace __INDEX__ with actual index in all relevant attributes
             const replaceIndex = (str) => str.replace(/__INDEX__/g, index)
 
-            row.querySelectorAll('*').forEach(el => {
-                // Replace in attributes
-                ;this.gridIndexedAttrs.forEach(attr => {
-                    if (el.hasAttribute(attr)) {
-                        el.setAttribute(attr, replaceIndex(el.getAttribute(attr)))
+            // Replace __INDEX__ in all attributes, including inside nested <template> elements
+            const processElement = (root) => {
+                // Replace in attributes of root (no-op for DocumentFragment which has no attributes)
+                // and all descendant elements
+                const elements = [root, ...root.querySelectorAll('*')]
+                for (const el of elements) {
+                    for (const attr of Array.from(el.attributes || [])) {
+                        if (attr.value.includes('__INDEX__')) {
+                            el.setAttribute(attr.name, replaceIndex(attr.value))
+                        }
                     }
-                })
-            })
+                    // Recurse into nested <template> content (e.g., x-for templates)
+                    if (el.tagName === 'TEMPLATE' && el.content) {
+                        processElement(el.content)
+                    }
+                }
+            }
+
+            processElement(row)
 
             // Update row number display
             const rowNumber = row.querySelector('.row-number')
@@ -378,7 +391,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
          * on already-initialized Alpine components.
          */
         rebuildGridRows(handle) {
-            const container = document.querySelector(`[data-grid-rows="${handle}"]`)
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
             if (!container) return
 
             // Remove all existing rows (Alpine auto-cleans up via MutationObserver)

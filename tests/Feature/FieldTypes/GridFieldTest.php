@@ -27,8 +27,8 @@ test('grid field renders correctly', function () {
     $output = renderEasyFormTag('grid_test');
 
     expect($output)
-        ->toContain('data-grid-template="passengers"')
-        ->toContain('data-grid-rows="passengers"')
+        ->toContain('data-grid-template="grid_test_passengers"')
+        ->toContain('data-grid-rows="grid_test_passengers"')
         ->toContain('ef-grid');
 });
 
@@ -312,8 +312,8 @@ test('grid field has data attributes for JS', function () {
     $output = renderEasyFormTag('grid_data');
 
     expect($output)
-        ->toContain('data-grid-template="rows"')
-        ->toContain('data-grid-rows="rows"')
+        ->toContain('data-grid-template="grid_data_rows"')
+        ->toContain('data-grid-rows="grid_data_rows"')
         ->toContain('data-grid-row="__INDEX__"');
 });
 
@@ -531,4 +531,141 @@ test('grid_rows parameter works alongside prepopulated_data', function () {
 
     // Prepopulated data should be present in the rendered output (passed as JSON to Alpine)
     expect($output)->toContain('Alice');
+});
+
+test('grid field required sub-fields are not marked optional', function () {
+    createTestForm('grid_required', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'validate' => 'required',
+                'fields' => [
+                    ['handle' => 'name', 'field' => [
+                        'type' => 'text',
+                        'display' => 'Name',
+                        'validate' => 'required',
+                    ]],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_required');
+
+    // Neither the grid field nor the sub-field should show "(Optional)"
+    expect($output)
+        ->not->toContain('Optional');
+});
+
+test('grid field optional sub-fields are marked optional', function () {
+    createTestForm('grid_optional', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'nickname', 'field' => [
+                        'type' => 'text',
+                        'display' => 'Nickname',
+                    ]],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_optional');
+
+    expect($output)->toContain('Optional');
+});
+
+test('grid field sub-fields display error messages using dot notation', function () {
+    createTestForm('grid_errors', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                    ['handle' => 'email', 'field' => ['type' => 'text', 'input_type' => 'email', 'display' => 'Email']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_errors');
+
+    // Error display should use __INDEX__ dot notation keys
+    expect($output)
+        ->toContain("errors['passengers.__INDEX__.name']")
+        ->toContain("errors['passengers.__INDEX__.email']");
+});
+
+test('grid field sub-fields have labels linked to inputs', function () {
+    createTestForm('grid_labels', [
+        [
+            'handle' => 'items',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Items',
+                'fields' => [
+                    ['handle' => 'title', 'field' => ['type' => 'text', 'display' => 'Title']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_labels');
+
+    // Labels and inputs should use matching IDs with __INDEX__ placeholder
+    expect($output)
+        ->toContain('for="grid_labels_items___INDEX___title"')
+        ->toContain('id="grid_labels_items___INDEX___title"');
+});
+
+test('grid field has accessible container with legend', function () {
+    createTestForm('grid_a11y', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_a11y');
+
+    // The grid container should be a fieldset with an aria-label and sr-only legend
+    expect($output)
+        ->toContain('<fieldset class="ef-grid')
+        ->toContain('aria-label="Passengers"')
+        ->toContain('<legend class="sr-only">Passengers</legend>');
+});
+
+test('grid field dispatches grid-row-removed event on row removal', function () {
+    createTestForm('grid_dispatch', [
+        [
+            'handle' => 'rows',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Rows',
+                'fields' => [
+                    ['handle' => 'value', 'field' => ['type' => 'text', 'display' => 'Value']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_dispatch');
+
+    // The form component should listen for the grid-row-removed event
+    expect($output)
+        ->toContain('x-on:grid-row-removed="handleGridRowRemoved($event.detail)"');
 });
