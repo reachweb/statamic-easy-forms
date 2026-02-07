@@ -18,7 +18,7 @@ class ValidateRecaptcha
 {
     /**
      * The reCAPTCHA secret key.
-     * This should be set in your .env file as RECAPTCHA_SECRET_KEY
+     * Configure via config/easy-forms.php or set RECAPTCHA_SECRET_KEY in .env
      */
     protected string $secret;
 

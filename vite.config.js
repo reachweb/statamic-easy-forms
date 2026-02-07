@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import { resolve } from 'path'
 
 // Build config for the main easy-forms bundle
-const mainConfig = defineConfig({
+export default defineConfig(({ command }) => ({
     plugins: [tailwindcss()],
     build: {
         manifest: true,
@@ -17,9 +17,5 @@ const mainConfig = defineConfig({
             formats: ['iife'],
         },
     },
-    esbuild: {
-        drop: ['console', 'debugger'],
-    },
-})
-
-export default mainConfig
+    esbuild: command === 'build' ? { drop: ['console', 'debugger'] } : {},
+}))

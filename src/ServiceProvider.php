@@ -26,8 +26,8 @@ class ServiceProvider extends AddonServiceProvider
             __DIR__.'/../config/easy-forms.php' => config_path('easy-forms.php'),
         ], 'easy-forms-config');
 
-        // Only register reCAPTCHA validation if secret key is configured
-        if (! empty(config('easy-forms.recaptcha.secret_key'))) {
+        // Only register reCAPTCHA validation if secret key is configured and google/recaptcha is installed
+        if (! empty(config('easy-forms.recaptcha.secret_key')) && class_exists(\ReCaptcha\ReCaptcha::class)) {
             $this->listen[FormSubmitted::class] = [
                 ValidateRecaptcha::class,
             ];
