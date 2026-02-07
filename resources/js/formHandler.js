@@ -48,11 +48,11 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
          */
         updateSubmitData(data) {
             this.submitData = data;
-            
+
             if (this.precognitionEnabled && !this.precogInitialized) {
                 this.initPrecognition();
             }
-            
+
             if (this.precogForm) {
                 Object.keys(data).forEach(key => {
                     this.precogForm[key] = data[key];
@@ -67,6 +67,14 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         validateField(fieldHandle) {
             if (!this.precognitionEnabled || !this.precogForm) return;
             if (fieldHandle === 'g-recaptcha-response' || fieldHandle === 'recaptcha') return;
+
+            // Skip precognition validation for grid/group fields (nested fields with dots)
+            // because Laravel validation rules use wildcards (grid_field.*.name) which
+            // don't match Precognition's exact field matching (grid_field.0.name).
+            // These fields will still be validated on form submit.
+            if (fieldHandle.includes('.')) {
+                return;
+            }
 
             // Sync the latest value before validating (fields-changed is debounced)
             if (this.submitData[fieldHandle] !== undefined) {
@@ -293,6 +301,44 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 Object.keys(this.precogForm.errors).forEach(field => {
                     this.precogForm.forgetError(field);
                 });
+            }
+        },
+
+        /**
+         * Handle grid row removal by shifting error indices.
+         * Errors for rows after the removed index shift down by 1.
+         * Errors for the removed row are discarded. Other errors stay intact.
+         */
+        handleGridRowRemoved({ handle, removedIndex }) {
+            const gridPattern = new RegExp(`^${handle}\\.(\\d+)\\.(.+)$`)
+
+            this.errors = Object.entries(this.errors).reduce((acc, [key, value]) => {
+                const match = key.match(gridPattern)
+
+                if (!match) {
+                    // Not a grid field error - keep as-is
+                    acc[key] = value
+                } else {
+                    const rowIndex = parseInt(match[1])
+                    if (rowIndex < removedIndex) {
+                        // Before removed row - keep as-is
+                        acc[key] = value
+                    } else if (rowIndex > removedIndex) {
+                        // After removed row - shift index down
+                        acc[`${handle}.${rowIndex - 1}.${match[2]}`] = value
+                    }
+                    // rowIndex === removedIndex: discard (don't add to acc)
+                }
+                return acc
+            }, {})
+
+            // Clear precognition grid errors (will be re-validated on next interaction)
+            if (this.precognitionEnabled && this.precogForm) {
+                Object.keys(this.precogForm.errors).forEach(field => {
+                    if (field.startsWith(`${handle}.`)) {
+                        this.precogForm.forgetError(field)
+                    }
+                })
             }
         },
 

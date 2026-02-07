@@ -13,6 +13,7 @@
     x-on:submit.prevent="formSubmit"
     x-on:fields-changed="updateSubmitData($event.detail)"
     x-on:validate-field="validateField($event.detail)"
+    x-on:grid-row-removed="handleGridRowRemoved($event.detail)"
     data-csrf-token="{{$ csrf_token() $}}"
     aria-label="{{ title }}"
 >
