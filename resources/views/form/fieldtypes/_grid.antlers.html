@@ -1,5 +1,6 @@
 {{# Grid Field Template - Uses template cloning approach #}}
-<div class="ef-grid mt-6">
+<fieldset class="ef-grid mt-6" aria-label="{{ display | trans }}">
+    <legend class="sr-only">{{ display | trans }}</legend>
 
     {{# Hidden template row with __INDEX__ placeholders - JS will clone this #}}
     <template data-grid-template="{{ handle }}">
@@ -53,4 +54,4 @@
     </button>
     {{ /unless }}
 
-</div>
+</fieldset>

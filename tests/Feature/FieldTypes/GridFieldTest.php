@@ -626,6 +626,29 @@ test('grid field sub-fields have labels linked to inputs', function () {
         ->toContain('id="grid_labels_items___INDEX___title"');
 });
 
+test('grid field has accessible container with legend', function () {
+    createTestForm('grid_a11y', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_a11y');
+
+    // The grid container should be a fieldset with an aria-label and sr-only legend
+    expect($output)
+        ->toContain('<fieldset class="ef-grid')
+        ->toContain('aria-label="Passengers"')
+        ->toContain('<legend class="sr-only">Passengers</legend>');
+});
+
 test('grid field dispatches grid-row-removed event on row removal', function () {
     createTestForm('grid_dispatch', [
         [
