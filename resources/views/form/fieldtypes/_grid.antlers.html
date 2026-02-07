@@ -3,7 +3,7 @@
     <legend class="sr-only">{{ display | trans }}</legend>
 
     {{# Hidden template row with __INDEX__ placeholders - JS will clone this #}}
-    <template data-grid-template="{{ handle }}">
+    <template data-grid-template="{{ form_id }}_{{ handle }}">
         <fieldset class="border border-ef-border rounded-ef p-4 lg:p-6 relative mb-6" data-grid-row="__INDEX__">
             {{# Row number badge #}}
             <div class="absolute -top-3 left-4 bg-ef-button-bg py-1 px-3 rounded-ef text-ef text-white">
@@ -33,7 +33,7 @@
 
     {{# Container for cloned rows #}}
     <div
-        data-grid-rows="{{ handle }}"
+        data-grid-rows="{{ form_id }}_{{ handle }}"
         x-init="
             const rowCount = submitFields['_grid_count_{{ handle }}'] || {{ fixed_rows ?? min_rows ?? 1 }};
             for (let i = 0; i < rowCount; i++) {

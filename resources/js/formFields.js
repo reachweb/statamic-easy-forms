@@ -1,8 +1,9 @@
-export default function formFields(fields, honeypot, hideFields, prepopulatedData) {
+export default function formFields(fields, honeypot, hideFields, prepopulatedData, formId) {
     return {
         submitFields: {},
         fields: [],
         fieldsMap: {},
+        formId: formId || '',
         honeypot: '',
         hideFields: [],
         TRACKING_COOKIE_PREFIX: 'ef_track_',
@@ -342,8 +343,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
          * Clone template row in DOM and replace __INDEX__ placeholders.
          */
         cloneGridRow(handle, index) {
-            const template = document.querySelector(`[data-grid-template="${handle}"]`)
-            const container = document.querySelector(`[data-grid-rows="${handle}"]`)
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const template = document.querySelector(`[data-grid-template="${gridId}"]`)
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
             if (!template || !container) return
 
             const clone = template.content.cloneNode(true)
@@ -389,7 +391,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
          * on already-initialized Alpine components.
          */
         rebuildGridRows(handle) {
-            const container = document.querySelector(`[data-grid-rows="${handle}"]`)
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
             if (!container) return
 
             // Remove all existing rows (Alpine auto-cleans up via MutationObserver)

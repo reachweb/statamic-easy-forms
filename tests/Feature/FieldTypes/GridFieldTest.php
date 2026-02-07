@@ -27,8 +27,8 @@ test('grid field renders correctly', function () {
     $output = renderEasyFormTag('grid_test');
 
     expect($output)
-        ->toContain('data-grid-template="passengers"')
-        ->toContain('data-grid-rows="passengers"')
+        ->toContain('data-grid-template="grid_test_passengers"')
+        ->toContain('data-grid-rows="grid_test_passengers"')
         ->toContain('ef-grid');
 });
 
@@ -312,8 +312,8 @@ test('grid field has data attributes for JS', function () {
     $output = renderEasyFormTag('grid_data');
 
     expect($output)
-        ->toContain('data-grid-template="rows"')
-        ->toContain('data-grid-rows="rows"')
+        ->toContain('data-grid-template="grid_data_rows"')
+        ->toContain('data-grid-rows="grid_data_rows"')
         ->toContain('data-grid-row="__INDEX__"');
 });
 
