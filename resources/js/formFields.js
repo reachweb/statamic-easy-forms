@@ -109,7 +109,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     if (field.dynamic_rows_field) {
                         const controlValue = parseInt(acc[field.dynamic_rows_field]) || 0
                         rowCount = Math.max(controlValue, field.min_rows || 0)
-                        if (field.max_rows) rowCount = Math.min(rowCount, field.max_rows)
+                        if (field.max_rows) {
+                            rowCount = Math.min(rowCount, field.max_rows)
+                        }
                     } else {
                         rowCount = field.fixed_rows || field.min_rows || 1
                     }
@@ -415,13 +417,14 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         /**
          * Set the row count for a grid field, adding or removing rows as needed.
          */
-        setGridRowCount(handle, count) {
+        setGridRowCount(handle, newCount) {
             const field = this.fieldsMap[handle]
             if (!field?.grid_fields) return
 
-            count = parseInt(count) || 0
-            count = Math.max(count, field.min_rows || 0)
-            if (field.max_rows) count = Math.min(count, field.max_rows)
+            let count = Math.max(parseInt(newCount) || 0, field.min_rows || 0)
+            if (field.max_rows) {
+                count = Math.min(count, field.max_rows)
+            }
 
             const countKey = `_grid_count_${handle}`
             const currentCount = this.submitFields[countKey] || 0
@@ -451,9 +454,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         initDynamicGridRows(handle, controlFieldHandle) {
             this.$watch(
                 () => this.submitFields[controlFieldHandle],
-                (newValue) => {
-                    this.setGridRowCount(handle, newValue)
-                }
+                (newValue) => this.setGridRowCount(handle, newValue)
             )
         },
     }
