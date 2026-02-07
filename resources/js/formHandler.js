@@ -311,26 +311,26 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
          */
         handleGridRowRemoved({ handle, removedIndex }) {
             const gridPattern = new RegExp(`^${handle}\\.(\\d+)\\.(.+)$`)
+            const shifted = {}
 
-            this.errors = Object.entries(this.errors).reduce((acc, [key, value]) => {
+            for (const [key, value] of Object.entries(this.errors)) {
                 const match = key.match(gridPattern)
 
                 if (!match) {
-                    // Not a grid field error - keep as-is
-                    acc[key] = value
-                } else {
-                    const rowIndex = parseInt(match[1])
-                    if (rowIndex < removedIndex) {
-                        // Before removed row - keep as-is
-                        acc[key] = value
-                    } else if (rowIndex > removedIndex) {
-                        // After removed row - shift index down
-                        acc[`${handle}.${rowIndex - 1}.${match[2]}`] = value
-                    }
-                    // rowIndex === removedIndex: discard (don't add to acc)
+                    shifted[key] = value
+                    continue
                 }
-                return acc
-            }, {})
+
+                const rowIndex = parseInt(match[1], 10)
+                if (rowIndex < removedIndex) {
+                    shifted[key] = value
+                } else if (rowIndex > removedIndex) {
+                    shifted[`${handle}.${rowIndex - 1}.${match[2]}`] = value
+                }
+                // rowIndex === removedIndex: discard
+            }
+
+            this.errors = shifted
 
             // Clear precognition grid errors (will be re-validated on next interaction)
             if (this.precognitionEnabled && this.precogForm) {

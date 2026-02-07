@@ -352,30 +352,22 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             // Replace __INDEX__ with actual index in all relevant attributes
             const replaceIndex = (str) => str.replace(/__INDEX__/g, index)
 
-            // Recursively process element and its nested templates
-            const processElement = (el) => {
-                // Replace in this element's attributes
-                Array.from(el.attributes || []).forEach(attr => {
-                    if (attr.value.includes('__INDEX__')) {
-                        el.setAttribute(attr.name, replaceIndex(attr.value))
-                    }
-                })
-
-                // Process child elements
-                el.querySelectorAll('*').forEach(child => {
-                    Array.from(child.attributes || []).forEach(attr => {
+            // Replace __INDEX__ in all attributes, including inside nested <template> elements
+            const processElement = (root) => {
+                // Replace in attributes of root (no-op for DocumentFragment which has no attributes)
+                // and all descendant elements
+                const elements = [root, ...root.querySelectorAll('*')]
+                for (const el of elements) {
+                    for (const attr of Array.from(el.attributes || [])) {
                         if (attr.value.includes('__INDEX__')) {
-                            child.setAttribute(attr.name, replaceIndex(attr.value))
+                            el.setAttribute(attr.name, replaceIndex(attr.value))
                         }
-                    })
-                })
-
-                // Process nested <template> elements (e.g., x-for templates)
-                el.querySelectorAll('template').forEach(nestedTemplate => {
-                    if (nestedTemplate.content) {
-                        processElement(nestedTemplate.content)
                     }
-                })
+                    // Recurse into nested <template> content (e.g., x-for templates)
+                    if (el.tagName === 'TEMPLATE' && el.content) {
+                        processElement(el.content)
+                    }
+                }
             }
 
             processElement(row)
