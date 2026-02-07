@@ -68,11 +68,12 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             if (!this.precognitionEnabled || !this.precogForm) return;
             if (fieldHandle === 'g-recaptcha-response' || fieldHandle === 'recaptcha') return;
 
-            // Skip precognition validation for grid/group fields (nested fields with dots)
-            // because Laravel validation rules use wildcards (grid_field.*.name) which
-            // don't match Precognition's exact field matching (grid_field.0.name).
-            // These fields will still be validated on form submit.
-            if (fieldHandle.includes('.')) {
+            // Skip precognition validation for grid row fields (paths with numeric segments
+            // like "grid_field.0.name") because Laravel validation rules use wildcards
+            // (grid_field.*.name) which don't match Precognition's exact field matching.
+            // Group fields (e.g. "group.field") use the same dot path in both JS and Laravel
+            // rules, so they CAN be validated by Precognition.
+            if (/\.\d+\./.test(fieldHandle)) {
                 return;
             }
 
