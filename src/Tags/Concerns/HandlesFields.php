@@ -92,13 +92,21 @@ trait HandlesFields
             $fieldData['min_rows'] = $fieldData['min_rows'] ?? 1;
             $fieldData['max_rows'] = $fieldData['max_rows'] ?? null;
             $fieldData['fixed_rows'] = $fieldData['fixed_rows'] ?? null;
-            $fieldData['is_fixed'] = ! empty($fieldData['fixed_rows']);
+            $fieldData['dynamic_rows_field'] = $fieldData['dynamic_rows_field'] ?? null;
+
+            // fixed_rows takes precedence over dynamic_rows_field
+            if (! empty($fieldData['fixed_rows'])) {
+                $fieldData['dynamic_rows_field'] = null;
+            }
+
+            $fieldData['is_fixed'] = ! empty($fieldData['fixed_rows']) || ! empty($fieldData['dynamic_rows_field']);
             $fieldData['add_row_text'] = $fieldData['add_row'] ?? __('Add Row');
 
             // Apply grid_rows tag parameter override
             if (isset($this->gridRowOverrides[$field->handle()])) {
                 $fieldData['fixed_rows'] = (int) $this->gridRowOverrides[$field->handle()];
                 $fieldData['is_fixed'] = true;
+                $fieldData['dynamic_rows_field'] = null;
             }
         }
 

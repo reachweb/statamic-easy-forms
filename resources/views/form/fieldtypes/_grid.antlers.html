@@ -35,10 +35,18 @@
     <div
         data-grid-rows="{{ form_id }}_{{ handle }}"
         x-init="
+            {{ if dynamic_rows_field }}
+            const dynamicValue = parseInt(submitFields['{{ dynamic_rows_field }}']) || 0;
+            const rowCount = submitFields['_grid_count_{{ handle }}'] || Math.max(dynamicValue, {{ min_rows ?? 0 }});
+            {{ else }}
             const rowCount = submitFields['_grid_count_{{ handle }}'] || {{ fixed_rows ?? min_rows ?? 1 }};
+            {{ /if }}
             for (let i = 0; i < rowCount; i++) {
                 cloneGridRow('{{ handle }}', i);
             }
+            {{ if dynamic_rows_field }}
+            initDynamicGridRows('{{ handle }}', '{{ dynamic_rows_field }}');
+            {{ /if }}
         "
     ></div>
 

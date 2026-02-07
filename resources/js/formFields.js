@@ -105,7 +105,14 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
                 // Handle grid fields - initialize with flat indexed keys
                 if (field.type === 'grid' && field.grid_fields) {
-                    const rowCount = field.fixed_rows || field.min_rows || 1
+                    let rowCount
+                    if (field.dynamic_rows_field) {
+                        const controlValue = parseInt(acc[field.dynamic_rows_field]) || 0
+                        rowCount = Math.max(controlValue, field.min_rows || 0)
+                        if (field.max_rows) rowCount = Math.min(rowCount, field.max_rows)
+                    } else {
+                        rowCount = field.fixed_rows || field.min_rows || 1
+                    }
                     // Initialize flat state with indexed keys for each row
                     for (let i = 0; i < rowCount; i++) {
                         field.grid_fields.forEach(nestedField => {
@@ -403,6 +410,51 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             for (let i = 0; i < count; i++) {
                 this.cloneGridRow(handle, i)
             }
+        },
+
+        /**
+         * Set the row count for a grid field, adding or removing rows as needed.
+         */
+        setGridRowCount(handle, count) {
+            const field = this.fieldsMap[handle]
+            if (!field?.grid_fields) return
+
+            count = parseInt(count) || 0
+            count = Math.max(count, field.min_rows || 0)
+            if (field.max_rows) count = Math.min(count, field.max_rows)
+
+            const countKey = `_grid_count_${handle}`
+            const currentCount = this.submitFields[countKey] || 0
+            if (count === currentCount) return
+
+            if (count > currentCount) {
+                for (let i = currentCount; i < count; i++) {
+                    field.grid_fields.forEach(f => {
+                        this.submitFields[`${handle}.${i}.${f.handle}`] = this.getFieldDefaultValue(f)
+                    })
+                }
+            } else {
+                for (let i = currentCount - 1; i >= count; i--) {
+                    field.grid_fields.forEach(f => {
+                        delete this.submitFields[`${handle}.${i}.${f.handle}`]
+                    })
+                }
+            }
+
+            this.submitFields[countKey] = count
+            this.rebuildGridRows(handle)
+        },
+
+        /**
+         * Initialize dynamic grid rows that react to another field's value.
+         */
+        initDynamicGridRows(handle, controlFieldHandle) {
+            this.$watch(
+                () => this.submitFields[controlFieldHandle],
+                (newValue) => {
+                    this.setGridRowCount(handle, newValue)
+                }
+            )
         },
     }
 }

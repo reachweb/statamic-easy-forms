@@ -669,3 +669,155 @@ test('grid field dispatches grid-row-removed event on row removal', function () 
     expect($output)
         ->toContain('x-on:grid-row-removed="handleGridRowRemoved($event.detail)"');
 });
+
+test('dynamic_rows_field hides add and remove buttons', function () {
+    createTestForm('grid_dynamic', [
+        [
+            'handle' => 'num_passengers',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Number of Passengers',
+            ],
+        ],
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'dynamic_rows_field' => 'num_passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_dynamic');
+
+    // is_fixed should be true, so no add/remove buttons
+    expect($output)
+        ->not->toContain("addGridRow('passengers')")
+        ->not->toContain("removeGridRow('passengers'")
+        ->not->toContain("canAddGridRow('passengers')")
+        ->not->toContain("canRemoveGridRow('passengers')");
+});
+
+test('dynamic_rows_field passes initDynamicGridRows to template', function () {
+    createTestForm('grid_dynamic_init', [
+        [
+            'handle' => 'count',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Count',
+            ],
+        ],
+        [
+            'handle' => 'rows',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Rows',
+                'dynamic_rows_field' => 'count',
+                'fields' => [
+                    ['handle' => 'value', 'field' => ['type' => 'text', 'display' => 'Value']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_dynamic_init');
+
+    expect($output)
+        ->toContain("initDynamicGridRows('rows', 'count')");
+});
+
+test('dynamic_rows_field uses controlling field value in x-init', function () {
+    createTestForm('grid_dynamic_xinit', [
+        [
+            'handle' => 'num_items',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Number of Items',
+            ],
+        ],
+        [
+            'handle' => 'items',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Items',
+                'dynamic_rows_field' => 'num_items',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_dynamic_xinit');
+
+    expect($output)
+        ->toContain("parseInt(submitFields['num_items'])");
+});
+
+test('fixed_rows takes precedence over dynamic_rows_field', function () {
+    createTestForm('grid_fixed_wins', [
+        [
+            'handle' => 'count',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Count',
+            ],
+        ],
+        [
+            'handle' => 'rows',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Rows',
+                'fixed_rows' => 3,
+                'dynamic_rows_field' => 'count',
+                'fields' => [
+                    ['handle' => 'value', 'field' => ['type' => 'text', 'display' => 'Value']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_fixed_wins');
+
+    // fixed_rows is set, so dynamic behavior should not appear
+    expect($output)
+        ->toContain('|| 3')
+        ->not->toContain("initDynamicGridRows");
+});
+
+test('grid_rows tag parameter overrides dynamic_rows_field', function () {
+    createTestForm('grid_tag_wins', [
+        [
+            'handle' => 'count',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Count',
+            ],
+        ],
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'dynamic_rows_field' => 'count',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_tag_wins', [
+        'grid_rows' => ['passengers' => 5],
+    ]);
+
+    // Tag parameter should win: fixed at 5, no dynamic behavior
+    expect($output)
+        ->toContain('|| 5')
+        ->not->toContain("initDynamicGridRows")
+        ->not->toContain("addGridRow('passengers')");
+});
