@@ -285,7 +285,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             this.submitFields[countKey] = currentCount + 1
 
             // Clone template row in DOM
-            this.cloneGridRow(handle, currentCount)
+            this.cloneGridRow(handle, currentCount, true)
         },
 
         /**
@@ -302,28 +302,40 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             // Check min_rows limit
             if (field.min_rows && currentCount <= field.min_rows) return
 
-            // Remove row fields from state
-            field.grid_fields.forEach(f => {
-                delete this.submitFields[`${handle}.${index}.${f.handle}`]
-            })
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
+            const row = container?.querySelector(`[data-grid-row="${index}"]`)
 
-            // Shift remaining rows down
-            for (let i = index + 1; i < currentCount; i++) {
+            const cleanup = () => {
+                // Remove row fields from state
                 field.grid_fields.forEach(f => {
-                    const oldKey = `${handle}.${i}.${f.handle}`
-                    const newKey = `${handle}.${i - 1}.${f.handle}`
-                    this.submitFields[newKey] = this.submitFields[oldKey]
-                    delete this.submitFields[oldKey]
+                    delete this.submitFields[`${handle}.${index}.${f.handle}`]
                 })
+
+                // Shift remaining rows down
+                for (let i = index + 1; i < currentCount; i++) {
+                    field.grid_fields.forEach(f => {
+                        const oldKey = `${handle}.${i}.${f.handle}`
+                        const newKey = `${handle}.${i - 1}.${f.handle}`
+                        this.submitFields[newKey] = this.submitFields[oldKey]
+                        delete this.submitFields[oldKey]
+                    })
+                }
+
+                this.submitFields[countKey] = currentCount - 1
+
+                // Shift errors in the parent formHandler component
+                this.$dispatch('grid-row-removed', { handle, removedIndex: index })
+
+                // Rebuild all DOM rows so Alpine creates fresh, correct bindings
+                this.rebuildGridRows(handle)
             }
 
-            this.submitFields[countKey] = currentCount - 1
-
-            // Shift errors in the parent formHandler component
-            this.$dispatch('grid-row-removed', { handle, removedIndex: index })
-
-            // Rebuild all DOM rows so Alpine creates fresh, correct bindings
-            this.rebuildGridRows(handle)
+            if (row) {
+                this.animateGridRowOut(row, cleanup)
+            } else {
+                cleanup()
+            }
         },
 
         /**
@@ -351,7 +363,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         /**
          * Clone template row in DOM and replace __INDEX__ placeholders.
          */
-        cloneGridRow(handle, index) {
+        cloneGridRow(handle, index, animate = false) {
             const gridId = this.formId ? `${this.formId}_${handle}` : handle
             const template = document.querySelector(`[data-grid-template="${gridId}"]`)
             const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
@@ -390,6 +402,10 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             }
 
             row.setAttribute('data-grid-row', index)
+            if (animate) {
+                row.classList.add('ef-row-enter')
+                row.addEventListener('animationend', () => row.classList.remove('ef-row-enter'), { once: true })
+            }
             container.appendChild(row)
         },
 
@@ -430,22 +446,54 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             const currentCount = this.submitFields[countKey] || 0
             if (count === currentCount) return
 
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
+
+            // Clean up any rows still animating out from a previous change
+            if (container) {
+                container.querySelectorAll('.ef-row-exit').forEach(row => row.remove())
+            }
+
             if (count > currentCount) {
                 for (let i = currentCount; i < count; i++) {
                     field.grid_fields.forEach(f => {
                         this.submitFields[`${handle}.${i}.${f.handle}`] = this.getFieldDefaultValue(f)
                     })
+                    this.cloneGridRow(handle, i, true)
                 }
             } else {
                 for (let i = currentCount - 1; i >= count; i--) {
                     field.grid_fields.forEach(f => {
                         delete this.submitFields[`${handle}.${i}.${f.handle}`]
                     })
+                    const row = container?.querySelector(`[data-grid-row="${i}"]`)
+                    if (row) {
+                        this.animateGridRowOut(row)
+                    }
                 }
             }
 
             this.submitFields[countKey] = count
-            this.rebuildGridRows(handle)
+        },
+
+        /**
+         * Animate a grid row out: fade + translate, then collapse height.
+         */
+        animateGridRowOut(row, onComplete) {
+            row.classList.add('ef-row-exit')
+            row.addEventListener('animationend', () => {
+                // Phase 2: smoothly collapse the space
+                row.style.height = row.offsetHeight + 'px'
+                row.style.overflow = 'hidden'
+                row.offsetHeight // force reflow
+                row.style.transition = 'height .15s ease-in, margin .15s ease-in'
+                row.style.height = '0'
+                row.style.marginBottom = '0'
+                row.addEventListener('transitionend', () => {
+                    row.remove()
+                    if (onComplete) onComplete()
+                }, { once: true })
+            }, { once: true })
         },
 
         /**
