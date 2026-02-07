@@ -18,7 +18,7 @@ class ValidateRecaptcha
 {
     /**
      * The reCAPTCHA secret key.
-     * This should be set in your .env file as RECAPTCHA_SECRET_KEY
+     * Configure via config/easy-forms.php or set RECAPTCHA_SECRET_KEY in .env
      */
     protected string $secret;
 
@@ -33,8 +33,8 @@ class ValidateRecaptcha
      */
     public function __construct()
     {
-        $this->secret = env('RECAPTCHA_SECRET_KEY', '');
-        $this->scoreThreshold = (float) env('RECAPTCHA_SCORE_THRESHOLD', 0.5);
+        $this->secret = config('easy-forms.recaptcha.secret_key') ?? '';
+        $this->scoreThreshold = (float) (config('easy-forms.recaptcha.score_threshold') ?? 0.5);
     }
 
     /**

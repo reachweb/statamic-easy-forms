@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 import { resolve } from 'path'
 
 // Build config for the precognition plugin bundle
-export default defineConfig({
+export default defineConfig(({ command }) => ({
     build: {
         outDir: 'dist',
         emptyOutDir: false,
@@ -13,4 +13,5 @@ export default defineConfig({
             formats: ['iife'],
         },
     },
-})
+    esbuild: command === 'build' ? { drop: ['console', 'debugger'] } : {},
+}))

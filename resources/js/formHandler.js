@@ -206,7 +206,21 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                     this.fatalError = true
                 } else {
                     const errorData = await response.json()
-                    this.errors = errorData?.error || errorData?.errors || {}
+                    const rawErrors = errorData?.error ?? errorData?.errors ?? {}
+                    // Normalize errors: Laravel returns arrays like {"email": ["Invalid email"]}
+                    // Templates use x-text which needs strings, not arrays
+                    if (rawErrors && typeof rawErrors === 'object' && !Array.isArray(rawErrors)) {
+                        this.errors = Object.fromEntries(
+                            Object.entries(rawErrors).map(([key, value]) => [
+                                key,
+                                Array.isArray(value) ? value[0] : value
+                            ])
+                        )
+                    } else if (rawErrors) {
+                        this.errors = { form: String(rawErrors) }
+                    } else {
+                        this.errors = {}
+                    }
 
                     // Sync errors to precognition form if enabled
                     if (this.precognitionEnabled && this.precogForm) {

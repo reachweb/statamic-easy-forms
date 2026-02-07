@@ -231,13 +231,13 @@ test('tag uses form handle as formHandler identifier', function () {
 test('tag passes recaptcha site key when configured', function () {
     createTestForm('recaptcha_form');
 
-    // Set the environment variable
-    putenv('RECAPTCHA_SITE_KEY=test_site_key_123');
+    // Set the config value
+    config(['easy-forms.recaptcha.site_key' => 'test_site_key_123']);
 
     $output = renderEasyFormTag('recaptcha_form');
 
     // Clean up
-    putenv('RECAPTCHA_SITE_KEY');
+    config(['easy-forms.recaptcha.site_key' => null]);
 
     expect($output)->toContain("formHandler('recaptcha_form', 'recaptcha_form', 'test_site_key_123', false)");
 });
@@ -245,8 +245,8 @@ test('tag passes recaptcha site key when configured', function () {
 test('tag passes null for recaptcha when not configured', function () {
     createTestForm('no_recaptcha_form');
 
-    // Ensure the environment variable is not set
-    putenv('RECAPTCHA_SITE_KEY');
+    // Ensure the config value is not set
+    config(['easy-forms.recaptcha.site_key' => null]);
 
     $output = renderEasyFormTag('no_recaptcha_form');
 

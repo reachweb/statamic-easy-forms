@@ -20,8 +20,14 @@ class ServiceProvider extends AddonServiceProvider
 
     public function bootAddon()
     {
-        // Only register reCAPTCHA validation if secret key is configured
-        if (! empty(env('RECAPTCHA_SECRET_KEY'))) {
+        $this->mergeConfigFrom(__DIR__.'/../config/easy-forms.php', 'easy-forms');
+
+        $this->publishes([
+            __DIR__.'/../config/easy-forms.php' => config_path('easy-forms.php'),
+        ], 'easy-forms-config');
+
+        // Only register reCAPTCHA validation if secret key is configured and google/recaptcha is installed
+        if (! empty(config('easy-forms.recaptcha.secret_key')) && class_exists(\ReCaptcha\ReCaptcha::class)) {
             $this->listen[FormSubmitted::class] = [
                 ValidateRecaptcha::class,
             ];

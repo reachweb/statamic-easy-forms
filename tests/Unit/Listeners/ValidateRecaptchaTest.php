@@ -10,18 +10,22 @@ beforeEach(function () {
     // Clean up any existing forms
     Form::all()->each->delete();
 
-    // Mock the environment variables
-    putenv('RECAPTCHA_SECRET_KEY=test_secret_key');
-    putenv('RECAPTCHA_SCORE_THRESHOLD=0.5');
+    // Set config values for reCAPTCHA
+    config([
+        'easy-forms.recaptcha.secret_key' => 'test_secret_key',
+        'easy-forms.recaptcha.score_threshold' => 0.5,
+    ]);
 });
 
 afterEach(function () {
     // Clean up after tests
     Form::all()->each->delete();
 
-    // Clear environment variables
-    putenv('RECAPTCHA_SECRET_KEY');
-    putenv('RECAPTCHA_SCORE_THRESHOLD');
+    // Clear config values
+    config([
+        'easy-forms.recaptcha.secret_key' => null,
+        'easy-forms.recaptcha.score_threshold' => null,
+    ]);
 });
 
 test('listener is registered in service provider', function () {
@@ -65,7 +69,7 @@ test('listener throws exception when recaptcha is configured but token is missin
 });
 
 test('listener skips validation when secret key not configured', function () {
-    putenv('RECAPTCHA_SECRET_KEY=');
+    config(['easy-forms.recaptcha.secret_key' => '']);
 
     $form = createTestForm('test_form');
     $submission = $form->makeSubmission();
@@ -92,7 +96,7 @@ test('listener throws validation exception when recaptcha response is empty', fu
 });
 
 test('listener uses configured score threshold', function () {
-    putenv('RECAPTCHA_SCORE_THRESHOLD=0.7');
+    config(['easy-forms.recaptcha.score_threshold' => 0.7]);
 
     $listener = new ValidateRecaptcha;
 
@@ -104,7 +108,7 @@ test('listener uses configured score threshold', function () {
 });
 
 test('listener uses default score threshold when not configured', function () {
-    putenv('RECAPTCHA_SCORE_THRESHOLD');
+    config(['easy-forms.recaptcha.score_threshold' => null]);
 
     $listener = new ValidateRecaptcha;
 
@@ -142,8 +146,8 @@ test('listener can be extended for custom behavior', function () {
     expect(fn () => $customListener->handle($event))->not->toThrow(ValidationException::class);
 });
 
-test('listener reads secret key from environment', function () {
-    putenv('RECAPTCHA_SECRET_KEY=my_secret_key_123');
+test('listener reads secret key from config', function () {
+    config(['easy-forms.recaptcha.secret_key' => 'my_secret_key_123']);
 
     $listener = new ValidateRecaptcha;
 
