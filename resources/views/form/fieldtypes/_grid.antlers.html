@@ -4,6 +4,10 @@
     @keyframes ef-grid-row-out { to { opacity: 0; transform: translateY(-.5rem); } }
     [data-grid-row].ef-row-enter { animation: ef-grid-row-in .2s ease-out; }
     [data-grid-row].ef-row-exit { animation: ef-grid-row-out .15s ease-in forwards; pointer-events: none; }
+    @media (prefers-reduced-motion: reduce) {
+        [data-grid-row].ef-row-enter,
+        [data-grid-row].ef-row-exit { animation: none; transition: none; }
+    }
 </style>
 <fieldset class="ef-grid mt-6" aria-label="{{ display | trans }}">
     <legend class="sr-only">{{ display | trans }}</legend>

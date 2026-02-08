@@ -93,6 +93,12 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         initializeFields(fields) {
+            // Pre-compute handle→default map for O(1) lookups (used by dynamic_rows_field)
+            const defaultsByHandle = Object.create(null)
+            for (const f of fields) {
+                defaultsByHandle[f.handle] = f.default
+            }
+
             return fields.reduce((acc, field) => {
                 // Handle group fields - initialize nested fields with dot notation
                 if (field.type === 'group' && field.group_fields) {
@@ -110,7 +116,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                         // Look up from acc first (already processed), then fall back to the field's default
                         const controlValue = parseInt(
                             acc[field.dynamic_rows_field]
-                            ?? fields.find(f => f.handle === field.dynamic_rows_field)?.default
+                            ?? defaultsByHandle[field.dynamic_rows_field]
                         ) || 0
                         rowCount = Math.max(controlValue, field.min_rows || 0)
                         if (field.max_rows) {
