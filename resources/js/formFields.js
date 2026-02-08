@@ -93,6 +93,12 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         initializeFields(fields) {
+            // Pre-compute handle→default map for O(1) lookups (used by dynamic_rows_field)
+            const defaultsByHandle = Object.create(null)
+            for (const f of fields) {
+                defaultsByHandle[f.handle] = f.default
+            }
+
             return fields.reduce((acc, field) => {
                 // Handle group fields - initialize nested fields with dot notation
                 if (field.type === 'group' && field.group_fields) {
@@ -105,7 +111,20 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
                 // Handle grid fields - initialize with flat indexed keys
                 if (field.type === 'grid' && field.grid_fields) {
-                    const rowCount = field.fixed_rows || field.min_rows || 1
+                    let rowCount
+                    if (field.dynamic_rows_field) {
+                        // Look up from acc first (already processed), then fall back to the field's default
+                        const controlValue = parseInt(
+                            acc[field.dynamic_rows_field]
+                            ?? defaultsByHandle[field.dynamic_rows_field]
+                        ) || 0
+                        rowCount = Math.max(controlValue, field.min_rows || 0)
+                        if (field.max_rows) {
+                            rowCount = Math.min(rowCount, field.max_rows)
+                        }
+                    } else {
+                        rowCount = field.fixed_rows || field.min_rows || 1
+                    }
                     // Initialize flat state with indexed keys for each row
                     for (let i = 0; i < rowCount; i++) {
                         field.grid_fields.forEach(nestedField => {
@@ -276,7 +295,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             this.submitFields[countKey] = currentCount + 1
 
             // Clone template row in DOM
-            this.cloneGridRow(handle, currentCount)
+            this.cloneGridRow(handle, currentCount, true)
         },
 
         /**
@@ -293,28 +312,40 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             // Check min_rows limit
             if (field.min_rows && currentCount <= field.min_rows) return
 
-            // Remove row fields from state
-            field.grid_fields.forEach(f => {
-                delete this.submitFields[`${handle}.${index}.${f.handle}`]
-            })
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
+            const row = container?.querySelector(`[data-grid-row="${index}"]`)
 
-            // Shift remaining rows down
-            for (let i = index + 1; i < currentCount; i++) {
+            const cleanup = () => {
+                // Remove row fields from state
                 field.grid_fields.forEach(f => {
-                    const oldKey = `${handle}.${i}.${f.handle}`
-                    const newKey = `${handle}.${i - 1}.${f.handle}`
-                    this.submitFields[newKey] = this.submitFields[oldKey]
-                    delete this.submitFields[oldKey]
+                    delete this.submitFields[`${handle}.${index}.${f.handle}`]
                 })
+
+                // Shift remaining rows down
+                for (let i = index + 1; i < currentCount; i++) {
+                    field.grid_fields.forEach(f => {
+                        const oldKey = `${handle}.${i}.${f.handle}`
+                        const newKey = `${handle}.${i - 1}.${f.handle}`
+                        this.submitFields[newKey] = this.submitFields[oldKey]
+                        delete this.submitFields[oldKey]
+                    })
+                }
+
+                this.submitFields[countKey] = currentCount - 1
+
+                // Shift errors in the parent formHandler component
+                this.$dispatch('grid-row-removed', { handle, removedIndex: index })
+
+                // Rebuild all DOM rows so Alpine creates fresh, correct bindings
+                this.rebuildGridRows(handle)
             }
 
-            this.submitFields[countKey] = currentCount - 1
-
-            // Shift errors in the parent formHandler component
-            this.$dispatch('grid-row-removed', { handle, removedIndex: index })
-
-            // Rebuild all DOM rows so Alpine creates fresh, correct bindings
-            this.rebuildGridRows(handle)
+            if (row) {
+                this.animateGridRowOut(row, cleanup)
+            } else {
+                cleanup()
+            }
         },
 
         /**
@@ -342,7 +373,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         /**
          * Clone template row in DOM and replace __INDEX__ placeholders.
          */
-        cloneGridRow(handle, index) {
+        cloneGridRow(handle, index, animate = false) {
             const gridId = this.formId ? `${this.formId}_${handle}` : handle
             const template = document.querySelector(`[data-grid-template="${gridId}"]`)
             const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
@@ -381,6 +412,10 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             }
 
             row.setAttribute('data-grid-row', index)
+            if (animate) {
+                row.classList.add('ef-row-enter')
+                row.addEventListener('animationend', () => row.classList.remove('ef-row-enter'), { once: true })
+            }
             container.appendChild(row)
         },
 
@@ -403,6 +438,105 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             for (let i = 0; i < count; i++) {
                 this.cloneGridRow(handle, i)
             }
+        },
+
+        /**
+         * Set the row count for a grid field, adding or removing rows as needed.
+         */
+        setGridRowCount(handle, newCount) {
+            const field = this.fieldsMap[handle]
+            if (!field?.grid_fields) return
+
+            let count = Math.max(parseInt(newCount) || 0, field.min_rows || 0)
+            if (field.max_rows) {
+                count = Math.min(count, field.max_rows)
+            }
+
+            const countKey = `_grid_count_${handle}`
+            const currentCount = this.submitFields[countKey] || 0
+            if (count === currentCount) return
+
+            const gridId = this.formId ? `${this.formId}_${handle}` : handle
+            const container = document.querySelector(`[data-grid-rows="${gridId}"]`)
+
+            // Clean up any rows still animating out from a previous change
+            if (container) {
+                container.querySelectorAll('.ef-row-exit').forEach(row => row.remove())
+            }
+
+            if (count > currentCount) {
+                for (let i = currentCount; i < count; i++) {
+                    field.grid_fields.forEach(f => {
+                        this.submitFields[`${handle}.${i}.${f.handle}`] = this.getFieldDefaultValue(f)
+                    })
+                    this.cloneGridRow(handle, i, true)
+                }
+            } else {
+                for (let i = currentCount - 1; i >= count; i--) {
+                    field.grid_fields.forEach(f => {
+                        delete this.submitFields[`${handle}.${i}.${f.handle}`]
+                    })
+                    const row = container?.querySelector(`[data-grid-row="${i}"]`)
+                    if (row) {
+                        this.animateGridRowOut(row)
+                    }
+                    // Clear validation errors for removed rows
+                    this.$dispatch('grid-row-removed', { handle, removedIndex: i })
+                }
+            }
+
+            this.submitFields[countKey] = count
+        },
+
+        /**
+         * Animate a grid row out: fade + translate, then collapse height.
+         * Skips animation for prefers-reduced-motion. Includes safety timeout
+         * in case animationend/transitionend never fires.
+         */
+        animateGridRowOut(row, onComplete) {
+            let done = false
+            const finish = () => {
+                if (done) return
+                done = true
+                row.remove()
+                if (onComplete) onComplete()
+            }
+
+            // Skip animation when user prefers reduced motion
+            if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+                finish()
+                return
+            }
+
+            const safetyTimeout = setTimeout(finish, 400)
+
+            row.classList.add('ef-row-exit')
+            row.addEventListener('animationend', () => {
+                // Phase 2: smoothly collapse the space
+                row.style.height = row.offsetHeight + 'px'
+                row.style.overflow = 'hidden'
+                row.offsetHeight // force reflow
+                row.style.transition = 'height .15s ease-in, margin .15s ease-in'
+                row.style.height = '0'
+                row.style.marginBottom = '0'
+                row.addEventListener('transitionend', () => {
+                    clearTimeout(safetyTimeout)
+                    finish()
+                }, { once: true })
+            }, { once: true })
+        },
+
+        /**
+         * Initialize dynamic grid rows that react to another field's value.
+         */
+        initDynamicGridRows(handle, controlFieldHandle) {
+            this.$watch(
+                () => this.submitFields[controlFieldHandle],
+                (newValue) => this.setGridRowCount(handle, newValue)
+            )
+
+            // Sync immediately in case prepopulated data changed the controlling field
+            this.setGridRowCount(handle, this.submitFields[controlFieldHandle])
         },
     }
 }

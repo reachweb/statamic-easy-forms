@@ -232,6 +232,14 @@ class ServiceProvider extends AddonServiceProvider
                 'display' => 'Fixed rows',
                 'instructions' => 'Render exactly this many rows with no add/remove buttons. Overrides min/max.',
             ],
+            'dynamic_rows_field' => [
+                'type' => 'text',
+                'display' => 'Dynamic rows field',
+                'instructions' => 'Handle of a field whose value controls the number of grid rows. The grid will behave as fixed (no add/remove buttons).',
+                'unless' => [
+                    'fixed_rows' => 'not null',
+                ],
+            ],
         ]);
     }
 }
