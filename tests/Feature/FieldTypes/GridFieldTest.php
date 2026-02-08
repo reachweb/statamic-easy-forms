@@ -183,7 +183,7 @@ test('grid field respects min_rows config', function () {
 
     // x-init initializes with min_rows count
     expect($output)
-        ->toContain("|| 3");
+        ->toContain('|| 3');
 });
 
 test('grid field respects fixed_rows config', function () {
@@ -416,121 +416,6 @@ test('grid field with instance parameter scopes IDs', function () {
     // form_id becomes "grid_instance_sidebar", so IDs use that prefix
     expect($output)
         ->toContain('id="grid_instance_sidebar_items___INDEX___name"');
-});
-
-test('grid_rows parameter overrides fixed_rows and renders correct count', function () {
-    createTestForm('grid_rows_override', [
-        [
-            'handle' => 'passengers',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Passengers',
-                'fields' => [
-                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
-                ],
-            ],
-        ],
-    ]);
-
-    $output = renderEasyFormTag('grid_rows_override', [
-        'grid_rows' => ['passengers' => 4],
-    ]);
-
-    // fixed_rows should be set to 4 via the override
-    expect($output)
-        ->toContain('|| 4')
-        ->not->toContain("addGridRow('passengers')")
-        ->not->toContain("removeGridRow('passengers'");
-});
-
-test('grid_rows parameter hides add and remove buttons', function () {
-    createTestForm('grid_rows_buttons', [
-        [
-            'handle' => 'items',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Items',
-                'fields' => [
-                    ['handle' => 'value', 'field' => ['type' => 'text', 'display' => 'Value']],
-                ],
-            ],
-        ],
-    ]);
-
-    $output = renderEasyFormTag('grid_rows_buttons', [
-        'grid_rows' => ['items' => 3],
-    ]);
-
-    expect($output)
-        ->not->toContain("addGridRow('items')")
-        ->not->toContain("removeGridRow('items'")
-        ->not->toContain("canAddGridRow('items')")
-        ->not->toContain("canRemoveGridRow('items')");
-});
-
-test('grid_rows parameter does not affect unrelated grid fields', function () {
-    createTestForm('grid_rows_multi', [
-        [
-            'handle' => 'passengers',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Passengers',
-                'fields' => [
-                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
-                ],
-            ],
-        ],
-        [
-            'handle' => 'luggage',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Luggage',
-                'fields' => [
-                    ['handle' => 'description', 'field' => ['type' => 'text', 'display' => 'Description']],
-                ],
-            ],
-        ],
-    ]);
-
-    $output = renderEasyFormTag('grid_rows_multi', [
-        'grid_rows' => ['passengers' => 5],
-    ]);
-
-    // passengers grid should be fixed at 5 rows
-    expect($output)->toContain('|| 5');
-
-    // luggage grid should still have add/remove buttons (not fixed)
-    expect($output)
-        ->toContain("addGridRow('luggage')")
-        ->toContain("removeGridRow('luggage'");
-});
-
-test('grid_rows parameter works alongside prepopulated_data', function () {
-    createTestForm('grid_rows_prepop', [
-        [
-            'handle' => 'guests',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Guests',
-                'fields' => [
-                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
-                ],
-            ],
-        ],
-    ]);
-
-    $output = renderEasyFormTag('grid_rows_prepop', [
-        'grid_rows' => ['guests' => 2],
-        'prepopulated_data' => ['guests.0.name' => 'Alice'],
-    ]);
-
-    // Grid should be fixed at 2 rows
-    expect($output)
-        ->toContain('|| 2')
-        ->not->toContain("addGridRow('guests')");
-
-    // Prepopulated data should be present in the rendered output (passed as JSON to Alpine)
-    expect($output)->toContain('Alice');
 });
 
 test('grid field required sub-fields are not marked optional', function () {
@@ -786,40 +671,7 @@ test('fixed_rows takes precedence over dynamic_rows_field', function () {
     // fixed_rows is set, so dynamic behavior should not appear
     expect($output)
         ->toContain('|| 3')
-        ->not->toContain("initDynamicGridRows");
-});
-
-test('grid_rows tag parameter overrides dynamic_rows_field', function () {
-    createTestForm('grid_tag_wins', [
-        [
-            'handle' => 'count',
-            'field' => [
-                'type' => 'integer',
-                'display' => 'Count',
-            ],
-        ],
-        [
-            'handle' => 'passengers',
-            'field' => [
-                'type' => 'grid',
-                'display' => 'Passengers',
-                'dynamic_rows_field' => 'count',
-                'fields' => [
-                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
-                ],
-            ],
-        ],
-    ]);
-
-    $output = renderEasyFormTag('grid_tag_wins', [
-        'grid_rows' => ['passengers' => 5],
-    ]);
-
-    // Tag parameter should win: fixed at 5, no dynamic behavior
-    expect($output)
-        ->toContain('|| 5')
-        ->not->toContain("initDynamicGridRows")
-        ->not->toContain("addGridRow('passengers')");
+        ->not->toContain('initDynamicGridRows');
 });
 
 test('dynamic_rows_field works when controlling field is defined after grid', function () {

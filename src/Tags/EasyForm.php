@@ -42,11 +42,6 @@ class EasyForm extends Tags
         $form = $this->getForm();
         $blueprint = $form->blueprint();
 
-        $gridRows = $this->params->get('grid_rows', []);
-        if (! empty($gridRows) && is_array($gridRows)) {
-            $this->setGridRowOverrides($gridRows);
-        }
-
         $sectionsData = $this->processSections($blueprint);
 
         // If we have sections, collect fields from them instead of reprocessing
