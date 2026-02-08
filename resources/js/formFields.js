@@ -107,7 +107,11 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 if (field.type === 'grid' && field.grid_fields) {
                     let rowCount
                     if (field.dynamic_rows_field) {
-                        const controlValue = parseInt(acc[field.dynamic_rows_field]) || 0
+                        // Look up from acc first (already processed), then fall back to the field's default
+                        const controlValue = parseInt(
+                            acc[field.dynamic_rows_field]
+                            ?? fields.find(f => f.handle === field.dynamic_rows_field)?.default
+                        ) || 0
                         rowCount = Math.max(controlValue, field.min_rows || 0)
                         if (field.max_rows) {
                             rowCount = Math.min(rowCount, field.max_rows)
@@ -470,6 +474,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     if (row) {
                         this.animateGridRowOut(row)
                     }
+                    // Clear validation errors for removed rows
+                    this.$dispatch('grid-row-removed', { handle, removedIndex: i })
                 }
             }
 
@@ -478,8 +484,26 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
 
         /**
          * Animate a grid row out: fade + translate, then collapse height.
+         * Skips animation for prefers-reduced-motion. Includes safety timeout
+         * in case animationend/transitionend never fires.
          */
         animateGridRowOut(row, onComplete) {
+            let done = false
+            const finish = () => {
+                if (done) return
+                done = true
+                row.remove()
+                if (onComplete) onComplete()
+            }
+
+            // Skip animation when user prefers reduced motion
+            if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+                finish()
+                return
+            }
+
+            const safetyTimeout = setTimeout(finish, 400)
+
             row.classList.add('ef-row-exit')
             row.addEventListener('animationend', () => {
                 // Phase 2: smoothly collapse the space
@@ -490,8 +514,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 row.style.height = '0'
                 row.style.marginBottom = '0'
                 row.addEventListener('transitionend', () => {
-                    row.remove()
-                    if (onComplete) onComplete()
+                    clearTimeout(safetyTimeout)
+                    finish()
                 }, { once: true })
             }, { once: true })
         },
@@ -504,6 +528,9 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 () => this.submitFields[controlFieldHandle],
                 (newValue) => this.setGridRowCount(handle, newValue)
             )
+
+            // Sync immediately in case prepopulated data changed the controlling field
+            this.setGridRowCount(handle, this.submitFields[controlFieldHandle])
         },
     }
 }

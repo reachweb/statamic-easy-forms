@@ -821,3 +821,66 @@ test('grid_rows tag parameter overrides dynamic_rows_field', function () {
         ->not->toContain("initDynamicGridRows")
         ->not->toContain("addGridRow('passengers')");
 });
+
+test('dynamic_rows_field works when controlling field is defined after grid', function () {
+    createTestForm('grid_field_order', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'dynamic_rows_field' => 'num_passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+        [
+            'handle' => 'num_passengers',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Number of Passengers',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_field_order');
+
+    // Should still render dynamic grid behavior regardless of field order
+    expect($output)
+        ->toContain("initDynamicGridRows('passengers', 'num_passengers')")
+        ->toContain("parseInt(submitFields['num_passengers'])")
+        ->not->toContain("addGridRow('passengers')");
+});
+
+test('dynamic_rows_field works with prepopulated_data', function () {
+    createTestForm('grid_dynamic_prepop', [
+        [
+            'handle' => 'count',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Count',
+            ],
+        ],
+        [
+            'handle' => 'items',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Items',
+                'dynamic_rows_field' => 'count',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('grid_dynamic_prepop', [
+        'prepopulated_data' => ['count' => 3, 'items.0.name' => 'Alice'],
+    ]);
+
+    // Should include prepopulated data and dynamic grid setup
+    expect($output)
+        ->toContain('Alice')
+        ->toContain("initDynamicGridRows('items', 'count')");
+});
