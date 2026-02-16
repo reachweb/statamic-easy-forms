@@ -47,7 +47,7 @@
                 {{# REGULAR MODE: Fieldsets #}}
                 <fieldset class="not-last:pb-6 not-last:lg:pb-10">
                     {{ if display }}
-                    <legend class="text-ef-xl font-bold text-ef-label mb-1">{{ display | trans }}</legend>
+                    <legend class="text-ef-xl font-bold text-ef-label {{ if instructions }}mb-1{{ else }}mb-6{{ /if }}">{{ display | trans }}</legend>
                     {{ /if }}
                     {{ if instructions }}
                     <p class="text-ef-sm text-ef-text-muted mb-6">{{ instructions | trans }}</p>
