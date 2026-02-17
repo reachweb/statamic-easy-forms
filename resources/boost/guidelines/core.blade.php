@@ -70,7 +70,7 @@ text, textarea, select, radio, checkboxes, date, time, telephone (240+ countries
 
 ### File Structure
 
-- `src/Tags/EasyForm.php` — Main `{{ easyform }}` tag handler.
+- `src/Tags/EasyForm.php` — Main `@{{ easyform }}` tag handler.
 - `src/Tags/Concerns/` — Trait composition: `HandlesForms`, `HandlesFields`, `HandlesDictionaries`, `HasVersion`.
 - `src/Listeners/ValidateRecaptcha.php` — Optional reCAPTCHA v3 listener.
 - `resources/views/form/fieldtypes/` — 18 field type Antlers templates.
