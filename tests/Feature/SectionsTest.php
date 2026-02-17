@@ -280,7 +280,7 @@ test('section legend has correct styling', function () {
         ->toContain('text-ef-xl')
         ->toContain('font-bold')
         ->toContain('text-ef-label')
-        ->toContain('mb-1');
+        ->toContain('mb-6');
 });
 
 test('section instructions have correct styling', function () {
