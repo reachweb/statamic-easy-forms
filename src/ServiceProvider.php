@@ -2,6 +2,7 @@
 
 namespace Reach\StatamicEasyForms;
 
+use Reach\StatamicEasyForms\Http\Middleware\LocalizeFormSubmission;
 use Statamic\Fieldtypes\Grid;
 use Statamic\Fieldtypes\Integer;
 use Statamic\Fieldtypes\Radio;
@@ -14,6 +15,12 @@ class ServiceProvider extends AddonServiceProvider
 {
     protected $publishables = [
         __DIR__.'/../dist' => '',
+    ];
+
+    protected $middlewareGroups = [
+        'web' => [
+            LocalizeFormSubmission::class,
+        ],
     ];
 
     public function bootAddon()
