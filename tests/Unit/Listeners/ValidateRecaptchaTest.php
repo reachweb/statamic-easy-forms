@@ -1,10 +1,28 @@
 <?php
 
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
 use Statamic\Facades\Form;
+
+/**
+ * The google/recaptcha package is only suggested and is not installed in the test
+ * environment, so the listener skips validation entirely. This subclass pretends the
+ * package is installed to allow testing the token checks that run before any
+ * ReCaptcha class is instantiated.
+ */
+function createListenerWithRecaptchaInstalled(): ValidateRecaptcha
+{
+    return new class extends ValidateRecaptcha
+    {
+        protected function isRecaptchaLibraryInstalled(): bool
+        {
+            return true;
+        }
+    };
+}
 
 beforeEach(function () {
     // Clean up any existing forms
@@ -57,12 +75,31 @@ test('listener is registered in service provider', function () {
     expect($hasListener)->toBeTrue();
 });
 
+test('listener skips validation when the google recaptcha package is not installed', function () {
+    // google/recaptcha is only suggested by the addon, so it is not present in the
+    // test environment — the exact scenario of a site setting RECAPTCHA_SECRET_KEY
+    // without installing the package.
+    expect(class_exists(\ReCaptcha\ReCaptcha::class))->toBeFalse();
+
+    Log::shouldReceive('warning')->once();
+
+    $form = createTestForm('test_form');
+    $submission = $form->makeSubmission();
+
+    request()->merge(['g-recaptcha-response' => 'test_token']);
+
+    $event = new FormSubmitted($submission);
+    $listener = new ValidateRecaptcha;
+
+    expect(fn () => $listener->handle($event))->not->toThrow(\Throwable::class);
+});
+
 test('listener throws exception when recaptcha is configured but token is missing', function () {
     $form = createTestForm('test_form');
     $submission = $form->makeSubmission();
 
     $event = new FormSubmitted($submission);
-    $listener = new ValidateRecaptcha;
+    $listener = createListenerWithRecaptchaInstalled();
 
     // Should throw exception when reCAPTCHA is configured but g-recaptcha-response is missing
     expect(fn () => $listener->handle($event))->toThrow(ValidationException::class);
@@ -90,7 +127,7 @@ test('listener throws validation exception when recaptcha response is empty', fu
     request()->merge(['g-recaptcha-response' => '']);
 
     $event = new FormSubmitted($submission);
-    $listener = new ValidateRecaptcha;
+    $listener = createListenerWithRecaptchaInstalled();
 
     expect(fn () => $listener->handle($event))->toThrow(ValidationException::class);
 });

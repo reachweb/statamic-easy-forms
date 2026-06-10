@@ -2,6 +2,7 @@
 
 namespace Reach\StatamicEasyForms\Listeners;
 
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 use ReCaptcha\ReCaptcha;
 use Statamic\Events\FormSubmitted;
@@ -11,6 +12,10 @@ use Statamic\Events\FormSubmitted;
  *
  * This listener automatically validates reCAPTCHA tokens when present in form submissions.
  * It uses Google's reCAPTCHA v3 to verify the token and enforce a score threshold.
+ *
+ * Statamic auto-discovers this listener from the Listeners folder and registers it
+ * unconditionally, so validation is gated here: it is skipped unless a secret key is
+ * configured and the suggested google/recaptcha package is installed.
  *
  * @see https://developers.google.com/recaptcha/docs/v3
  */
@@ -49,6 +54,12 @@ class ValidateRecaptcha
             return;
         }
 
+        if (! $this->isRecaptchaLibraryInstalled()) {
+            Log::warning('Statamic Easy Forms: a reCAPTCHA secret key is configured but the google/recaptcha package is not installed. Skipping reCAPTCHA validation. Run "composer require google/recaptcha" to enable it.');
+
+            return;
+        }
+
         if (! request()->has('g-recaptcha-response')) {
             throw ValidationException::withMessages([
                 'recaptcha' => __('ReCAPTCHA verification is required.'),
@@ -56,6 +67,14 @@ class ValidateRecaptcha
         }
 
         $this->verify();
+    }
+
+    /**
+     * Determine whether the suggested google/recaptcha package is installed.
+     */
+    protected function isRecaptchaLibraryInstalled(): bool
+    {
+        return class_exists(ReCaptcha::class);
     }
 
     /**
