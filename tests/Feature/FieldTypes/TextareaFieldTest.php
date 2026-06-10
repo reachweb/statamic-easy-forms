@@ -45,6 +45,27 @@ test('textarea with placeholder renders correctly', function () {
     expect($output)->toContain('Enter your comment here');
 });
 
+test('textarea placeholder is translated', function () {
+    app('translator')->addLines(['forms.comment_placeholder' => 'Translated comment placeholder'], 'en');
+
+    createTestForm('textarea_placeholder_trans', [
+        [
+            'handle' => 'comment',
+            'field' => [
+                'type' => 'textarea',
+                'display' => 'Comment',
+                'placeholder' => 'forms.comment_placeholder',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('textarea_placeholder_trans');
+
+    expect($output)
+        ->toContain('placeholder="Translated comment placeholder"')
+        ->not->toContain('placeholder="forms.comment_placeholder"');
+});
+
 test('textarea has Alpine model binding', function () {
     createTestForm('alpine_textarea', [
         [

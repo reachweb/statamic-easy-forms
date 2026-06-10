@@ -10,7 +10,7 @@
         selectedLabels: [],
         setLabelText() {
             const count = this.selectedOptions.length;
-            if (count === 0) return '{{ placeholder ?? 'Please select' | trans }}';
+            if (count === 0) return '{{ { placeholder ?? "Please select" } | trans }}';
             return this.selectedLabels.join(', ');
         },
         handleOptionToggle(option) {

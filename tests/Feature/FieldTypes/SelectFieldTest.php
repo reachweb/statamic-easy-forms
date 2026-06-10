@@ -146,6 +146,31 @@ test('select field without multiple has form-select class and placeholder', func
         ->not->toContain('name="color[]"');
 });
 
+test('select field placeholder is translated', function () {
+    app('translator')->addLines(['forms.color_placeholder' => 'Translated color placeholder'], 'en');
+
+    createTestForm('select_placeholder_trans', [
+        [
+            'handle' => 'color',
+            'field' => [
+                'type' => 'select',
+                'display' => 'Color',
+                'options' => [
+                    'red' => 'Red',
+                    'blue' => 'Blue',
+                ],
+                'placeholder' => 'forms.color_placeholder',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('select_placeholder_trans');
+
+    expect($output)
+        ->toContain('Translated color placeholder')
+        ->not->toContain('>forms.color_placeholder<');
+});
+
 // Tests for improved select field
 test('select improved field renders with single selection (no checkboxes)', function () {
     createTestForm('select_improved_single', [
@@ -197,6 +222,32 @@ test('select improved field renders with multiple selection (with checkboxes)', 
         ->toContain('handleOptionToggle')
         ->toContain('type="checkbox"')
         ->toContain('form-checkbox');
+});
+
+test('select improved field placeholder is translated', function () {
+    app('translator')->addLines(['forms.country_placeholder' => 'Translated country placeholder'], 'en');
+
+    createTestForm('select_improved_placeholder_trans', [
+        [
+            'handle' => 'country',
+            'field' => [
+                'type' => 'select',
+                'display' => 'Country',
+                'options' => [
+                    'us' => 'United States',
+                    'ca' => 'Canada',
+                ],
+                'improved_field' => true,
+                'placeholder' => 'forms.country_placeholder',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('select_improved_placeholder_trans');
+
+    expect($output)
+        ->toContain('Translated country placeholder')
+        ->not->toContain("'forms.country_placeholder'");
 });
 
 test('select improved field includes search when searchable is true', function () {

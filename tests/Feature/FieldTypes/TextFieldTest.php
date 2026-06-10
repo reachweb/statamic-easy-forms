@@ -64,6 +64,27 @@ test('text field with placeholder renders correctly', function () {
     expect($output)->toContain('Enter your name');
 });
 
+test('text field placeholder is translated', function () {
+    app('translator')->addLines(['forms.name_placeholder' => 'Translated name placeholder'], 'en');
+
+    createTestForm('placeholder_trans_test', [
+        [
+            'handle' => 'name',
+            'field' => [
+                'type' => 'text',
+                'display' => 'Name',
+                'placeholder' => 'forms.name_placeholder',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('placeholder_trans_test');
+
+    expect($output)
+        ->toContain('placeholder="Translated name placeholder"')
+        ->not->toContain('placeholder="forms.name_placeholder"');
+});
+
 test('text field with default value renders correctly', function () {
     createTestForm('default_test', [
         [

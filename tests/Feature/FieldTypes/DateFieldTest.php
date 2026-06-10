@@ -382,6 +382,29 @@ test('date field with placeholder renders correctly', function () {
     expect($output)->toContain('Choose a date');
 });
 
+test('date field placeholder is translated', function () {
+    app('translator')->addLines(['forms.date_placeholder' => 'Translated date placeholder'], 'en');
+
+    createTestForm('date_placeholder_trans_test', [
+        [
+            'handle' => 'date',
+            'field' => [
+                'type' => 'text',
+                'input_type' => 'date',
+                'improved_field' => true,
+                'display' => 'Date',
+                'placeholder' => 'forms.date_placeholder',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('date_placeholder_trans_test');
+
+    expect($output)
+        ->toContain('placeholder="Translated date placeholder"')
+        ->not->toContain('placeholder="forms.date_placeholder"');
+});
+
 test('date field is readonly to prevent manual input', function () {
     createTestForm('date_readonly_test', [
         [
