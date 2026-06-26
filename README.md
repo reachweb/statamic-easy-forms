@@ -28,4 +28,4 @@ So we made it ridiculously simple: just add the `{{ easyform }}` tag and get a f
 
 ## License
 
-⚠️ **Commercial addon** - License required for production use. Test freely in local development. Purchase at the [Statamic Marketplace](https://statamic.com/addons/reachweb/statamic-easy-forms)
+⚠️ **Commercial addon** - License required for production use. Test freely in local development. Purchase at the [Statamic Marketplace](https://statamic.com/addons/reach/easy-forms)
