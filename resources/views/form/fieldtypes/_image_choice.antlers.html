@@ -1,0 +1,61 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+<fieldset
+    id="{{ form_id }}_{{ field_id }}"
+    x-data="{
+        keys: [{{ options }}String({{ key | to_json | entities }}), {{ /options }}],
+        init() {
+            {{# Core doesn't validate the choice, so drop prepopulated keys that aren't options #}}
+            const current = submitFields['{{ field_key ?? handle }}'];
+            {{ if multiple }}
+            const selected = Array.isArray(current) ? current : (current ? [current] : []);
+            submitFields['{{ field_key ?? handle }}'] = selected.map(String).filter(key => this.keys.includes(key));
+            {{ else }}
+            const selected = String((Array.isArray(current) ? current[0] : current) ?? '');
+            submitFields['{{ field_key ?? handle }}'] = this.keys.includes(selected) ? selected : '';
+            {{ /if }}
+        }
+    }"
+    x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+>
+    <legend class="sr-only">{{ display ?? handle }}</legend>
+    <div class="@container">
+        <div class="grid {{ if columns == 1 }}grid-cols-1{{ elseif columns == 2 }}grid-cols-1 @xs:grid-cols-2{{ elseif columns == 4 }}grid-cols-1 @xs:grid-cols-2 @2xl:grid-cols-4{{ else }}grid-cols-1 @xs:grid-cols-2 @xl:grid-cols-3{{ /if }} {{ if gap == 2 }}gap-2{{ elseif gap == 4 }}gap-4{{ else }}gap-3{{ /if }}">
+            {{ options }}
+            <label
+                for="{{ form_id }}_{{ field_id }}_{{ index }}"
+                class="group relative flex flex-col overflow-hidden rounded-ef bg-ef-input-bg border-2 border-ef-border cursor-pointer transition-colors
+                hover:border-ef-border-hover has-checked:border-ef-checkbox-checked! has-focus-visible:ring-2 has-focus-visible:ring-ef-focus has-focus-visible:ring-offset-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-transparent"
+            >
+                <input
+                    id="{{ form_id }}_{{ field_id }}_{{ index }}"
+                    type="{{ if multiple }}checkbox{{ else }}radio{{ /if }}"
+                    class="sr-only"
+                    name="{{ field_name ?? handle }}{{ if multiple }}[]{{ /if }}"
+                    value="{{ key }}"
+                    x-model="submitFields['{{ field_key ?? handle }}']"
+                >
+                {{# The visible label names the option, so the image is decorative #}}
+                <span class="block w-full bg-ef-subtle {{ if aspect_ratio == '1/1' }}aspect-square{{ elseif aspect_ratio == '4/3' }}aspect-4/3{{ elseif aspect_ratio == '3/2' }}aspect-3/2{{ elseif aspect_ratio == '3/4' }}aspect-3/4{{ elseif aspect_ratio == '2/3' }}aspect-2/3{{ else }}aspect-video{{ /if }}">
+                    {{ if image }}
+                    <img src="{{ image }}" alt="" loading="lazy" class="size-full object-cover">
+                    {{ /if }}
+                </span>
+                <span class="flex items-center gap-2 px-3 py-2.5 text-ef font-medium text-ef-text">
+                    {{# Circle for single choice, square for multiple; filled with a check when selected #}}
+                    <span
+                        aria-hidden="true"
+                        class="flex items-center justify-center size-5 shrink-0 {{ if multiple }}rounded-ef-sm{{ else }}rounded-full{{ /if }} bg-ef-checkbox-bg border border-ef-checkbox-border text-transparent
+                        group-has-checked:bg-ef-checkbox-checked group-has-checked:border-ef-checkbox-checked group-has-checked:text-ef-text-white"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-3.5 invisible group-has-checked:visible">
+                            <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+                        </svg>
+                    </span>
+                    <span>{{ label ?? key }}</span>
+                </span>
+            </label>
+            {{ /options }}
+        </div>
+    </div>
+</fieldset>

@@ -40,6 +40,7 @@
     --color-ef-label: var(--color-gray-900); /* Label text color */
     --color-ef-icon: var(--color-gray-500); /* Icon color */
     --color-ef-placeholder: var(--color-gray-400); /* Placeholder text */
+    --color-ef-rating: var(--color-yellow-500); /* Filled rating stars */
 
     /* --- Border & Spacing --- */
     --ef-border-width: 1px; /* Main border width */

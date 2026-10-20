@@ -155,6 +155,14 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 return field.default ?? false
             } else if (field.type === 'checkboxes') {
                 return field.default || []
+            } else if (field.type === 'image_choice') {
+                return field.default || (field.multiple ? [] : '')
+            } else if (field.type === 'ranking') {
+                // The ranking template fills in the options' order when it initializes
+                return field.default || []
+            } else if (field.type === 'star_rating' || field.type === 'opinion_scale') {
+                // Unrated scales submit nothing
+                return field.default ?? null
             } else if (field.handle === 'tracking_id' && field.input_type === 'hidden') {
                 // Auto-populate tracking_id: URL first (immediate), then cookie (returning visitors)
                 return this.getTrackingId() || field.default || ''

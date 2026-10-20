@@ -1,0 +1,118 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+<fieldset
+    id="{{ form_id }}_{{ field_id }}"
+    x-data="{
+        options: [{{ foreach:options as="option_key|option_label" }}{ key: String({{ option_key | to_json | entities }}), label: {{ (option_label ?? option_key) | to_json | entities }} }, {{ /foreach:options }}],
+        messages: {
+            up: {{ 'Move :item up' | trans | to_json | entities }},
+            down: {{ 'Move :item down' | trans | to_json | entities }},
+            moved: {{ ':item moved to position :position of :total' | trans | to_json | entities }}
+        },
+        dragging: null,
+        announcement: '',
+        get order() {
+            return submitFields['{{ field_key ?? handle }}'];
+        },
+        label(key) {
+            return this.options.find(option => option.key === key)?.label ?? key;
+        },
+        message(name, key, index) {
+            return this.messages[name]
+                .replace(':item', this.label(key))
+                .replace(':position', index + 1)
+                .replace(':total', this.order.length);
+        },
+        reorder(from, to) {
+            if (from === to || to < 0 || to >= this.order.length) return false;
+            const order = [...this.order];
+            order.splice(to, 0, order.splice(from, 1)[0]);
+            submitFields['{{ field_key ?? handle }}'] = order;
+            return true;
+        },
+        announce(key) {
+            this.announcement = '';
+            this.$nextTick(() => this.announcement = this.message('moved', key, this.order.indexOf(key)));
+            this.$dispatch('validate-field', '{{ field_key ?? handle }}');
+        },
+        move(index, direction) {
+            const key = this.order[index];
+            if (! this.reorder(index, direction === 'up' ? index - 1 : index + 1)) return;
+            this.announce(key);
+            {{# Moving the item re-inserts its element, which drops focus, so put it back on the same button #}}
+            this.$nextTick(() => Array.from(this.$refs.list.children)
+                .find(item => item.dataset.key === key)
+                ?.querySelector('[data-move=' + direction + ']')
+                ?.focus());
+        },
+        dragStart(key, event) {
+            this.dragging = key;
+            event.dataTransfer.effectAllowed = 'move';
+            event.dataTransfer.setData('text/plain', key);
+        },
+        dragOver(index) {
+            if (this.dragging !== null) this.reorder(this.order.indexOf(this.dragging), index);
+        },
+        dragEnd() {
+            if (this.dragging === null) return;
+            this.announce(this.dragging);
+            this.dragging = null;
+        },
+        init() {
+            {{# Start from the options' order (as Statamic does), keeping any valid prepopulated order #}}
+            const keys = this.options.map(option => option.key);
+            const current = Array.isArray(this.order)
+                ? this.order.map(String).filter((key, index, all) => keys.includes(key) && all.indexOf(key) === index)
+                : [];
+            submitFields['{{ field_key ?? handle }}'] = [...current, ...keys.filter(key => ! current.includes(key))];
+        }
+    }"
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+>
+    <legend class="sr-only">{{ display ?? handle }}</legend>
+    <ol class="space-y-2" role="list" x-ref="list">
+        <template x-for="(key, index) in order" :key="key">
+            <li
+                class="flex items-center gap-2 py-1.5 ps-3 pe-1.5 text-ef text-ef-text bg-ef-input-bg border border-ef-border rounded-ef cursor-grab transition-opacity"
+                draggable="true"
+                x-bind:data-key="key"
+                x-bind:class="dragging === key ? 'opacity-50' : ''"
+                x-on:dragstart="dragStart(key, $event)"
+                x-on:dragover.prevent="dragOver(index)"
+                x-on:drop.prevent
+                x-on:dragend="dragEnd()"
+            >
+                <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-4 shrink-0 text-ef-icon">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <span class="min-w-6 font-semibold text-ef-text-muted" x-text="(index + 1) + '.'"></span>
+                <span class="flex-1" x-text="label(key)"></span>
+                <input type="hidden" name="{{ field_name ?? handle }}[]" x-bind:value="key">
+                <button
+                    type="button"
+                    data-move="up"
+                    class="flex items-center justify-center size-8 shrink-0 rounded-ef-sm text-ef-text-muted cursor-pointer hover:text-ef-text hover:bg-ef-subtle focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ef-focus aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+                    x-bind:aria-label="message('up', key, index)"
+                    x-bind:aria-disabled="index === 0"
+                    x-on:click="move(index, 'up')"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="size-5 rotate-180">
+                        <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+                <button
+                    type="button"
+                    data-move="down"
+                    class="flex items-center justify-center size-8 shrink-0 rounded-ef-sm text-ef-text-muted cursor-pointer hover:text-ef-text hover:bg-ef-subtle focus:outline-hidden focus-visible:ring-2 focus-visible:ring-ef-focus aria-disabled:opacity-40 aria-disabled:cursor-not-allowed"
+                    x-bind:aria-label="message('down', key, index)"
+                    x-bind:aria-disabled="index === order.length - 1"
+                    x-on:click="move(index, 'down')"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" class="size-5">
+                        <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </li>
+        </template>
+    </ol>
+    <div class="sr-only" aria-live="polite" aria-atomic="true" x-text="announcement"></div>
+</fieldset>

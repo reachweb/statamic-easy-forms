@@ -1,0 +1,53 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+{{ middle_index = scale_values | count | subtract:1 | divide:2 | floor }}
+<fieldset
+    id="{{ form_id }}_{{ field_id }}"
+    x-data="{
+        allowed: [{{ scale_values }}'{{ value }}', {{ /scale_values }}],
+        init() {
+            {{# Core doesn't validate the value, so drop prepopulated values that aren't on the scale #}}
+            const current = submitFields['{{ field_key ?? handle }}'];
+            if (current === null || current === undefined || current === '') return;
+            submitFields['{{ field_key ?? handle }}'] = this.allowed.includes(String(current)) ? String(current) : null;
+        }
+    }"
+    x-on:change="$dispatch('validate-field', '{{ field_key ?? handle }}')"
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+>
+    <legend class="sr-only">{{ display ?? handle }}</legend>
+    <div class="grid gap-1 sm:gap-2" style="grid-template-columns: repeat({{ scale_values | count }}, minmax(0, 1fr))">
+        {{ scale_values }}
+        <label
+            for="{{ form_id }}_{{ field_id }}_{{ value }}"
+            class="flex items-center justify-center h-11 text-ef font-medium text-ef-text rounded-ef bg-ef-input-bg border border-ef-border cursor-pointer transition-colors duration-300
+            hover:border-ef-border-hover has-checked:bg-ef-checkbox-checked! has-checked:border-ef-checkbox-checked has-checked:text-ef-text-white forced-colors:has-checked:outline-3 forced-colors:has-checked:outline-offset-[-6px]
+            has-focus-visible:ring-2 has-focus-visible:ring-ef-focus has-focus-visible:ring-offset-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-transparent"
+        >
+            <input
+                id="{{ form_id }}_{{ field_id }}_{{ value }}"
+                type="radio"
+                class="sr-only"
+                name="{{ field_name ?? handle }}"
+                value="{{ value }}"
+                x-model="submitFields['{{ field_key ?? handle }}']"
+                {{ if first && low_label }}
+                aria-describedby="{{ form_id }}_{{ field_id }}-low"
+                {{ elseif index == middle_index && middle_label }}
+                aria-describedby="{{ form_id }}_{{ field_id }}-middle"
+                {{ elseif last && high_label }}
+                aria-describedby="{{ form_id }}_{{ field_id }}-high"
+                {{ /if }}
+            >
+            <span>{{ value }}</span>
+        </label>
+        {{ /scale_values }}
+    </div>
+    {{# The anchor labels describe the first, middle and last values, so screen readers hear them with those options #}}
+    {{ if low_label || middle_label || high_label }}
+    <div class="flex gap-4 mt-2 text-ef-xs text-ef-text-muted" aria-hidden="true">
+        <span id="{{ form_id }}_{{ field_id }}-low" class="flex-1 text-start">{{ low_label | trans }}</span>
+        <span id="{{ form_id }}_{{ field_id }}-middle" class="flex-1 text-center">{{ middle_label | trans }}</span>
+        <span id="{{ form_id }}_{{ field_id }}-high" class="flex-1 text-end">{{ high_label | trans }}</span>
+    </div>
+    {{ /if }}
+</fieldset>

@@ -2,11 +2,13 @@
 
 namespace Reach\StatamicEasyForms\Tags\Concerns;
 
+use Illuminate\Support\Collection;
+use Statamic\Fields\Blueprint;
 use Statamic\Fields\Field;
 
 trait HandlesFields
 {
-    protected static ?\Illuminate\Support\Collection $commonFieldOptionsCache = null;
+    protected static ?Collection $commonFieldOptionsCache = null;
 
     private const REQUIRED_VALIDATION_KEYS = [
         'required',
@@ -25,7 +27,7 @@ trait HandlesFields
     /**
      * Get cached common field options.
      */
-    protected function getCachedCommonFieldOptions(): \Illuminate\Support\Collection
+    protected function getCachedCommonFieldOptions(): Collection
     {
         if (self::$commonFieldOptionsCache === null) {
             self::$commonFieldOptionsCache = Field::commonFieldOptions()->all();
@@ -37,7 +39,7 @@ trait HandlesFields
     /**
      * Process a field to extract needed properties and add optional flag.
      *
-     * @param  \Statamic\Fields\Field  $field
+     * @param  Field  $field
      * @param  string|null  $parentHandle  Parent handle for nested fields (e.g., group fields)
      */
     protected function processField($field, ?string $parentHandle = null): array
@@ -70,6 +72,14 @@ trait HandlesFields
         if ($field->type() === 'integer') {
             $fieldData['min_value'] = $fieldData['min'] ?? $fieldData['min_value'] ?? null;
             $fieldData['max_value'] = $fieldData['max'] ?? $fieldData['max_value'] ?? null;
+        }
+
+        // Forms 2 saves ranking options as key/value rows, which core only turns into a map for top-level fields
+        if ($field->type() === 'ranking' && collect($fieldData['options'] ?? [])->every(fn ($option) => is_array($option) && isset($option['key']))) {
+            $fieldData['options'] = collect($fieldData['options'])
+                ->reject(fn (array $option) => $option['hidden'] ?? false)
+                ->mapWithKeys(fn (array $option) => [$option['key'] => $option['value'] ?? $option['key']])
+                ->all();
         }
 
         // Process group fields - extract nested fields
@@ -149,7 +159,7 @@ trait HandlesFields
     /**
      * Check if a field is optional (not required).
      *
-     * @param  \Statamic\Fields\Field  $field
+     * @param  Field  $field
      */
     protected function isFieldOptional($field): bool
     {
@@ -185,7 +195,7 @@ trait HandlesFields
     /**
      * Process all fields from the blueprint.
      *
-     * @param  \Statamic\Fields\Blueprint  $blueprint
+     * @param  Blueprint  $blueprint
      */
     protected function processAllFields($blueprint): array
     {

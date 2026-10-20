@@ -1,0 +1,23 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+<div class="flex">
+    <span
+        id="{{ form_id }}_{{ field_id }}-currency"
+        class="inline-flex items-center px-3 text-ef-text-muted bg-ef-subtle border border-e-0 border-ef-border rounded-s-ef"
+        aria-hidden="true"
+    >{{ currency_symbol }}</span>
+    {{# Statamic validates currency amounts as integers, so decimal separators and exponents can't be typed #}}
+    <input
+        class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-e-ef rounded-s-none focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full min-w-0 p-2.5"
+        id="{{ form_id }}_{{ field_id }}"
+        name="{{ field_name ?? handle }}"
+        type="number"
+        inputmode="numeric"
+        step="1"
+        {{ if placeholder }}placeholder="{{ placeholder | trans }}"{{ /if }}
+        aria-describedby="{{ form_id }}_{{ field_id }}-currency{{ if has_own_instructions }} {{ form_id }}_{{ field_id }}-description{{ /if }}"
+        autocomplete="off"
+        x-model.number="submitFields['{{ field_key ?? handle }}']"
+        x-on:keydown="['.', ',', 'e', 'E', '+'].includes($event.key) && $event.preventDefault()"
+        x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
+    >
+</div>

@@ -1,0 +1,84 @@
+{{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
+{{ star_count = max_stars ?? 5 }}
+<fieldset
+    id="{{ form_id }}_{{ field_id }}"
+    class="flex flex-wrap items-center gap-3"
+    x-data="{
+        allowed: [{{ loop from="1" :to="star_count" }}{{ if allow_half_stars }}'{{ value - 0.5 }}', {{ /if }}'{{ value }}', {{ /loop }}],
+        hovered: null,
+        get rating() {
+            return submitFields['{{ field_key ?? handle }}'];
+        },
+        fill(star) {
+            const shown = parseFloat(this.hovered ?? this.rating) || 0;
+            return shown >= star ? 'full' : (shown >= star - 0.5 ? 'half' : 'empty');
+        },
+        init() {
+            {{# Core doesn't validate the rating, so drop prepopulated values that aren't one of the stars #}}
+            const current = this.rating;
+            if (current === null || current === undefined || current === '') return;
+            const normalized = String(parseFloat(current));
+            submitFields['{{ field_key ?? handle }}'] = this.allowed.includes(normalized) ? normalized : null;
+        }
+    }"
+    x-on:change="hovered = null; $dispatch('validate-field', '{{ field_key ?? handle }}')"
+    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+>
+    <legend class="sr-only">{{ display ?? handle }}</legend>
+    <div class="flex items-center gap-1" x-on:mouseleave="hovered = null">
+        {{ loop from="1" :to="star_count" }}
+        {{ half_value = value - 0.5 }}
+        <span class="relative block size-8 rounded-ef-sm has-focus-visible:ring-2 has-focus-visible:ring-ef-focus has-focus-visible:ring-offset-2 has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-transparent">
+            <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor" class="absolute inset-0 size-full text-ef-text-muted">
+                <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"/>
+            </svg>
+            <svg
+                xmlns="http://www.w3.org/2000/svg"
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                class="invisible absolute inset-0 size-full text-[color:var(--color-ef-rating,var(--color-yellow-500))]"
+                x-bind:class="{ 'invisible': fill({{ value }}) === 'empty', '[clip-path:inset(0_50%_0_0)] rtl:[clip-path:inset(0_0_0_50%)]': fill({{ value }}) === 'half' }"
+            >
+                <path fill-rule="evenodd" d="M10.788 3.21c.448-1.077 1.976-1.077 2.424 0l2.082 5.006 5.404.434c1.164.093 1.636 1.545.749 2.305l-4.117 3.527 1.257 5.273c.271 1.136-.964 2.033-1.96 1.425L12 18.354 7.373 21.18c-.996.608-2.231-.29-1.96-1.425l1.257-5.273-4.117-3.527c-.887-.76-.415-2.212.749-2.305l5.404-.434 2.082-5.005Z" clip-rule="evenodd"/>
+            </svg>
+            {{# With half stars, the start half of each star selects the half value #}}
+            {{ if allow_half_stars }}
+            <label
+                for="{{ form_id }}_{{ field_id }}-star-{{ value }}-half"
+                class="absolute inset-y-0 start-0 w-1/2 cursor-pointer"
+                x-on:mouseenter="hovered = '{{ half_value }}'"
+            >
+                <input
+                    id="{{ form_id }}_{{ field_id }}-star-{{ value }}-half"
+                    type="radio"
+                    class="sr-only"
+                    name="{{ field_name ?? handle }}"
+                    value="{{ half_value }}"
+                    x-model="submitFields['{{ field_key ?? handle }}']"
+                >
+                <span class="sr-only">{{ trans key=":rating stars" :rating="half_value" }}</span>
+            </label>
+            {{ /if }}
+            <label
+                for="{{ form_id }}_{{ field_id }}-star-{{ value }}"
+                class="absolute inset-y-0 end-0 {{ if allow_half_stars }}w-1/2{{ else }}w-full{{ /if }} cursor-pointer"
+                x-on:mouseenter="hovered = '{{ value }}'"
+            >
+                <input
+                    id="{{ form_id }}_{{ field_id }}-star-{{ value }}"
+                    type="radio"
+                    class="sr-only"
+                    name="{{ field_name ?? handle }}"
+                    value="{{ value }}"
+                    x-model="submitFields['{{ field_key ?? handle }}']"
+                >
+                <span class="sr-only">{{ if value == 1 }}{{ trans key=":rating star" :rating="value" }}{{ else }}{{ trans key=":rating stars" :rating="value" }}{{ /if }}</span>
+            </label>
+        </span>
+        {{ /loop }}
+    </div>
+    <span class="text-ef text-ef-text-muted" x-show="rating" x-cloak aria-hidden="true">
+        <span x-text="rating"></span>/{{ star_count }}
+    </span>
+</fieldset>
