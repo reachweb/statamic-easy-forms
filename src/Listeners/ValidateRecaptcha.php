@@ -54,6 +54,12 @@ class ValidateRecaptcha
             return;
         }
 
+        // Fake submissions generated from the Control Panel (Forms 2) dispatch
+        // FormSubmitted without a frontend request, so there is no token to verify.
+        if ($event->submission->get('_fake')) {
+            return;
+        }
+
         if (! $this->isRecaptchaLibraryInstalled()) {
             Log::warning('Statamic Easy Forms: a reCAPTCHA secret key is configured but the google/recaptcha package is not installed. Skipping reCAPTCHA validation. Run "composer require google/recaptcha" to enable it.');
 

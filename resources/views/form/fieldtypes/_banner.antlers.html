@@ -1,0 +1,6 @@
+<div
+    class="rounded-ef border border-ef-border border-l-4 {{ if state == 'warning' || state == 'important' }}border-l-ef-error{{ else }}border-l-ef-accent{{ /if }} bg-ef-subtle p-4 text-ef text-ef-text [&_a]:underline [&_p:not(:last-child)]:mb-2"
+    data-state="{{ state ?? 'notice' }}"
+>
+    {{ content | markdown }}
+</div>

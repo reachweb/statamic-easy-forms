@@ -77,7 +77,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
             }
 
             // If no conditions defined, show the field
-            if (!field.if && !field.unless && !field.show_when && !field.hide_when) {
+            const conditionKeys = ['if', 'if_any', 'unless', 'unless_any', 'show_when', 'show_when_any', 'hide_when', 'hide_when_any']
+            if (!conditionKeys.some(key => field[key])) {
                 return true
             }
 
@@ -136,6 +137,11 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     return acc
                 }
 
+                // Display-only Forms 2 fields (banner, heading, paragraph) don't collect a value
+                if (['info', 'form_heading', 'form_paragraph'].includes(field.type)) {
+                    return acc
+                }
+
                 // Initialize different field types with appropriate defaults
                 acc[field.handle] = this.getFieldDefaultValue(field)
                 return acc
@@ -143,7 +149,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         getFieldDefaultValue(field) {
-            if (field.type === 'assets') {
+            if (field.type === 'assets' || field.type === 'form_upload') {
                 return null
             } else if (field.type === 'toggle') {
                 return field.default ?? false

@@ -3,9 +3,9 @@
     class="{{ if honeypot == handle || input_type == 'hidden' }}hidden{{ /if }} {{ if width == 50 }}col-span-12 md:col-span-6{{ elseif width == 75 }}col-span-12 md:col-span-9{{ elseif width == 66 }}col-span-12 md:col-span-8{{ elseif width == 33 }}col-span-12 md:col-span-4{{ elseif width == 25 }}col-span-12 md:col-span-3{{ else }}col-span-12{{ /if }}"
     x-show="shouldShowField('{{ field_key ?? handle }}')"
 >
-    {{ unless type == 'toggle' || type == 'spacer' }}
+    {{ unless type == 'toggle' || type == 'spacer' || type == 'info' || type == 'form_heading' || type == 'form_paragraph' }}
     <div class="flex items-center mb-2" {{ if type == 'integer' && integer_template == 'counter' }}id="{{ form_id }}_{{ field_id }}-label"{{ /if }}>
-        {{ if type == 'checkboxes' || type == 'radio' || (type == 'integer' && integer_template == 'rating') || type == 'group' || type == 'grid' }}
+        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating') || type == 'group' || type == 'grid' }}
         <span class="block font-semibold text-ef text-ef-label">
         {{ else }}
         <label class="block font-semibold text-ef text-ef-label" for="{{ form_id }}_{{ field_id }}">
@@ -17,7 +17,7 @@
             {{ if append }}
             <span class="text-ef-text-muted">{{ append | trans }}</span>
             {{ /if }}
-        {{ if type == 'checkboxes' || type == 'radio' || (type == 'integer' && integer_template == 'rating') || type == 'group' || type == 'grid' }}
+        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating') || type == 'group' || type == 'grid' }}
         </span>
         {{ else }}
         </label>
@@ -42,7 +42,7 @@
     {{ /if }}
 
     {{# Date #}}
-    {{ if input_type == 'date' && type == 'text' && improved_field }}
+    {{ if (input_type == 'date' && type == 'text' && improved_field) || type == 'date' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/date }}
     {{ /if }}
 
@@ -52,7 +52,7 @@
     {{ /if }}
 
     {{# Time #}}
-    {{ if input_type == 'time' && type == 'text' && improved_field }}
+    {{ if (input_type == 'time' && type == 'text' && improved_field) || type == 'time' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/time }}
     {{ /if }}
 
@@ -77,7 +77,7 @@
     {{ /if }}
 
     {{# Radio Improved #}}
-    {{ if type == 'radio' && improved_field }}
+    {{ if (type == 'radio' && improved_field) || type == 'yes_no' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/radio_improved }}
     {{ /if }}
 
@@ -101,13 +101,13 @@
         {{ partial:statamic-easy-forms::form/fieldtypes/textarea }}
     {{ /if }}
 
-    {{# Assets #}}
-    {{ if type == 'assets' }}
+    {{# Assets (Forms 2 uploads that are stored as assets render the same way) #}}
+    {{ if type == 'assets' || (type == 'form_upload' && store) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/assets }}
     {{ /if }}
 
-    {{# Files #}}
-    {{ if type == 'files' }}
+    {{# Files (Forms 2 uploads that are not stored render the same way) #}}
+    {{ if type == 'files' || (type == 'form_upload' && !store) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/files }}
     {{ /if }}
 
@@ -124,6 +124,19 @@
     {{# Spacer #}}
     {{ if type == 'spacer' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/spacer }}
+    {{ /if }}
+
+    {{# Forms 2 display-only fields #}}
+    {{ if type == 'info' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/banner }}
+    {{ /if }}
+
+    {{ if type == 'form_heading' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/heading }}
+    {{ /if }}
+
+    {{ if type == 'form_paragraph' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/paragraph }}
     {{ /if }}
 
     {{# Group #}}

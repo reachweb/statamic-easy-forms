@@ -3,6 +3,7 @@
 namespace Reach\StatamicEasyForms\Tags\Concerns;
 
 use Statamic\Facades\Form;
+use Statamic\Fields\Blueprint;
 
 trait HandlesForms
 {
@@ -31,43 +32,38 @@ trait HandlesForms
     }
 
     /**
-     * Extract sections from blueprint contents.
+     * Extract sections from the blueprint's tabs.
      *
-     * @param  \Statamic\Fields\Blueprint  $blueprint
+     * Iterates the resolved tab/section/field objects rather than the raw contents
+     * so that fieldset imports (offered by the Forms 2 builder) are expanded.
+     *
+     * @param  Blueprint  $blueprint
      * @return array ['has_sections' => bool, 'sections' => array]
      */
-    protected function extractSections(array $contents, $blueprint): array
+    protected function extractSections($blueprint): array
     {
         $hasSections = false;
         $sections = [];
 
-        if (! isset($contents['tabs'])) {
-            return compact('hasSections', 'sections');
-        }
-
-        foreach ($contents['tabs'] as $tab) {
-            if (! isset($tab['sections']) || ! is_array($tab['sections'])) {
-                continue;
-            }
-
-            foreach ($tab['sections'] as $section) {
-                if (! isset($section['fields']) || ! is_array($section['fields'])) {
+        foreach ($blueprint->tabs() as $tab) {
+            foreach ($tab->sections() as $section) {
+                // Skip sections without fields, e.g. when every field in them is
+                // set to "Always hide" in the Forms 2 logic and removed from the blueprint.
+                if (empty($section->contents()['fields'] ?? null)) {
                     continue;
                 }
 
                 $hasSections = true;
                 $processedSectionFields = [];
 
-                foreach ($section['fields'] as $fieldConfig) {
-                    $field = $blueprint->field($fieldConfig['handle']);
-                    if ($field) {
-                        $processedSectionFields[] = $this->processField($field);
-                    }
+                foreach ($section->fields()->all() as $handle => $sectionField) {
+                    $field = $blueprint->field($handle) ?? $sectionField;
+                    $processedSectionFields[] = $this->processField($field);
                 }
 
                 $sections[] = [
-                    'display' => $section['display'] ?? null,
-                    'instructions' => $section['instructions'] ?? null,
+                    'display' => $section->display(),
+                    'instructions' => $section->instructions(),
                     'fields' => $processedSectionFields,
                     'field_handles' => array_column($processedSectionFields, 'handle'),
                 ];
@@ -148,13 +144,47 @@ trait HandlesForms
     /**
      * Process all sections from the blueprint.
      *
-     * @param  \Statamic\Fields\Blueprint  $blueprint
+     * @param  Blueprint  $blueprint
      */
     protected function processSections($blueprint): array
     {
-        $contents = $blueprint->contents();
+        return $this->extractSections($blueprint);
+    }
 
-        return $this->extractSections($contents, $blueprint);
+    /**
+     * Get the form's access restriction (closed, submission limit reached, login required).
+     *
+     * Restrictions were introduced with Forms 2, so older Statamic versions never restrict.
+     *
+     * @param  \Statamic\Forms\Form  $form
+     * @return array|null ['message' => string, 'status' => string]
+     */
+    protected function getRestriction($form): ?array
+    {
+        if (! method_exists($form, 'restricted') || ! $form->restricted()) {
+            return null;
+        }
+
+        return [
+            'message' => $form->restrictionMessage(),
+            'status' => $form->status(),
+        ];
+    }
+
+    /**
+     * Render the restriction message in place of the form.
+     *
+     * @param  \Statamic\Forms\Form  $form
+     */
+    protected function renderRestricted($form, array $restriction): string
+    {
+        return view('statamic-easy-forms::form/_restricted', [
+            'handle' => $form->handle(),
+            'form_id' => $this->buildFormId($form->handle()),
+            'title' => $form->title(),
+            'restriction_message' => $restriction['message'],
+            'status' => $restriction['status'],
+        ])->withoutExtractions()->render();
     }
 
     /**

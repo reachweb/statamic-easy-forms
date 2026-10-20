@@ -40,6 +40,11 @@ class EasyForm extends Tags
     public function index(): string
     {
         $form = $this->getForm();
+
+        if ($restriction = $this->getRestriction($form)) {
+            return $this->renderRestricted($form, $restriction);
+        }
+
         $blueprint = $form->blueprint();
 
         $sectionsData = $this->processSections($blueprint);

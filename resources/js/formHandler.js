@@ -274,8 +274,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             const fieldId = `${this.formId}_${fieldIdSuffix}`
 
             // Find field by label or fallback to input element
-            const label = this.$refs.form.querySelector(`label[for="${fieldId}"]`)
-            const fieldElement = label ? label.closest('div') : this.$refs.form.querySelector(`#${fieldId}`)
+            // (escaped, since form-level error keys such as "*" are not valid selectors)
+            const label = this.$refs.form.querySelector(`label[for="${CSS.escape(fieldId)}"]`)
+            const fieldElement = label ? label.closest('div') : this.$refs.form.querySelector(`#${CSS.escape(fieldId)}`)
 
             if (!fieldElement) return
 
