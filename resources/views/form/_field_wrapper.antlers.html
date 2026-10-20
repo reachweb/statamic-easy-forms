@@ -41,6 +41,11 @@
         {{ partial:statamic-easy-forms::form/fieldtypes/text }}
     {{ /if }}
 
+    {{# Hidden #}}
+    {{ if type == 'hidden' }}
+        {{ partial:statamic-easy-forms::form/fieldtypes/text }}
+    {{ /if }}
+
     {{# Date #}}
     {{ if (input_type == 'date' && type == 'text' && improved_field) || type == 'date' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/date }}

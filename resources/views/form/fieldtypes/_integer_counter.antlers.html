@@ -39,7 +39,7 @@
         />
         <button
             type="button"
-            x-on:click="submitFields['{{ field_key ?? handle }}'] = maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount) : Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount; $dispatch('validate-field', '{{ field_key ?? handle }}')"
+            x-on:click="submitFields['{{ field_key ?? handle }}'] = Math.max(minVal, maxVal !== null ? Math.min(maxVal, Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount) : Number(submitFields['{{ field_key ?? handle }}']) + incrementAmount); $dispatch('validate-field', '{{ field_key ?? handle }}')"
             :disabled="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal"
             :class="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-r-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"

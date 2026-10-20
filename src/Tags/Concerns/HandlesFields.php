@@ -66,6 +66,12 @@ trait HandlesFields
             $field->fieldtype()->extraRenderableFieldData()
         );
 
+        // The native min/max are validated server-side, so they win over the older min_value/max_value
+        if ($field->type() === 'integer') {
+            $fieldData['min_value'] = $fieldData['min'] ?? $fieldData['min_value'] ?? null;
+            $fieldData['max_value'] = $fieldData['max'] ?? $fieldData['max_value'] ?? null;
+        }
+
         // Process group fields - extract nested fields
         if ($field->type() === 'group' && ! empty($fieldData['fields'])) {
             $fieldData['group_fields'] = $this->processGroupFields(

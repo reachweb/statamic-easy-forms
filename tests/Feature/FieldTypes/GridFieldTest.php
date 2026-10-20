@@ -1,5 +1,8 @@
 <?php
 
+use Facades\Statamic\Fields\FieldtypeRepository;
+use Facades\Statamic\Forms\Fields\FormFieldtypeRepository;
+use Reach\StatamicEasyForms\FormFieldtypes\Grid;
 use Statamic\Facades\Form;
 
 beforeEach(function () {
@@ -735,4 +738,97 @@ test('dynamic_rows_field works with prepopulated_data', function () {
     expect($output)
         ->toContain('Alice')
         ->toContain("initDynamicGridRows('items', 'count')");
+});
+
+test('grid is an easy forms form fieldtype that collects values', function () {
+    $fieldtype = FormFieldtypeRepository::find('grid');
+
+    expect($fieldtype)->toBeInstanceOf(Grid::class)
+        ->and($fieldtype->isSelectable())->toBeTrue()
+        // Fields that don't collect a value are left out of emails
+        ->and($fieldtype->collectsValue())->toBeTrue()
+        ->and($fieldtype->configFields()->all()->keys()->all())
+        ->toBe(['fields', 'min_rows', 'max_rows', 'add_row', 'fixed_rows', 'dynamic_rows_field']);
+});
+
+test('the classic grid fieldtype is not offered in the form builder any more', function () {
+    expect(FieldtypeRepository::find('grid')->selectableInForms())->toBeFalse();
+});
+
+test('grid form fields keep their config', function () {
+    $form = createTestForm('grid_config', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'min_rows' => 2,
+                'max_rows' => 4,
+                'add_row' => 'Add passenger',
+                'dynamic_rows_field' => 'count',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+                ],
+            ],
+        ],
+    ]);
+
+    expect($form->blueprint()->field('passengers')->config())->toMatchArray([
+        'type' => 'grid',
+        'min_rows' => 2,
+        'max_rows' => 4,
+        'add_row' => 'Add passenger',
+        'dynamic_rows_field' => 'count',
+        'fields' => [
+            ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+        ],
+    ]);
+});
+
+test('grid rows are submitted and stored', function () {
+    createTestForm('grid_submit', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name', 'validate' => ['required']]],
+                    ['handle' => 'age', 'field' => ['type' => 'integer', 'display' => 'Age']],
+                ],
+            ],
+        ],
+    ]);
+
+    $this->postJson('/!/forms/grid_submit', [
+        'passengers' => [
+            ['name' => 'Ann', 'age' => '34'],
+            ['name' => 'Ben', 'age' => '7'],
+        ],
+    ])->assertOk();
+
+    expect(Form::find('grid_submit')->submissions()->first()->get('passengers'))->toBe([
+        ['name' => 'Ann', 'age' => 34],
+        ['name' => 'Ben', 'age' => 7],
+    ]);
+});
+
+test('grid row errors use dot notation', function () {
+    createTestForm('grid_errors', [
+        [
+            'handle' => 'passengers',
+            'field' => [
+                'type' => 'grid',
+                'display' => 'Passengers',
+                'fields' => [
+                    ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name', 'validate' => ['required']]],
+                ],
+            ],
+        ],
+    ]);
+
+    $this->postJson('/!/forms/grid_errors', ['passengers' => [['name' => 'Ann'], ['name' => '']]])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('passengers.1.name')
+        ->assertJsonMissingValidationErrors('passengers.0.name');
 });

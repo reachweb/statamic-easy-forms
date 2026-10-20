@@ -61,3 +61,26 @@ test('integer field has Alpine model binding', function () {
 
     expect($output)->toContain('x-model');
 });
+
+test('counter uses the native min and never increments below it', function () {
+    createTestForm('counter_min_form', [
+        [
+            'handle' => 'guests',
+            'field' => [
+                'type' => 'number',
+                'display' => 'Guests',
+                'min' => 2,
+                'max' => 9,
+                'integer_template' => 'counter',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('counter_min_form');
+
+    expect($output)
+        ->toContain('minVal: 2,')
+        ->toContain('maxVal: 9,')
+        // "+" on an empty counter jumps to the minimum instead of 1
+        ->toContain("submitFields['guests'] = Math.max(minVal, maxVal !== null ? Math.min(maxVal,");
+});

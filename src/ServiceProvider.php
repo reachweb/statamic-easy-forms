@@ -3,12 +3,17 @@
 namespace Reach\StatamicEasyForms;
 
 use Reach\StatamicEasyForms\Http\Middleware\LocalizeFormSubmission;
-use Statamic\Fieldtypes\Grid;
 use Statamic\Fieldtypes\Integer;
 use Statamic\Fieldtypes\Radio;
 use Statamic\Fieldtypes\Select;
 use Statamic\Fieldtypes\Text;
 use Statamic\Fieldtypes\Toggle;
+use Statamic\Forms\Fieldtypes\DatePicker;
+use Statamic\Forms\Fieldtypes\Dropdown;
+use Statamic\Forms\Fieldtypes\MultiChoice;
+use Statamic\Forms\Fieldtypes\Number;
+use Statamic\Forms\Fieldtypes\Phone;
+use Statamic\Forms\Fieldtypes\Toggle as ToggleFormFieldtype;
 use Statamic\Providers\AddonServiceProvider;
 
 class ServiceProvider extends AddonServiceProvider
@@ -30,9 +35,6 @@ class ServiceProvider extends AddonServiceProvider
         $this->publishes([
             __DIR__.'/../config/easy-forms.php' => config_path('easy-forms.php'),
         ], 'easy-forms-config');
-
-        // Enable Grid fieldtype for forms (for repeater functionality)
-        Grid::makeSelectableInForms();
 
         $this->addConfigOptions();
 
@@ -60,155 +62,56 @@ class ServiceProvider extends AddonServiceProvider
 
     public function addConfigOptions()
     {
-        Text::appendConfigFields([
+        $section = [
             'easy_forms' => [
                 'type' => 'section',
                 'display' => 'Easy Forms',
             ],
-            'improved_field' => [
-                'type' => 'toggle',
-                'display' => 'Enable Improved Fields',
-                'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
-            ],
-            'datepicker_config' => [
-                'type' => 'section',
-                'display' => 'Datepicker config',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-            ],
-            'date_range' => [
-                'type' => 'toggle',
-                'display' => 'Date range',
-                'instructions' => 'The datepicker will select a date range instead of a single day',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-            ],
-            'max_range' => [
-                'type' => 'integer',
-                'display' => 'Max range',
-                'instructions' => 'The maximum amount of days allowed when range mode is enabled',
-                'if' => [
-                    'input_type' => 'is date',
-                    'date_range' => 'is true',
-                ],
-            ],
-            'min_date_today' => [
-                'type' => 'integer',
-                'display' => 'Minimum date relative to today',
-                'instructions' => 'Set to 0 for using today as minimum date or an integer to add days',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-            ],
-            'max_date_today' => [
-                'type' => 'integer',
-                'display' => 'Maximum date relative to today',
-                'instructions' => 'Set to 0 for using today as maximum date or an integer to add days',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-            ],
-            'min_date' => [
-                'type' => 'date',
-                'display' => 'Minimum date',
-                'instructions' => 'The minimum date allowed in the datepicker',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-                'unless' => [
-                    'min_date_today' => 'not null',
-                ],
-            ],
-            'max_date' => [
-                'type' => 'date',
-                'display' => 'Maximum date',
-                'instructions' => 'The maximum date allowed in the datepicker',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-                'unless' => [
-                    'max_date_today' => 'not null',
-                ],
-            ],
-            'dont_close_after_selection' => [
-                'type' => 'toggle',
-                'display' => 'Don\'t close after selection',
-                'instructions' => 'Do not close the datepicker after the user selects a date',
-                'if' => [
-                    'input_type' => 'is date',
-                ],
-            ],
-        ]);
+        ];
 
-        Radio::appendConfigFields([
-            'easy_forms' => [
-                'type' => 'section',
-                'display' => 'Easy Forms',
-            ],
-            'improved_field' => [
-                'type' => 'toggle',
-                'display' => 'Enable Improved Fields',
-                'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
-            ],
-        ]);
+        $improvedField = [
+            'type' => 'toggle',
+            'display' => 'Enable Improved Fields',
+        ];
 
-        Select::appendConfigFields([
-            'easy_forms' => [
-                'type' => 'section',
-                'display' => 'Easy Forms',
-            ],
+        $improvedChoices = [
+            ...$section,
             'improved_field' => [
-                'type' => 'toggle',
-                'display' => 'Enable Improved Fields',
-                'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
+                ...$improvedField,
+                'instructions' => 'Show the options as buttons',
             ],
-        ]);
+        ];
 
-        Toggle::appendConfigFields([
-            'easy_forms' => [
-                'type' => 'section',
-                'display' => 'Easy Forms',
+        $improvedSelect = [
+            ...$section,
+            'improved_field' => [
+                ...$improvedField,
+                'instructions' => 'Use a searchable dropdown',
             ],
+        ];
+
+        $labelOverride = [
+            ...$section,
             'label_override' => [
                 'type' => 'markdown',
                 'display' => 'Label override',
                 'instructions' => 'Override the inline label here to use Markdown.',
             ],
-        ]);
+        ];
 
-        Integer::appendConfigFields([
-            'easy_forms' => [
-                'type' => 'section',
-                'display' => 'Easy Forms',
-            ],
+        // The native Min and Max settings set the limits (and are validated server-side)
+        $integerTemplate = [
+            ...$section,
             'integer_template' => [
                 'type' => 'button_group',
                 'display' => 'Field template',
-                'instructions' => 'Select the type of template you want to use',
+                'instructions' => 'Select the type of template you want to use. Counter and Rating use the Min and Max values.',
                 'options' => [
                     'simple' => 'Simple',
                     'counter' => 'Counter',
                     'rating' => 'Rating',
                 ],
                 'default' => 'simple',
-            ],
-            'min_value' => [
-                'type' => 'integer',
-                'display' => 'Minimum value',
-                'instructions' => 'Select the minimum value allowed',
-                'unless' => [
-                    'integer_template' => 'is simple',
-                ],
-            ],
-            'max_value' => [
-                'type' => 'integer',
-                'display' => 'Maximum value',
-                'instructions' => 'Select the maximum value allowed',
-                'unless' => [
-                    'integer_template' => 'is simple',
-                ],
             ],
             'increment_amount' => [
                 'type' => 'integer',
@@ -218,26 +121,126 @@ class ServiceProvider extends AddonServiceProvider
                     'integer_template' => 'is counter',
                 ],
             ],
-        ]);
+        ];
 
-        Grid::appendConfigFields([
-            'easy_forms' => [
-                'type' => 'section',
-                'display' => 'Easy Forms',
-            ],
-            'fixed_rows' => [
+        $dateLimits = [
+            'min_date_today' => [
                 'type' => 'integer',
-                'display' => 'Fixed rows',
-                'instructions' => 'Render exactly this many rows with no add/remove buttons. Overrides min/max.',
+                'display' => 'Minimum date relative to today',
+                'instructions' => 'Set to 0 for using today as minimum date or an integer to add days',
             ],
-            'dynamic_rows_field' => [
-                'type' => 'text',
-                'display' => 'Dynamic rows field',
-                'instructions' => 'Handle of a field whose value controls the number of grid rows. The grid will behave as fixed (no add/remove buttons).',
+            'max_date_today' => [
+                'type' => 'integer',
+                'display' => 'Maximum date relative to today',
+                'instructions' => 'Set to 0 for using today as maximum date or an integer to add days',
+            ],
+            'min_date' => [
+                'type' => 'date',
+                'display' => 'Minimum date',
+                'instructions' => 'The minimum date allowed in the datepicker',
                 'unless' => [
-                    'fixed_rows' => 'not null',
+                    'min_date_today' => 'not null',
                 ],
             ],
+            'max_date' => [
+                'type' => 'date',
+                'display' => 'Maximum date',
+                'instructions' => 'The maximum date allowed in the datepicker',
+                'unless' => [
+                    'max_date_today' => 'not null',
+                ],
+            ],
+            'dont_close_after_selection' => [
+                'type' => 'toggle',
+                'display' => 'Don\'t close after selection',
+                'instructions' => 'Do not close the datepicker after the user selects a date',
+            ],
+        ];
+
+        // Form fieldtypes, offered by the form builder
+        Phone::appendConfigFields([
+            ...$section,
+            'improved_field' => [
+                ...$improvedField,
+                'instructions' => 'Add a country code picker',
+            ],
         ]);
+
+        // A range uses the classic date fieldtype's range mode, so it's validated and stored as {start, end}
+        DatePicker::appendConfigFields([
+            ...$section,
+            'mode' => [
+                'type' => 'button_group',
+                'display' => 'Mode',
+                'instructions' => 'Select a single date or a date range',
+                'options' => [
+                    'single' => 'Single',
+                    'range' => 'Range',
+                ],
+                'default' => 'single',
+            ],
+            'max_range' => [
+                'type' => 'integer',
+                'display' => 'Max range',
+                'instructions' => 'The maximum amount of days allowed in a range',
+                'if' => [
+                    'mode' => 'is range',
+                ],
+            ],
+            ...$dateLimits,
+        ]);
+
+        MultiChoice::appendConfigFields($improvedChoices);
+        Dropdown::appendConfigFields($improvedSelect);
+        ToggleFormFieldtype::appendConfigFields($labelOverride);
+        Number::appendConfigFields($integerTemplate);
+
+        // Classic fieldtypes, still used by group and grid children and fieldset fields. Until v7, core
+        // also copies these onto every form fieldtype wrapping them, so they reuse the handles above
+        // and are hidden on the ones they don't apply to (short answer, email, yes/no, currency...)
+        Text::appendConfigFields([
+            ...$this->withCondition('if', ['input_type' => 'contains_any tel, date, time'], [
+                ...$section,
+                'improved_field' => [
+                    ...$improvedField,
+                    'instructions' => 'Enable improved Alpine fields for supported input types (eg. date, tel)',
+                ],
+            ]),
+            ...$this->withCondition('if', ['input_type' => 'is date'], [
+                'datepicker_config' => [
+                    'type' => 'section',
+                    'display' => 'Datepicker config',
+                ],
+                'date_range' => [
+                    'type' => 'toggle',
+                    'display' => 'Date range',
+                    'instructions' => 'The datepicker will select a date range instead of a single day',
+                ],
+                'max_range' => [
+                    'type' => 'integer',
+                    'display' => 'Max range',
+                    'instructions' => 'The maximum amount of days allowed when range mode is enabled',
+                    'if' => [
+                        'date_range' => 'is true',
+                    ],
+                ],
+                ...$dateLimits,
+            ]),
+        ]);
+
+        Radio::appendConfigFields($this->withCondition('unless', ['type' => 'is yes_no'], $improvedChoices));
+        Select::appendConfigFields($improvedSelect);
+        Toggle::appendConfigFields($labelOverride);
+        Integer::appendConfigFields($this->withCondition('unless', ['type' => 'is currency'], $integerTemplate));
+    }
+
+    /**
+     * Add a condition to each of the given config fields.
+     */
+    private function withCondition(string $key, array $condition, array $fields): array
+    {
+        return collect($fields)
+            ->map(fn (array $field) => [...$field, $key => [...$condition, ...($field[$key] ?? [])]])
+            ->all();
     }
 }

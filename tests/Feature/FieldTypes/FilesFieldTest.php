@@ -29,13 +29,14 @@ test('files field renders correctly', function () {
         ->toContain('id="files_test_document"');
 });
 
-test('files field with single file (default)', function () {
+test('files field with max_files 1 takes a single file', function () {
     createTestForm('single_file', [
         [
             'handle' => 'resume',
             'field' => [
                 'type' => 'upload',
                 'display' => 'Resume',
+                'max_files' => 1,
             ],
         ],
     ]);
@@ -45,7 +46,42 @@ test('files field with single file (default)', function () {
     expect($output)
         ->toContain('name="resume"')
         ->toContain('type="file"')
+        ->toContain('const maxFiles = 1')
         ->not->toContain('multiple');
+});
+
+test('files field without max_files takes any number of files', function () {
+    createTestForm('unlimited_files', [
+        [
+            'handle' => 'attachments',
+            'field' => [
+                'type' => 'upload',
+                'display' => 'Attachments',
+            ],
+        ],
+    ]);
+
+    expect(renderEasyFormTag('unlimited_files'))
+        ->toContain('const maxFiles = null')
+        ->toMatch('/<input[^>]*\smultiple[^>]*>/');
+});
+
+test('files field shows the minimum number of files', function () {
+    createTestForm('min_files', [
+        [
+            'handle' => 'attachments',
+            'field' => [
+                'type' => 'upload',
+                'display' => 'Attachments',
+                'min_files' => 3,
+            ],
+        ],
+    ]);
+
+    expect(renderEasyFormTag('min_files'))
+        ->toContain('Select at least 3 files')
+        ->toContain('aria-describedby="min_files_attachments-min-files"')
+        ->toContain('selectedCount < 3');
 });
 
 test('files field with multiple files enabled', function () {

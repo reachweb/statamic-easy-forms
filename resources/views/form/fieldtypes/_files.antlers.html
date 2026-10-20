@@ -2,9 +2,13 @@
 <div
     class="relative flex w-full flex-col gap-1"
     x-data="{
+        selectedCount: 0,
+
         handleFileChange(event) {
             const files = Array.from(event.target.files)
-            const maxFiles = {{ max_files ?? 1 }}
+            this.selectedCount = files.length
+            {{# No max_files means any number of files #}}
+            const maxFiles = {{ max_files ?? 'null' }}
 
             if (maxFiles === 1) {
                 submitFields['{{ field_key ?? handle }}'] = files[0] || null
@@ -19,9 +23,20 @@
         name="{{ field_name ?? handle }}"
         type="file"
         class="w-full overflow-clip rounded-ef border border-ef-border bg-ef-input-bg text-ef text-ef-input-text file:mr-4 file:border-none file:bg-ef-subtle file:px-4 file:py-2 file:font-medium file:text-ef-text focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none"
-        {{ if max_files > 1 }}multiple{{ /if }}
-        {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+        {{ if max_files !== 1 }}multiple{{ /if }}
+        {{ if has_own_instructions || min_files > 1 }}aria-describedby="{{ if has_own_instructions }}{{ form_id }}_{{ field_id }}-description{{ /if }}{{ if has_own_instructions && min_files > 1 }} {{ /if }}{{ if min_files > 1 }}{{ form_id }}_{{ field_id }}-min-files{{ /if }}"{{ /if }}
         x-ref="fileInput"
         x-on:change="handleFileChange($event)"
     />
+
+    {{# Minimum number of files (also validated server-side) #}}
+    {{ if min_files > 1 }}
+    <p
+        id="{{ form_id }}_{{ field_id }}-min-files"
+        class="text-ef"
+        x-bind:class="selectedCount > 0 && selectedCount < {{ min_files }} ? 'text-ef-error' : 'text-ef-text-muted'"
+    >
+        {{ trans key="Select at least :count files" :count="min_files" }}
+    </p>
+    {{ /if }}
 </div>

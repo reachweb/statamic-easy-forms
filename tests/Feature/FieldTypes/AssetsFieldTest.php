@@ -52,7 +52,7 @@ test('assets field with multiple files enabled', function () {
         ->toContain('maxFiles: 5');
 });
 
-test('assets field with single file (default)', function () {
+test('assets field with max_files 1 takes a single file', function () {
     createTestForm('single_asset', [
         [
             'handle' => 'photo',
@@ -60,6 +60,7 @@ test('assets field with single file (default)', function () {
                 'type' => 'upload',
                 'store' => true,
                 'display' => 'Photo',
+                'max_files' => 1,
             ],
         ],
     ]);
@@ -72,6 +73,69 @@ test('assets field with single file (default)', function () {
 
     // Verify the multiple HTML attribute is not present on the input
     expect($output)->not->toMatch('/<input[^>]*\smultiple[^>]*>/');
+});
+
+test('assets field without max_files takes any number of files', function () {
+    createTestForm('unlimited_assets', [
+        [
+            'handle' => 'photos',
+            'field' => [
+                'type' => 'upload',
+                'store' => true,
+                'display' => 'Photos',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('unlimited_assets');
+
+    expect($output)
+        ->toContain('maxFiles: null')
+        ->toContain('this.maxFiles && totalFiles > this.maxFiles')
+        ->toMatch('/<input[^>]*\smultiple[^>]*>/');
+});
+
+test('assets field shows the minimum number of files', function () {
+    createTestForm('min_assets', [
+        [
+            'handle' => 'photos',
+            'field' => [
+                'type' => 'upload',
+                'store' => true,
+                'display' => 'Photos',
+                'min_files' => 2,
+                'max_files' => 5,
+                'instructions' => 'Upload a few photos',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('min_assets');
+
+    expect($output)
+        ->toContain('minFiles: 2')
+        ->toContain('id="min_assets_photos-min-files"')
+        ->toContain('Select at least 2 files')
+        ->toContain('aria-describedby="min_assets_photos-description min_assets_photos-min-files"')
+        ->toContain('files.length < minFiles');
+});
+
+test('assets field without min_files shows no minimum', function () {
+    createTestForm('no_min_assets', [
+        [
+            'handle' => 'photos',
+            'field' => [
+                'type' => 'upload',
+                'store' => true,
+                'display' => 'Photos',
+            ],
+        ],
+    ]);
+
+    expect(renderEasyFormTag('no_min_assets'))
+        ->toContain('minFiles: null')
+        ->not->toContain('-min-files')
+        ->not->toContain('aria-describedby');
 });
 
 test('assets field includes drag and drop zone', function () {

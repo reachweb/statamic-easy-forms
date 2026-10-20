@@ -3,7 +3,9 @@
     x-data="{
         files: [],
         isDragging: false,
-        maxFiles: {{ max_files ?? 1 }},
+        {{# No max_files means any number of files #}}
+        maxFiles: {{ max_files ?? 'null' }},
+        minFiles: {{ min_files ?? 'null' }},
 
         handleFiles(fileList) {
             const newFiles = Array.from(fileList)
@@ -13,7 +15,7 @@
                 this.files = [newFiles[0]].filter(Boolean)
             } else {
                 const totalFiles = this.files.length + newFiles.length
-                if (totalFiles > this.maxFiles) {
+                if (this.maxFiles && totalFiles > this.maxFiles) {
                     alert(`Maximum ${this.maxFiles} file(s) allowed`)
                     return
                 }
@@ -53,7 +55,7 @@
         x-on:dragover.prevent="isDragging = true"
         x-on:dragleave.prevent="isDragging = false"
         x-on:drop.prevent="isDragging = false; handleFiles($event.dataTransfer.files)"
-        x-show="files.length === 0 || maxFiles > 1"
+        x-show="files.length === 0 || maxFiles !== 1"
     >
         {{# Upload Icon #}}
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor" class="w-12 h-12 opacity-75 text-ef-icon">
@@ -71,15 +73,26 @@
                     type="file"
                     class="sr-only"
                     x-ref="input"
-                    {{ if max_files > 1 }}multiple{{ /if }}
+                    {{ if max_files !== 1 }}multiple{{ /if }}
                     x-on:change="handleFiles($event.target.files)"
-                    {{ if has_own_instructions }}aria-describedby="{{ form_id }}_{{ field_id }}-description"{{ /if }}
+                    {{ if has_own_instructions || min_files > 1 }}aria-describedby="{{ if has_own_instructions }}{{ form_id }}_{{ field_id }}-description{{ /if }}{{ if has_own_instructions && min_files > 1 }} {{ /if }}{{ if min_files > 1 }}{{ form_id }}_{{ field_id }}-min-files{{ /if }}"{{ /if }}
                 />
                 {{ "Browse" | trans }}
             </label>
             <span> {{ "or drag and drop here" | trans }}</span>
         </div>
     </div>
+
+    {{# Minimum number of files (also validated server-side) #}}
+    {{ if min_files > 1 }}
+    <p
+        id="{{ form_id }}_{{ field_id }}-min-files"
+        class="mt-2 text-ef"
+        x-bind:class="files.length > 0 && files.length < minFiles ? 'text-ef-error' : 'text-ef-text-muted'"
+    >
+        {{ trans key="Select at least :count files" :count="min_files" }}
+    </p>
+    {{ /if }}
 
     {{# Selected Files List #}}
     <div x-show="files.length > 0" class="mt-4 space-y-2" x-transition.opacity>
@@ -112,7 +125,7 @@
             </div>
         </template>
 
-        {{# File Counter (for multiple files) #}}
+        {{# File Counter (for a limited number of files) #}}
         <div x-show="maxFiles > 1" class="mt-2 text-ef text-ef-text-muted">
             <span x-text="files.length"></span> {{ "of" | trans }} <span x-text="maxFiles"></span> {{ "max files" | trans }}
         </div>

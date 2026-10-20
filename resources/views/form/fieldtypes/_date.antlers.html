@@ -1,15 +1,19 @@
 {{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
 <div
     x-model="submitFields['{{ field_key ?? handle }}']"
-    x-modelable="selectedDate"
+    x-modelable="value"
     x-data="{
+        value: '',
         selectedDate: '',
         showDatepicker: false,
         showYearPicker: false,
         openUpwards: false,
         
         {{# --- Configuration --- #}}
-        mode: '{{ if date_range }}range{{ else }}single{{ /if }}',
+        mode: '{{ if date_range || mode == "range" }}range{{ else }}single{{ /if }}',
+
+        {{# Date pickers post a range as {start, end}, text inputs as a "start - end" string #}}
+        rangeAsObject: {{ type == 'date' ? 'true' : 'false' }},
         
         {{# Static dates (Strings) #}}
         configMinDateStr: '{{ min_date ?? "" }}',
@@ -85,6 +89,13 @@
             this.$watch('selectedDate', () => {
                 this.parseSelectedDate();
                 this.generateDays();
+            });
+
+            {{# Mirror the submitted value (e.g. prepopulated data) in the input #}}
+            this.$watch('value', (value) => {
+                this.selectedDate = value && typeof value === 'object'
+                    ? (value.start && value.end ? value.start + ' - ' + value.end : '')
+                    : (value || '');
             });
         },
 
@@ -256,8 +267,12 @@
 
             if (this.mode === 'single' && this.dateFrom) {
                 this.selectedDate = formatDate(this.dateFrom);
+                this.value = this.selectedDate;
             } else if (this.mode === 'range' && this.dateFrom && this.dateTo) {
                 this.selectedDate = formatDate(this.dateFrom) + ' - ' + formatDate(this.dateTo);
+                this.value = this.rangeAsObject
+                    ? { start: formatDate(this.dateFrom), end: formatDate(this.dateTo) }
+                    : this.selectedDate;
             }
         },
 
@@ -266,6 +281,7 @@
             this.dateTo = null;
             this.hoverDate = null;
             this.selectedDate = '';
+            this.value = '';
             this.$nextTick(() => {
                 this.$dispatch('validate-field', '{{ field_key ?? handle }}');
             });

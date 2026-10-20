@@ -174,6 +174,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                     formData.append(formKey, value)
                 } else if (Array.isArray(value)) {
                     value.forEach(item => formData.append(`${formKey}[]`, item))
+                } else if (value !== null && typeof value === 'object') {
+                    // Objects (e.g. date ranges) are posted as "handle[start]", "handle[end]"
+                    Object.entries(value).forEach(([subKey, item]) => formData.append(`${formKey}[${subKey}]`, item ?? ''))
                 } else if (value !== null && value !== undefined) {
                     formData.append(formKey, value)
                 }
