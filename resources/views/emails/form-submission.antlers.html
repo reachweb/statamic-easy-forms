@@ -1,4 +1,5 @@
-{{ real_url = config:app:url }}
+{{# Inside the fields loop, "config" is the field's config, so read the app config first #}}
+{{ ef_cp_enabled = config:statamic:cp:enabled }}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -11,9 +12,18 @@
         img { -ms-interpolation-mode: bicubic; border: 0; height: auto; line-height: 100%; outline: none; text-decoration: none; }
         table { border-collapse: collapse !important; }
         body { height: 100% !important; margin: 0 !important; padding: 0 !important; width: 100% !important; }
+        .ef-message p, .ef-message ul, .ef-message ol { margin: 0 0 12px 0; }
     </style>
 </head>
 <body style="margin: 0; padding: 0; font-family: Helvetica, Arial, sans-serif; background-color: #f5f5f5;">
+
+    {{#
+        Notes for customizing this template:
+        - Don't loop with a "value" tag pair: Antlers would pair its closing tag with any plain
+          "value" tag in the template. Loop with foreach:value instead.
+        - Prefix loop variables (ef_), because submitted field handles are top-level variables too.
+        - Escape submitted values with the "entities" modifier.
+    #}}
 
     <table border="0" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f5f5f5;">
         <tr>
@@ -23,6 +33,12 @@
 
                     <tr>
                         <td bgcolor="#2d7a7d" style="background: linear-gradient(135deg, #2d7a7d 0%, #43AEB1  100%); padding: 25px 30px;">
+                            {{# With a Message, the email may go to the visitor, so use the form title as the heading #}}
+                            {{ if email_config:body }}
+                            <h1 style="margin: 0; padding: 0; color: #ffffff; font-size: 22px; font-weight: bold; font-family: Helvetica, Arial, sans-serif;">
+                                {{ form:title ?: 'Form Submission' }}
+                            </h1>
+                            {{ else }}
                             <h1 style="margin: 0; padding: 0; color: #ffffff; font-size: 22px; font-weight: bold; font-family: Helvetica, Arial, sans-serif;">
                                 New Submission
                             </h1>
@@ -31,114 +47,243 @@
                                 {{ form:title }}
                             </p>
                             {{ /if }}
+                            {{ /if }}
                         </td>
                     </tr>
+
+                    {{# The Message from the email connection, already rendered to HTML by Statamic #}}
+                    {{ if email_config:body }}
+                    <tr>
+                        <td style="padding: 25px 30px 0 30px;">
+                            <div class="ef-message" style="margin: 0; font-size: 15px; color: #222222; line-height: 1.6; word-break: break-word; font-family: Helvetica, Arial, sans-serif;">
+                                {{ email_config:body }}
+                            </div>
+                        </td>
+                    </tr>
+                    {{ /if }}
 
                     <tr>
                         <td style="padding: 10px 30px 30px 30px;">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
 
-                                {{ fields }}
-                                    {{ unless fieldtype == 'section' }}
-                                        {{# Group fields need special handling #}}
-                                        {{ if fieldtype == 'group' }}
-                                            {{ if value }}
-                                                {{# Group header #}}
-                                                <tr>
-                                                    <td colspan="2" style="padding: 16px 0 8px 0;">
-                                                        <p style="margin: 0; font-size: 13px; font-weight: bold; color: #2d7a7d; letter-spacing: 0.5px; text-transform: uppercase;">
-                                                            {{ display }}
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                                {{# Iterate over config fields to get proper display names #}}
-                                                {{ config:fields }}
-                                                    {{ nested_value = value[handle] }}
-                                                    {{ if nested_value }}
-                                                        <tr>
-                                                            <td width="35%" valign="middle" style="padding: 12px 10px 12px 15px; border-bottom: 1px solid #eeeeee;">
-                                                                <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
-                                                                    {{ field:display ?? handle | deslugify | ucfirst }}
-                                                                </p>
-                                                            </td>
-                                                            <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
-                                                                <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                                    {{ if nested_value | is_array }}
-                                                                        {{ nested_value }}
-                                                                            {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
-                                                                        {{ /nested_value }}
-                                                                    {{ else }}
-                                                                        {{ nested_value | entities }}
-                                                                    {{ /if }}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    {{ /if }}
-                                                {{ /config:fields }}
-                                            {{ /if }}
-                                        {{# Grid fields need special handling - array of rows #}}
-                                        {{ elseif fieldtype == 'grid' }}
-                                            {{ if value }}
-                                                {{# Grid header #}}
-                                                <tr>
-                                                    <td colspan="2" style="padding: 16px 0 8px 0;">
-                                                        <p style="margin: 0; font-size: 13px; font-weight: bold; color: #2d7a7d; letter-spacing: 0.5px; text-transform: uppercase;">
-                                                            {{ display }}
-                                                        </p>
-                                                    </td>
-                                                </tr>
-                                                {{# Iterate over grid rows using scope to preserve row data #}}
-                                                {{ value scope="row" }}
+                                {{ sections }}
+                                    {{# Only show a section heading when the section has answers #}}
+                                    {{ ef_section_has_values = false }}
+                                    {{ fields }}
+                                        {{ if value || (value | is_numeric) }}{{ ef_section_has_values = true }}{{ /if }}
+                                    {{ /fields }}
+                                    {{ if display && ef_section_has_values }}
+                                        <tr>
+                                            <td colspan="2" style="padding: 24px 0 8px 0; border-bottom: 2px solid #43AEB1;">
+                                                <p style="margin: 0; font-size: 16px; font-weight: bold; color: #2d7a7d; line-height: 1.4; font-family: Helvetica, Arial, sans-serif;">
+                                                    {{ display }}
+                                                </p>
+                                            </td>
+                                        </tr>
+                                    {{ /if }}
+
+                                    {{ fields }}
+                                        {{ unless fieldtype == 'section' }}
+                                            {{# Group fields need special handling #}}
+                                            {{ if fieldtype == 'group' }}
+                                                {{ if value }}
+                                                    {{# Group header #}}
                                                     <tr>
-                                                        <td colspan="2" style="padding: 8px 0 8px 15px; border-bottom: 1px solid #eeeeee;">
-                                                            {{# Iterate over config fields to get proper display names #}}
-                                                            {{ config:fields }}
-                                                                {{ nested_value = row[handle] }}
-                                                                {{ if nested_value }}
-                                                                    <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
-                                                                        <span style="color: #888888;">{{ field:display ?? handle | deslugify | ucfirst }}:</span>
-                                                                        {{ if nested_value | is_array }}
-                                                                            {{ nested_value }}
-                                                                                {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
-                                                                            {{ /nested_value }}
-                                                                        {{ else }}
-                                                                            {{ nested_value | entities }}
-                                                                        {{ /if }}
-                                                                    </p>
-                                                                {{ /if }}
-                                                            {{ /config:fields }}
+                                                        <td colspan="2" style="padding: 16px 0 8px 0;">
+                                                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #2d7a7d; letter-spacing: 0.5px; text-transform: uppercase;">
+                                                                {{ display }}
+                                                            </p>
                                                         </td>
                                                     </tr>
-                                                {{ /value }}
-                                            {{ /if }}
-                                        {{ elseif value }}
-                                            {{# Standard fields #}}
-                                            <tr>
-                                                <td width="35%" valign="middle" style="padding: 12px 10px 12px 0; border-bottom: 1px solid #eeeeee;">
-                                                    <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
-                                                        {{ display }}
-                                                    </p>
-                                                </td>
-
-                                                <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
-                                                    <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                        {{ if fieldtype == 'form_upload' && config:store }}
-                                                            <a href="{{ real_url }}/cp/forms/{{ form:handle }}/submissions/{{ id }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
-                                                                Login to view file(s) →
-                                                            </a>
-                                                        {{ elseif value | is_array }}
-                                                            {{ value }}
-                                                                {{ label ?? value ?? key | entities }}{{ unless last }}, {{ /unless }}
-                                                            {{ /value }}
-                                                        {{ else }}
-                                                            {{ value:label ?? label ?? value ?? key | entities }}
+                                                    {{# Iterate over config fields to get proper display names #}}
+                                                    {{ config:fields }}
+                                                        {{ nested_value = value[handle] }}
+                                                        {{ if nested_value || (nested_value | is_numeric) }}
+                                                            <tr>
+                                                                <td width="35%" valign="middle" style="padding: 12px 10px 12px 15px; border-bottom: 1px solid #eeeeee;">
+                                                                    <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
+                                                                        {{ field:display ?? handle | deslugify | ucfirst }}
+                                                                    </p>
+                                                                </td>
+                                                                <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                                    <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
+                                                                        {{ if field:type == 'toggle' }}
+                                                                            Yes
+                                                                        {{ elseif nested_value | is_array }}
+                                                                            {{# A single select, radio or button group value is one {key, value, label} array #}}
+                                                                            {{ if nested_value:label }}
+                                                                                {{ nested_value:label | entities }}
+                                                                            {{ else }}
+                                                                                {{ foreach:nested_value as="ef_item" }}
+                                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
+                                                                                {{ /foreach:nested_value }}
+                                                                            {{ /if }}
+                                                                        {{ else }}
+                                                                            {{ (nested_value:label ?? nested_value) | entities }}
+                                                                        {{ /if }}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
                                                         {{ /if }}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        {{ /if }}
-                                    {{ /unless }}
-                                {{ /fields }}
+                                                    {{ /config:fields }}
+                                                {{ /if }}
+                                            {{# Grid fields need special handling - array of rows #}}
+                                            {{ elseif fieldtype == 'grid' }}
+                                                {{ if value }}
+                                                    {{# Grid header #}}
+                                                    <tr>
+                                                        <td colspan="2" style="padding: 16px 0 8px 0;">
+                                                            <p style="margin: 0; font-size: 13px; font-weight: bold; color: #2d7a7d; letter-spacing: 0.5px; text-transform: uppercase;">
+                                                                {{ display }}
+                                                            </p>
+                                                        </td>
+                                                    </tr>
+                                                    {{ foreach:value as="ef_row" }}
+                                                        <tr>
+                                                            <td colspan="2" style="padding: 8px 0 8px 15px; border-bottom: 1px solid #eeeeee;">
+                                                                {{# Iterate over config fields to get proper display names #}}
+                                                                {{ config:fields }}
+                                                                    {{ nested_value = ef_row[handle] }}
+                                                                    {{ if nested_value || (nested_value | is_numeric) }}
+                                                                        <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
+                                                                            <span style="color: #888888;">{{ field:display ?? handle | deslugify | ucfirst }}:</span>
+                                                                            {{ if field:type == 'toggle' }}
+                                                                                Yes
+                                                                            {{ elseif nested_value | is_array }}
+                                                                                {{# A single select, radio or button group value is one {key, value, label} array #}}
+                                                                                {{ if nested_value:label }}
+                                                                                    {{ nested_value:label | entities }}
+                                                                                {{ else }}
+                                                                                    {{ foreach:nested_value as="ef_item" }}
+                                                                                        {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
+                                                                                    {{ /foreach:nested_value }}
+                                                                                {{ /if }}
+                                                                            {{ else }}
+                                                                                {{ (nested_value:label ?? nested_value) | entities }}
+                                                                            {{ /if }}
+                                                                        </p>
+                                                                    {{ /if }}
+                                                                {{ /config:fields }}
+                                                            </td>
+                                                        </tr>
+                                                    {{ /foreach:value }}
+                                                {{ /if }}
+                                            {{# Standard fields (a 0 is an answer too, e.g. on an opinion scale) #}}
+                                            {{ elseif value || (value | is_numeric) }}
+                                                <tr>
+                                                    <td width="35%" valign="middle" style="padding: 12px 10px 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                        <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
+                                                            {{ display }}
+                                                        </p>
+                                                    </td>
+
+                                                    <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                        <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
+                                                            {{ if fieldtype == 'form_upload' }}
+                                                                {{ if config:store }}
+                                                                    {{ if config:max_files == 1 }}
+                                                                        {{ value:basename | entities }}
+                                                                    {{ else }}
+                                                                        {{ value | pluck('basename') | join(', ') | entities }}
+                                                                    {{ /if }}
+                                                                    {{ if ef_cp_enabled }}
+                                                                        <br />
+                                                                        <a href="{{ route name="statamic.cp.forms.submissions.show" :form="form:handle" :submission="id" }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
+                                                                            Login to view file(s) →
+                                                                        </a>
+                                                                    {{ /if }}
+                                                                {{# Files that aren't stored are deleted once the emails are sent #}}
+                                                                {{ elseif value | is_array }}
+                                                                    {{ foreach:value as="ef_file" }}
+                                                                        {{ ef_file | pathinfo('basename') | entities }}{{ unless last }}, {{ /unless }}
+                                                                    {{ /foreach:value }}
+                                                                {{ else }}
+                                                                    {{ value | pathinfo('basename') | entities }}
+                                                                {{ /if }}
+                                                            {{ elseif fieldtype == 'ranking' }}
+                                                                {{ if value | is_array }}
+                                                                    {{ foreach:value as="ef_index|ef_choice" }}
+                                                                        {{ ef_index + 1 }}. {{ (config:options[ef_choice] ?? ef_choice) | entities }}{{ unless last }}<br />{{ /unless }}
+                                                                    {{ /foreach:value }}
+                                                                {{ /if }}
+                                                            {{ elseif fieldtype == 'image_choice' }}
+                                                                {{ if value | is_array }}
+                                                                    {{ foreach:value as="ef_choice" }}
+                                                                        {{ (config:options | where('key', ef_choice) | pluck('label') | join ?: ef_choice) | entities }}{{ unless last }}, {{ /unless }}
+                                                                    {{ /foreach:value }}
+                                                                {{ else }}
+                                                                    {{ (config:options | where('key', value) | pluck('label') | join ?: value) | entities }}
+                                                                {{ /if }}
+                                                            {{ elseif fieldtype == 'star_rating' }}
+                                                                {{ value }} / {{ config:max_stars }}
+                                                            {{ elseif fieldtype == 'opinion_scale' }}
+                                                                {{ value }} / {{ config:max }}
+                                                            {{ elseif fieldtype == 'integer' && config:currency_symbol }}
+                                                                {{ config:currency_symbol }}{{ value | format_number }}
+                                                            {{ elseif fieldtype == 'date' }}
+                                                                {{ if config:mode == 'range' }}
+                                                                    {{ value:start format="F j, Y" }} – {{ value:end format="F j, Y" }}
+                                                                {{ elseif config:time_enabled }}
+                                                                    {{ value format="F j, Y g:i A" }}
+                                                                {{ else }}
+                                                                    {{ value format="F j, Y" }}
+                                                                {{ /if }}
+                                                            {{ elseif fieldtype == 'toggle' }}
+                                                                Yes
+                                                            {{ elseif value | is_array }}
+                                                                {{ foreach:value as="ef_item" }}
+                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
+                                                                {{ /foreach:value }}
+                                                            {{ else }}
+                                                                {{ (value:label ?? value) | entities | nl2br }}
+                                                            {{ /if }}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            {{ /if }}
+                                        {{ /unless }}
+                                    {{ /fields }}
+                                {{ /sections }}
+
+                                {{# With Attachments on, Statamic attaches the uploads and leaves them out of the fields above #}}
+                                {{ if email_config:attachments }}
+                                    {{ scope:ef_submission }}
+                                        {{ ef_form_fields = form:fields }}
+                                        {{ foreach:ef_form_fields as="ef_handle|ef_field" }}
+                                            {{ if ef_field:type == 'form_upload' }}
+                                                {{ ef_files = ef_submission[ef_handle] }}
+                                                {{ if ef_files }}
+                                                    <tr>
+                                                        <td width="35%" valign="middle" style="padding: 12px 10px 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                            <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
+                                                                {{ ef_field:display ?? ef_handle | deslugify | ucfirst }}
+                                                            </p>
+                                                        </td>
+                                                        <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                            <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
+                                                                {{ if ef_field:store }}
+                                                                    {{ if ef_field:max_files == 1 }}
+                                                                        {{ ef_files:basename | entities }}
+                                                                    {{ else }}
+                                                                        {{ ef_files | pluck('basename') | join(', ') | entities }}
+                                                                    {{ /if }}
+                                                                {{ elseif ef_files | is_array }}
+                                                                    {{ foreach:ef_files as="ef_file" }}
+                                                                        {{ ef_file | pathinfo('basename') | entities }}{{ unless last }}, {{ /unless }}
+                                                                    {{ /foreach:ef_files }}
+                                                                {{ else }}
+                                                                    {{ ef_files | pathinfo('basename') | entities }}
+                                                                {{ /if }}
+                                                                <br />
+                                                                <span style="font-size: 12px; color: #888888;">Attached to this email</span>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                {{ /if }}
+                                            {{ /if }}
+                                        {{ /foreach:ef_form_fields }}
+                                    {{ /scope:ef_submission }}
+                                {{ /if }}
 
                             </table>
                         </td>

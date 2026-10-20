@@ -3,6 +3,8 @@
 namespace Reach\StatamicEasyForms\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\File;
+use Reach\StatamicEasyForms\EmailTemplate;
 use Statamic\Console\RunsInPlease;
 
 class InstallEasyForms extends Command
@@ -87,11 +89,24 @@ class InstallEasyForms extends Command
     {
         $this->info('Publishing email template...');
 
-        $this->callSilent('vendor:publish', [
-            '--tag' => 'easy-forms-emails',
-        ]);
+        $path = 'resources/views/'.EmailTemplate::view().'.antlers.html';
 
-        $this->line('  ✓ Email template published to resources/views/vendor/statamic-easy-forms/emails');
+        if (File::exists(EmailTemplate::path()) && ! $this->confirm('The email template is already published. Do you want to overwrite it?', false)) {
+            $this->line("  • Kept the existing email template at {$path}");
+        } else {
+            $this->callSilent('vendor:publish', [
+                '--tag' => 'easy-forms-emails',
+                '--force' => true,
+            ]);
+
+            $this->line("  ✓ Email template published to {$path}");
+        }
+
+        $this->newLine();
+        $this->comment('To send submissions with it, open a form in the control panel, go to Connect → Email and set:');
+        $this->line('  • HTML view: '.EmailTemplate::view());
+        $this->line('  • Text view: leave it empty, and keep Markdown off');
+        $this->line('  • Message (optional): shown above the submitted answers');
 
         return $this;
     }
