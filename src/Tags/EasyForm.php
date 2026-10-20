@@ -5,6 +5,7 @@ namespace Reach\StatamicEasyForms\Tags;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesDictionaries;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesFields;
 use Reach\StatamicEasyForms\Tags\Concerns\HandlesForms;
+use Reach\StatamicEasyForms\Tags\Concerns\HandlesPages;
 use Reach\StatamicEasyForms\Tags\Concerns\HasVersion;
 use Statamic\Tags\Tags;
 
@@ -13,6 +14,7 @@ class EasyForm extends Tags
     use HandlesDictionaries;
     use HandlesFields;
     use HandlesForms;
+    use HandlesPages;
     use HasVersion;
 
     protected static $handle = 'easyform';
@@ -34,6 +36,9 @@ class EasyForm extends Tags
      * - success_message: Custom text for the success message after submission
      * - precognition: Enable Laravel Precognition for real-time validation (default: false)
      * - wizard: Enable wizard/multi-step mode, splits form by sections (default: false)
+     *
+     * Forms with multiple pages (Statamic Forms Pro) always render in page mode: one step
+     * per page, each submitted on its own request. The wizard parameter is ignored for them.
      *
      * @return string Rendered HTML
      */
@@ -65,6 +70,10 @@ class EasyForm extends Tags
             $sectionsData['sections'],
             $sectionsData['hasSections']
         );
+
+        if ($form->hasMultiplePages()) {
+            $data = $this->addPageData($data, $form, $sectionsData['sections']);
+        }
 
         return $this->renderView($data);
     }

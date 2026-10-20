@@ -1,0 +1,14 @@
+{{# The position of the current page in the form. Page logic can skip pages, so the step can jump ahead. #}}
+<div x-ref="progress" class="mb-8" x-show="! successMessage" x-cloak>
+    <div class="flex justify-between items-center gap-8 mb-2">
+        <span class="text-ef-sm text-ef-text-muted shrink-0" role="status">
+            {{ "Step" | trans }} <span x-text="currentStep">1</span> {{ "of" | trans }} {{ total_pages }}
+        </span>
+        <div class="w-2/3 bg-ef-subtle rounded-ef h-2" aria-hidden="true">
+            <div
+                class="bg-ef-accent h-2 rounded-ef transition-all duration-300"
+                x-bind:style="'width: ' + getProgressPercent() + '%'"
+            ></div>
+        </div>
+    </div>
+</div>

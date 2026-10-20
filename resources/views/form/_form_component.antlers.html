@@ -1,7 +1,12 @@
 <form
     method="{{ method }}"
     action="{{ action }}"
-    {{ if wizard }}
+    {{ if page_mode }}
+    x-data="{
+        ...formHandler('{{ handle }}', '{{ form_id }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
+        ...pageHandler({{ pages_config | to_json | entities }})
+    }"
+    {{ elseif wizard }}
     x-data="{
         ...formHandler('{{ handle }}', '{{ form_id }}', {{ if recaptcha_site_key }}'{{ recaptcha_site_key }}'{{ else }}null{{ /if }}, {{ precognition | bool_string }}),
         ...wizardHandler({{ sections | count }})
@@ -26,19 +31,27 @@
     {{ /if }}
 
     {{# Wizard Progress Indicator #}}
-    {{ if wizard }}
+    {{ if page_mode }}
+    {{ partial:statamic-easy-forms::form/pages/progress }}
+    {{ elseif wizard }}
     {{ partial:statamic-easy-forms::form/wizard/progress }}
     {{ /if }}
     <div
         x-data="formFields({{ fields | to_json | entities }}, '{{ honeypot }}', {{ hide_fields | to_json | entities ?? '[]' }}, {{ (prepopulated_data | to_json | entities) ?? '[]' }}, '{{ form_id }}')"
+        x-ref="fields"
         x-show="! successMessage"
         {{ if wizard }}
         x-init="stepFields = { {{ sections }}{{ step }}: {{ field_handles | to_json | entities }}{{ unless is_last }}, {{ /unless }}{{ /sections }} }"
         {{ /if }}
-        class="{{ if wizard }}grid grid-cols-1{{ else }}space-y-6 lg:space-y-10 divide-y divide-ef-border{{ /if }}"
+        class="{{ if wizard || page_mode }}grid grid-cols-1{{ else }}space-y-6 lg:space-y-10 divide-y divide-ef-border{{ /if }}"
         x-transition.opacity
     >
-        {{ if has_sections }}
+        {{ if page_mode }}
+            {{# PAGE MODE: One step per Forms Pro page #}}
+            {{ pages }}
+                {{ partial:statamic-easy-forms::form/pages/page }}
+            {{ /pages }}
+        {{ elseif has_sections }}
             {{ sections }}
                 {{ if wizard }}
                 {{# WIZARD MODE: Steps with visibility toggle #}}
@@ -83,10 +96,18 @@
         <div class="my-1 text-center text-ef-error" x-show="'recaptcha' in errors" x-text="errors['recaptcha']" x-cloak role="alert" aria-live="polite"></div>
         {{# Form-level errors that are not tied to a field (e.g. the form closed or reached its submission limit) #}}
         <div class="my-1 text-center text-ef-error" x-show="'*' in errors" x-text="errors['*']" x-cloak role="alert" aria-live="polite"></div>
+        {{ if page_mode }}
+        {{# The server sent the visitor back to an earlier page because answers from it are missing #}}
+        <div class="my-1 text-center text-ef-error" x-show="pagesIncomplete" x-cloak role="alert" aria-live="polite">
+            {{ "Some required answers are missing. Please review the form and continue." | trans }}
+        </div>
+        {{ /if }}
     </div>
 
     {{# Wizard Navigation Buttons #}}
-    {{ if wizard }}    
+    {{ if page_mode }}
+    {{ partial:statamic-easy-forms::form/pages/buttons }}
+    {{ elseif wizard }}    
     {{ partial:statamic-easy-forms::form/wizard/buttons }}
     {{ else }}
     {{# Regular Submit Button #}}

@@ -154,10 +154,10 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             }
         },
 
-        buildFormData(token) {
+        buildFormData(token, data = this.submitData) {
             const formData = new FormData()
 
-            Object.entries(this.submitData).forEach(([key, value]) => {
+            Object.entries(data).forEach(([key, value]) => {
                 // Skip internal grid count trackers
                 if (key.startsWith('_grid_count_')) return
 
@@ -190,6 +190,21 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         },
 
         handleSuccess(data) {
+            // Multi-page forms (Statamic Forms Pro) answer every page but the last with the next page to show,
+            // and render in page mode (pageHandler.js). A next_page here means the form was posted in a single
+            // request, so only its first page was saved and the submission is not complete.
+            if (data.next_page) {
+                this.fatalError = true;
+                // window.console, so the production build (which drops console calls) keeps this message
+                window.console.error(`Easy Forms: the "${this.formHandle}" form has multiple pages (Statamic Forms Pro) but was submitted in a single request, so only its first page was saved and the submission was not completed. Render it with a view that supports page mode (republish any Easy Forms views you have published) and clear any cached copies of the page.`);
+
+                this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                    bubbles: true,
+                    detail: { error: 'The form has multiple pages but was submitted in a single request.', fatalError: true, formHandle: this.formHandle, formId: this.formId }
+                }))
+                return;
+            }
+
             if (data.success) {
                 this.successMessage = true;
 

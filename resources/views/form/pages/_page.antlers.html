@@ -1,0 +1,52 @@
+<div
+    data-page="{{ page_id }}"
+    x-show="currentPage === '{{ page_id }}'"
+    x-transition:enter="transition ease-out duration-300"
+    x-transition:enter-start="opacity-0 translate-x-4"
+    x-transition:enter-end="opacity-100 translate-x-0"
+    x-transition:leave="transition ease-in duration-200"
+    x-transition:leave-start="opacity-100"
+    x-transition:leave-end="opacity-0"
+    class="col-start-1 row-start-1 w-full focus:outline-none"
+    role="group"
+    {{ if page_display }}
+    aria-labelledby="{{ form_id }}_page_{{ page_step }}_heading"
+    {{ else }}
+    aria-label="{{ "Step" | trans }} {{ page_step }} {{ "of" | trans }} {{ total_pages }}"
+    {{ /if }}
+    {{# Receives focus on page change when the page has no heading #}}
+    tabindex="-1"
+    x-cloak
+>
+    {{# Page Header #}}
+    {{ if page_display || page_instructions }}
+    <div class="mb-6">
+        {{ if page_display }}
+        <h2 id="{{ form_id }}_page_{{ page_step }}_heading" class="text-ef-xl font-bold text-ef-label focus:outline-none" tabindex="-1" data-page-heading>{{ page_display | trans }}</h2>
+        {{ /if }}
+        {{ if page_instructions }}
+        <p class="text-ef-sm text-ef-text-muted {{ if page_display }}mt-1{{ /if }}">{{ page_instructions | trans }}</p>
+        {{ /if }}
+    </div>
+    {{ /if }}
+
+    {{# Page Sections #}}
+    <div class="space-y-6 lg:space-y-10 divide-y divide-ef-border">
+        {{ page_sections }}
+        <fieldset class="not-last:pb-6 not-last:lg:pb-10">
+            {{ if display }}
+            <legend class="text-ef-xl font-bold text-ef-label {{ if instructions }}mb-1{{ else }}mb-6{{ /if }}">{{ display | trans }}</legend>
+            {{ /if }}
+            {{ if instructions }}
+            <p class="text-ef-sm text-ef-text-muted mb-6">{{ instructions | trans }}</p>
+            {{ /if }}
+
+            <div class="grid grid-cols-12 gap-6 lg:gap-8">
+                {{ fields }}
+                    {{ partial:statamic-easy-forms::form/field_wrapper }}
+                {{ /fields }}
+            </div>
+        </fieldset>
+        {{ /page_sections }}
+    </div>
+</div>

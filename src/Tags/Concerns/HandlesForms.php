@@ -62,6 +62,7 @@ trait HandlesForms
                 }
 
                 $sections[] = [
+                    'page_id' => $tab->handle(),
                     'display' => $section->display(),
                     'instructions' => $section->instructions(),
                     'fields' => $processedSectionFields,

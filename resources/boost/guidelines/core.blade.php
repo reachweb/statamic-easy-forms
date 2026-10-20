@@ -35,6 +35,7 @@ text, textarea, select, radio, checkboxes, date, time, telephone (240+ countries
 ### Features
 
 - **Wizard Mode**: Split forms into steps using blueprint sections. Enable with `wizard="true"`. Each section becomes a step with automatic navigation.
+- **Forms Pro Pages**: Forms with multiple pages (Statamic Forms Pro) always render one step per page, whatever `wizard` is set to. Each page is submitted on its own request and the server picks the next page, so page logic can skip pages.
 - **Real-time Validation**: Enable with `precognition="true"`. Requires the precognition JS bundle.
 - **Conditional Fields**: Uses Statamic's built-in conditional logic to show/hide fields dynamically.
 - **Honeypot Spam Protection**: Built-in honeypot field for spam prevention.
@@ -71,11 +72,12 @@ text, textarea, select, radio, checkboxes, date, time, telephone (240+ countries
 ### File Structure
 
 - `src/Tags/EasyForm.php` — Main `@{{ easyform }}` tag handler.
-- `src/Tags/Concerns/` — Trait composition: `HandlesForms`, `HandlesFields`, `HandlesDictionaries`, `HasVersion`.
+- `src/Tags/Concerns/` — Trait composition: `HandlesForms`, `HandlesFields`, `HandlesPages`, `HandlesDictionaries`, `HasVersion`.
 - `src/Listeners/ValidateRecaptcha.php` — Optional reCAPTCHA v3 listener.
 - `resources/views/form/fieldtypes/` — 18 field type Antlers templates.
 - `resources/views/form/wizard/` — Wizard/multi-step templates.
-- `resources/js/` — Alpine components: `formHandler.js`, `formFields.js`, `wizardHandler.js`, `precognition.js`.
+- `resources/views/form/pages/` — Forms Pro page templates.
+- `resources/js/` — Alpine components: `formHandler.js`, `formFields.js`, `wizardHandler.js`, `pageHandler.js`, `precognition.js`.
 
 ### Namespace
 
