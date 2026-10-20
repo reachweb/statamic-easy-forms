@@ -296,7 +296,7 @@ test('instance parameter works with files fields', function () {
         [
             'handle' => 'document',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Document',
             ],
         ],
@@ -314,7 +314,8 @@ test('instance parameter works with assets fields', function () {
         [
             'handle' => 'images',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Images',
             ],
         ],

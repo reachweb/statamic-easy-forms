@@ -357,7 +357,8 @@ test('assets field does not include validation dispatch', function () {
         [
             'handle' => 'documents',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Documents',
                 'container' => 'assets',
             ],

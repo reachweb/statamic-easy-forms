@@ -211,7 +211,8 @@ test('email template renders assets field with control panel link', function () 
             [
                 'display' => 'Attachment',
                 'value' => ['file1.pdf', 'file2.jpg'],
-                'fieldtype' => 'assets',
+                'fieldtype' => 'form_upload',
+                'config' => ['store' => true],
             ],
         ],
         'date' => now(),

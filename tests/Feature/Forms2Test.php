@@ -5,7 +5,6 @@ use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\Form;
-use Statamic\Forms\Fields\FormFieldtype;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,10 +18,6 @@ use Statamic\Forms\Fields\FormFieldtype;
 */
 
 beforeEach(function () {
-    if (! class_exists(FormFieldtype::class)) {
-        $this->markTestSkipped('Requires Statamic Forms 2.');
-    }
-
     Form::all()->each->delete();
 });
 

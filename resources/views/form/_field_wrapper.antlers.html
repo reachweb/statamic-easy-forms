@@ -101,13 +101,13 @@
         {{ partial:statamic-easy-forms::form/fieldtypes/textarea }}
     {{ /if }}
 
-    {{# Assets (Forms 2 uploads that are stored as assets render the same way) #}}
-    {{ if type == 'assets' || (type == 'form_upload' && store) }}
+    {{# Uploads stored as assets #}}
+    {{ if type == 'form_upload' && store }}
         {{ partial:statamic-easy-forms::form/fieldtypes/assets }}
     {{ /if }}
 
-    {{# Files (Forms 2 uploads that are not stored render the same way) #}}
-    {{ if type == 'files' || (type == 'form_upload' && !store) }}
+    {{# Uploads that are not stored (e.g. email attachments) #}}
+    {{ if type == 'form_upload' && !store }}
         {{ partial:statamic-easy-forms::form/fieldtypes/files }}
     {{ /if }}
 

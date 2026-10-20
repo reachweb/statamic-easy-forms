@@ -154,14 +154,12 @@ trait HandlesForms
     /**
      * Get the form's access restriction (closed, submission limit reached, login required).
      *
-     * Restrictions were introduced with Forms 2, so older Statamic versions never restrict.
-     *
      * @param  \Statamic\Forms\Form  $form
      * @return array|null ['message' => string, 'status' => string]
      */
     protected function getRestriction($form): ?array
     {
-        if (! method_exists($form, 'restricted') || ! $form->restricted()) {
+        if (! $form->restricted()) {
             return null;
         }
 

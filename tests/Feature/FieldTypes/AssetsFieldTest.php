@@ -15,7 +15,8 @@ test('assets field renders correctly', function () {
         [
             'handle' => 'attachments',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Attachments',
                 'max_files' => 3,
             ],
@@ -35,7 +36,8 @@ test('assets field with multiple files enabled', function () {
         [
             'handle' => 'documents',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Documents',
                 'max_files' => 5,
             ],
@@ -55,7 +57,8 @@ test('assets field with single file (default)', function () {
         [
             'handle' => 'photo',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Photo',
             ],
         ],
@@ -76,7 +79,8 @@ test('assets field includes drag and drop zone', function () {
         [
             'handle' => 'files',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Files',
                 'max_files' => 10,
             ],
@@ -97,7 +101,8 @@ test('assets field includes file size formatting', function () {
         [
             'handle' => 'uploads',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Uploads',
             ],
         ],
@@ -114,7 +119,8 @@ test('assets field includes remove file functionality', function () {
         [
             'handle' => 'images',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Images',
                 'max_files' => 3,
             ],
@@ -133,7 +139,8 @@ test('assets field includes instructions', function () {
         [
             'handle' => 'docs',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Documents',
                 'instructions' => 'PDF, DOC, or DOCX only (max 5MB)',
             ],
@@ -152,7 +159,8 @@ test('assets field shows file counter for multiple files', function () {
         [
             'handle' => 'gallery',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Gallery',
                 'max_files' => 20,
             ],
@@ -170,7 +178,8 @@ test('assets field includes upload icon', function () {
         [
             'handle' => 'file',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'File Upload',
             ],
         ],
@@ -188,7 +197,8 @@ test('assets field handles file validation', function () {
         [
             'handle' => 'validated_files',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Validated Files',
                 'max_files' => 3,
             ],
@@ -207,7 +217,8 @@ test('assets field includes Alpine.js data binding', function () {
         [
             'handle' => 'attachments',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Attachments',
             ],
         ],
@@ -226,7 +237,8 @@ test('assets field shows selected files list', function () {
         [
             'handle' => 'documents',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Documents',
                 'max_files' => 5,
             ],
@@ -246,7 +258,8 @@ test('assets field has accessible labels', function () {
         [
             'handle' => 'uploads',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Uploads',
                 'instructions' => 'Upload your files here',
             ],
@@ -265,7 +278,8 @@ test('assets field uses theme colors', function () {
         [
             'handle' => 'files',
             'field' => [
-                'type' => 'assets',
+                'type' => 'upload',
+                'store' => true,
                 'display' => 'Files',
             ],
         ],

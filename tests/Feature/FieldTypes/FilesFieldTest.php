@@ -15,7 +15,7 @@ test('files field renders correctly', function () {
         [
             'handle' => 'document',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Document',
             ],
         ],
@@ -34,7 +34,7 @@ test('files field with single file (default)', function () {
         [
             'handle' => 'resume',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Resume',
             ],
         ],
@@ -53,7 +53,7 @@ test('files field with multiple files enabled', function () {
         [
             'handle' => 'attachments',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Attachments',
                 'max_files' => 5,
             ],
@@ -72,7 +72,7 @@ test('files field uses theme styling', function () {
         [
             'handle' => 'upload',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Upload',
             ],
         ],
@@ -94,7 +94,7 @@ test('files field has file button styling', function () {
         [
             'handle' => 'docs',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Documents',
             ],
         ],
@@ -117,7 +117,7 @@ test('files field includes instructions with aria', function () {
         [
             'handle' => 'certificate',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Certificate',
                 'instructions' => 'Upload PDF only',
             ],
@@ -135,7 +135,7 @@ test('files field has Alpine.js data binding', function () {
         [
             'handle' => 'file_upload',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'File Upload',
             ],
         ],
@@ -154,7 +154,7 @@ test('files field handles file change events', function () {
         [
             'handle' => 'upload',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Upload',
             ],
         ],
@@ -173,7 +173,7 @@ test('files field respects max_files configuration', function () {
         [
             'handle' => 'images',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Images',
                 'max_files' => 10,
             ],
@@ -192,7 +192,7 @@ test('files field is accessible', function () {
         [
             'handle' => 'accessible_upload',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Upload File',
                 'instructions' => 'Select a file to upload',
             ],
@@ -211,7 +211,7 @@ test('files field has proper input type', function () {
         [
             'handle' => 'file',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'File',
             ],
         ],
@@ -228,7 +228,7 @@ test('files field uses inline Alpine.js data', function () {
         [
             'handle' => 'upload',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Upload',
             ],
         ],
@@ -246,7 +246,7 @@ test('files field updates submit fields correctly for single file', function () 
         [
             'handle' => 'single',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Single File',
                 'max_files' => 1,
             ],
@@ -264,7 +264,7 @@ test('files field updates submit fields correctly for multiple files', function 
         [
             'handle' => 'multiple',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Multiple Files',
                 'max_files' => 5,
             ],
@@ -282,7 +282,7 @@ test('files field has focus states', function () {
         [
             'handle' => 'focused',
             'field' => [
-                'type' => 'files',
+                'type' => 'upload',
                 'display' => 'Focused Field',
             ],
         ],

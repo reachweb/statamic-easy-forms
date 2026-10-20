@@ -2,7 +2,6 @@
 
 use Reach\StatamicEasyForms\Tags\EasyForm;
 use Reach\StatamicEasyForms\Tests\TestCase;
-use Statamic\Facades\Blueprint;
 use Statamic\Forms\Form;
 
 /*
@@ -79,28 +78,15 @@ expect()->extend('toContainField', function (string $fieldHandle) {
  */
 function createTestForm(string $handle = 'test_form', array $fields = []): Form
 {
-    $formConfig = [
-        'title' => 'Test Form',
-        'honeypot' => 'honeypot',
-    ];
-
-    deleteStaleFormBlueprint($handle);
-
     $form = Statamic\Facades\Form::make($handle)
-        ->title($formConfig['title'])
-        ->honeypot($formConfig['honeypot']);
-
-    $form->save();
+        ->title('Test Form')
+        ->honeypot('honeypot');
 
     if (! empty($fields)) {
-        $contents = [
-            'fields' => $fields,
-        ];
-
-        $blueprint = Blueprint::make($handle)->setContents($contents);
-        $blueprint->setNamespace('forms');
-        $blueprint->save();
+        $form->formFields(['fields' => $fields]);
     }
+
+    $form->save();
 
     return $form;
 }
@@ -131,43 +117,21 @@ function createFieldDefinition(string $handle, string $type = 'text', array $con
  */
 function createFormWithSections(string $handle = 'test_form', array $sections = []): Form
 {
-    $formConfig = [
-        'title' => 'Test Form',
-        'honeypot' => 'honeypot',
-    ];
-
-    deleteStaleFormBlueprint($handle);
-
     $form = Statamic\Facades\Form::make($handle)
-        ->title($formConfig['title'])
-        ->honeypot($formConfig['honeypot']);
-
-    $form->save();
+        ->title('Test Form')
+        ->honeypot('honeypot');
 
     if (! empty($sections)) {
-        $blueprintSections = [];
-
-        foreach ($sections as $section) {
-            $blueprintSections[] = [
+        $form->formFields([
+            'sections' => collect($sections)->map(fn (array $section) => [
                 'display' => $section['display'] ?? null,
                 'instructions' => $section['instructions'] ?? null,
                 'fields' => $section['fields'] ?? [],
-            ];
-        }
-
-        $contents = [
-            'tabs' => [
-                'main' => [
-                    'display' => 'Main',
-                    'sections' => $blueprintSections,
-                ],
-            ],
-        ];
-
-        $blueprint = Blueprint::make($handle)->setContents($contents);
-        $blueprint->setNamespace('forms');
-        $blueprint->save();
+            ])->all(),
+        ]);
     }
+
+    $form->save();
 
     return $form;
 }
@@ -178,18 +142,6 @@ function createFormWithSections(string $handle = 'test_form', array $sections = 
  * @param  string  $handle  Form handle
  * @param  array  $params  Additional tag parameters
  */
-/**
- * Delete a form blueprint left behind by a previous test.
- *
- * Deleting a form does not delete its blueprint, and Statamic Forms 2 moves an
- * existing form blueprint into the form when the form is saved, so a stale
- * blueprint would replace the fields of the form being created.
- */
-function deleteStaleFormBlueprint(string $handle): void
-{
-    Blueprint::find("forms.{$handle}")?->delete();
-}
-
 function renderEasyFormTag(string $handle, array $params = []): string
 {
     $tag = new EasyForm;

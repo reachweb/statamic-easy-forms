@@ -149,7 +149,7 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
         },
 
         getFieldDefaultValue(field) {
-            if (field.type === 'assets' || field.type === 'form_upload') {
+            if (field.type === 'form_upload') {
                 return null
             } else if (field.type === 'toggle') {
                 return field.default ?? false
