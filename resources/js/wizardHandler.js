@@ -58,7 +58,10 @@ export default function wizardHandler(totalSteps) {
          * Validate current step's fields using Precognition.
          */
         async validateCurrentStep() {
-            const fields = Array.from(this.stepFields[this.currentStep] || []);
+            // Fields hidden by their conditions aren't submitted, so they don't block the step
+            const fieldsComponent = this.getFieldsComponent();
+            const fields = Array.from(this.stepFields[this.currentStep] || [])
+                .filter(field => this.isFieldSubmittable(fieldsComponent, field, field));
 
             if (fields.length === 0) return true;
 

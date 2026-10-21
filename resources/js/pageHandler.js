@@ -103,31 +103,12 @@ export default function pageHandler(pages) {
          * The server only keeps the posted page's fields, so other pages are left out.
          */
         getPageSubmitData(page) {
-            // x-ref="fields" is registered on the formFields component itself, not on this form component
-            const fieldsEl = this.$refs.form.querySelector('[x-ref="fields"]');
-            const fields = fieldsEl && window.Alpine?.$data(fieldsEl);
-
-            return Object.fromEntries(
-                Object.entries(this.submitData).filter(([key]) => {
-                    // Nested group and grid values ("address.city", "rows.0.name") belong to their field
-                    const handle = key.split('.')[0];
-
-                    return page.fields.includes(handle) && this.isFieldSubmittable(fields, handle, key);
-                })
+            const pageData = Object.fromEntries(
+                Object.entries(this.submitData).filter(([key]) => page.fields.includes(key.split('.')[0]))
             );
-        },
 
-        /**
-         * Fields hidden by their conditions are not posted (unless they always save), as Statamic's
-         * own form drivers do, so stale values don't reach validation or page logic.
-         */
-        isFieldSubmittable(fields, handle, key) {
-            if (!fields?.shouldShowField) return true;
-
-            // Fields hidden with the hide_fields parameter still post their (prepopulated) values
-            if (fields.hideFields.includes(handle) || fields.fieldsMap[handle]?.always_save) return true;
-
-            return fields.shouldShowField(handle) && (key === handle || fields.shouldShowField(key));
+            // Fields hidden by their conditions are left out, as in formHandler
+            return this.getSubmittableData(pageData);
         },
 
         /**

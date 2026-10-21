@@ -121,7 +121,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                     }
                 }
 
-                const formData = this.buildFormData(token)
+                const formData = this.buildFormData(token, this.getSubmittableData())
 
                 const response = await fetch(this.$refs.form.action, {
                     method: 'POST',
@@ -152,6 +152,43 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 this.toggleSubmit()
                 this.isSubmitting = false
             }
+        },
+
+        /**
+         * Get the formFields component, which keeps the field config and conditions.
+         * x-ref="fields" is registered on that component itself, not on this form component.
+         */
+        getFieldsComponent() {
+            const fieldsEl = this.$refs.form.querySelector('[x-ref="fields"]')
+
+            return fieldsEl && window.Alpine?.$data(fieldsEl)
+        },
+
+        /**
+         * Fields hidden by their conditions are not posted (unless they always save), as Statamic's
+         * own form drivers do, so stale values don't reach validation, logic or emails.
+         */
+        isFieldSubmittable(fields, handle, key) {
+            if (!fields?.shouldShowField) return true
+
+            // Fields hidden with the hide_fields parameter still post their (prepopulated) values
+            if (fields.hideFields.includes(handle) || fields.fieldsMap[handle]?.always_save) return true
+
+            return fields.shouldShowField(handle) && (key === handle || fields.shouldShowField(key))
+        },
+
+        /**
+         * Get the values to post, leaving out fields hidden by their conditions.
+         */
+        getSubmittableData(data = this.submitData) {
+            const fields = this.getFieldsComponent()
+
+            return Object.fromEntries(
+                Object.entries(data).filter(([key]) => {
+                    // Nested group and grid values ("address.city", "rows.0.name") belong to their field
+                    return key.startsWith('_grid_count_') || this.isFieldSubmittable(fields, key.split('.')[0], key)
+                })
+            )
         },
 
         buildFormData(token, data = this.submitData) {
