@@ -214,6 +214,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 } else if (value !== null && typeof value === 'object') {
                     // Objects (e.g. date ranges) are posted as "handle[start]", "handle[end]"
                     Object.entries(value).forEach(([subKey, item]) => formData.append(`${formKey}[${subKey}]`, item ?? ''))
+                } else if (typeof value === 'boolean') {
+                    // FormData would send "false", which Statamic's Toggle casts to true
+                    formData.append(formKey, value ? '1' : '0')
                 } else if (value !== null && value !== undefined) {
                     formData.append(formKey, value)
                 }
