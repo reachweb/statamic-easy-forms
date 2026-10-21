@@ -8,6 +8,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         errors: {},
         fatalError: false,
         sessionExpired: false,
+        rateLimited: false,
         disableSubmit: false,
         successMessage: false,
         hasReCaptcha: !!recaptchaSiteKey,
@@ -269,6 +270,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 if (response.status === 419) {
                     // CSRF token expired / session expired
                     this.sessionExpired = true
+                } else if (response.status === 429) {
+                    // Statamic throttles form submissions per IP (every page of a multi-page form counts)
+                    this.rateLimited = true
                 } else if (response.status === 500) {
                     this.fatalError = true
                 } else {
@@ -298,7 +302,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 // Dispatch error event
                 this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
                     bubbles: true,
-                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, sessionExpired: this.sessionExpired, formHandle: this.formHandle, formId: this.formId }
+                    detail: { errors: this.errors, status: response.status, fatalError: this.fatalError, sessionExpired: this.sessionExpired, rateLimited: this.rateLimited, formHandle: this.formHandle, formId: this.formId }
                 }))
 
                 // Scroll to first error field if outside of viewport
@@ -355,6 +359,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
             this.errors = {}
             this.fatalError = false
             this.sessionExpired = false
+            this.rateLimited = false
 
             // Clear precognition errors if enabled
             if (this.precognitionEnabled && this.precogForm) {
