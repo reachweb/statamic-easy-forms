@@ -1,5 +1,6 @@
 <?php
 
+use Statamic\Facades\Fieldset;
 use Statamic\Facades\Form;
 
 beforeEach(function () {
@@ -246,3 +247,25 @@ test('group field sub-fields have labels linked to inputs', function () {
         ->toContain('for="group_labels_person_last_name"')
         ->toContain('id="group_labels_person_last_name"');
 });
+
+test('group renders fields linked or imported from a fieldset', function (array $child) {
+    Fieldset::make('location')->setContents(['fields' => [
+        ['handle' => 'city', 'field' => ['type' => 'text', 'display' => 'City']],
+    ]])->save();
+
+    createTestForm('group_fieldset', [
+        ['handle' => 'place', 'field' => ['type' => 'group', 'display' => 'Place', 'fields' => [$child]]],
+    ]);
+
+    try {
+        expect(renderEasyFormTag('group_fieldset'))
+            ->toContain('name="place[city]"')
+            ->toContain('id="group_fieldset_place_city"')
+            ->toContain("submitFields['place.city']");
+    } finally {
+        Fieldset::find('location')->delete();
+    }
+})->with([
+    'linked' => [['handle' => 'city', 'field' => 'location.city']],
+    'imported' => [['import' => 'location']],
+]);

@@ -51,8 +51,9 @@ class EasyForm extends Tags
         }
 
         $blueprint = $form->blueprint();
+        $formFields = $form->formFields()->fields();
 
-        $sectionsData = $this->processSections($blueprint);
+        $sectionsData = $this->processSections($blueprint, $formFields);
 
         // If we have sections, collect fields from them instead of reprocessing
         if ($sectionsData['hasSections']) {
@@ -61,7 +62,7 @@ class EasyForm extends Tags
                 ->values()
                 ->all();
         } else {
-            $fields = $this->processAllFields($blueprint);
+            $fields = $this->processAllFields($blueprint, $formFields);
         }
 
         $data = $this->prepareViewData(

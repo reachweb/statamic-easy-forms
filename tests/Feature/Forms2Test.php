@@ -1,8 +1,10 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use Illuminate\Validation\ValidationException;
 use Reach\StatamicEasyForms\Listeners\ValidateRecaptcha;
 use Statamic\Events\FormSubmitted;
+use Statamic\Facades\Blueprint;
 use Statamic\Facades\Fieldset;
 use Statamic\Facades\Form;
 
@@ -258,3 +260,24 @@ test('recaptcha listener skips fake submissions generated in the control panel',
 
     config(['easy-forms.recaptcha.secret_key' => null]);
 });
+
+test('classic upload fields of forms that were not saved in Forms 2 yet render', function (string $type, string $template) {
+    Blueprint::make('classic_upload')->setNamespace('forms')->setContents(['fields' => [
+        ['handle' => 'document', 'field' => ['type' => $type, 'display' => 'Document']],
+    ]])->save();
+
+    $form = Form::make('classic_upload')->title('Classic');
+    File::put($form->path(), "title: Classic\n");
+
+    try {
+        expect(renderEasyFormTag('classic_upload'))
+            ->toContain('id="classic_upload_document"')
+            ->toContain($template);
+    } finally {
+        Blueprint::find('forms.classic_upload')?->delete();
+        File::delete($form->path());
+    }
+})->with([
+    'assets' => ['assets', 'or drag and drop here'],
+    'files' => ['files', 'x-ref="fileInput"'],
+]);

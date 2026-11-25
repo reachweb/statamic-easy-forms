@@ -2,8 +2,10 @@
 
 namespace Reach\StatamicEasyForms\Tags\Concerns;
 
+use Illuminate\Support\Collection;
 use Statamic\Facades\Form;
 use Statamic\Fields\Blueprint;
+use Statamic\Forms\Fields\FormField;
 
 trait HandlesForms
 {
@@ -38,9 +40,10 @@ trait HandlesForms
      * so that fieldset imports (offered by the Forms 2 builder) are expanded.
      *
      * @param  Blueprint  $blueprint
+     * @param  Collection<string, FormField>|null  $formFields
      * @return array ['has_sections' => bool, 'sections' => array]
      */
-    protected function extractSections($blueprint): array
+    protected function extractSections($blueprint, ?Collection $formFields = null): array
     {
         $hasSections = false;
         $sections = [];
@@ -58,7 +61,7 @@ trait HandlesForms
 
                 foreach ($section->fields()->all() as $handle => $sectionField) {
                     $field = $blueprint->field($handle) ?? $sectionField;
-                    $processedSectionFields[] = $this->processField($field);
+                    $processedSectionFields[] = $this->processField($field, formField: $formFields?->get($handle));
                 }
 
                 $sections[] = [
@@ -146,10 +149,11 @@ trait HandlesForms
      * Process all sections from the blueprint.
      *
      * @param  Blueprint  $blueprint
+     * @param  Collection<string, FormField>|null  $formFields
      */
-    protected function processSections($blueprint): array
+    protected function processSections($blueprint, ?Collection $formFields = null): array
     {
-        return $this->extractSections($blueprint);
+        return $this->extractSections($blueprint, $formFields);
     }
 
     /**
