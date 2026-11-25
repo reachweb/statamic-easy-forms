@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\File;
 use Statamic\Facades\Form;
 
 beforeEach(function () {
@@ -315,3 +316,24 @@ test('Forms 2 uploads that are not stored render the files template', function (
         ->toContain('x-ref="fileInput"')
         ->not->toContain('or drag and drop here');
 })->skip(! class_exists('Statamic\Fieldtypes\FormUpload'), 'Requires Statamic Forms 2');
+
+test('Forms 2 uploads render with views published before Statamic 6.44', function (string $type, string $template) {
+    $path = resource_path('views/vendor/statamic-easy-forms/form/_field_wrapper.antlers.html');
+    $published = preg_replace('/\|\| \(type == \'form_upload\'[^)]*\)/', '', file_get_contents(__DIR__.'/../../../resources/views/form/_field_wrapper.antlers.html'));
+
+    File::ensureDirectoryExists(dirname($path));
+    file_put_contents($path, $published);
+
+    createTestForm('published_upload', [
+        ['handle' => 'document', 'field' => ['type' => $type, 'display' => 'Document']],
+    ]);
+
+    try {
+        expect(renderEasyFormTag('published_upload'))->toContain('id="published_upload_document"')->toContain($template);
+    } finally {
+        unlink($path);
+    }
+})->with([
+    'assets' => ['assets', 'or drag and drop here'],
+    'files' => ['files', 'x-ref="fileInput"'],
+]);
