@@ -155,8 +155,8 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                     return acc
                 }
 
-                // Display-only Forms 2 fields (banner, heading, paragraph) don't collect a value
-                if (['info', 'form_heading', 'form_paragraph'].includes(field.type)) {
+                // Display-only fields (banner, heading, paragraph, section, html) don't collect a value
+                if (['info', 'form_heading', 'form_paragraph', 'section', 'html'].includes(field.type)) {
                     return acc
                 }
 

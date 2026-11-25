@@ -375,3 +375,23 @@ test('submissions with a filled in honeypot are not stored', function (?string $
     'ignored' => [null, []],
     'kept as spam' => ['mark_as_spam', [true]],
 ]);
+
+test('classic section and html fields render as content without an input', function () {
+    createTestForm('classic_display', [
+        ['handle' => 'details', 'field' => ['type' => 'section', 'display' => 'Your details', 'instructions' => 'We only use them to reply']],
+        ['handle' => 'note', 'field' => ['type' => 'html', 'display' => 'Note', 'html' => '<p class="note">Read this first</p>']],
+        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+    ]);
+
+    $output = renderEasyFormTag('classic_display');
+
+    expect($output)
+        ->not->toContain('Easy Forms has no template')
+        ->not->toContain('name="details"')
+        ->not->toContain('name="note"')
+        ->toMatch('/<h3[^>]*>\s*Your details\s*<\/h3>\s*<p[^>]*>\s*We only use them to reply\s*<\/p>/')
+        ->toContain('<p class="note">Read this first</p>')
+        ->toContain('name="name"')
+        // The instructions are the heading's subheading, not a description above it
+        ->not->toContain('id="classic_display_details-description"');
+});
