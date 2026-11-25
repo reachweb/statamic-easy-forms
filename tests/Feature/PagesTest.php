@@ -28,14 +28,14 @@ beforeEach(function () {
     Composer::shouldReceive('isInstalled')->with('statamic/forms-pro')->andReturnTrue()->byDefault();
 
     Form::all()->each(function ($form) {
-        $form->submissions()->each->delete();
+        $form->querySubmissions()->get()->each->delete();
         $form->delete();
     });
 });
 
 afterEach(function () {
     Form::all()->each(function ($form) {
-        $form->submissions()->each->delete();
+        $form->querySubmissions()->get()->each->delete();
         $form->delete();
     });
 });
@@ -315,7 +315,7 @@ test('each page is saved as a partial submission and the last page finalizes it'
         ->assertOk()
         ->assertJson(['success' => true, 'next_page' => 'contact']);
 
-    $submission = $form->submissions()->first();
+    $submission = $form->querySubmissions()->first();
     expect($submission->isPartial())->toBeTrue()
         ->and($submission->get('name'))->toBe('Olaf')
         ->and($dispatched)->toBe(0);
@@ -406,7 +406,7 @@ test('files are uploaded with the request of their page', function () {
     ])->assertOk()->assertJson(['next_page' => 'details']);
 
     // The partial holds the temporary upload until the submission is finalized
-    expect($form->submissions()->first()->get('cv'))->toEndWith('cv/cv.pdf');
+    expect($form->querySubmissions()->first()->get('cv'))->toEndWith('cv/cv.pdf');
 
     postPage('upload_survey', 'details', ['message' => 'Hello'])
         ->assertOk()
@@ -446,7 +446,7 @@ test('recaptcha is only verified on the request that finalizes the submission', 
 
     $response = postPage('survey', 'details', ['message' => 'Hello'])->assertStatus(400);
     expect($response->json('error'))->toHaveKey('recaptcha')
-        ->and($form->submissions()->first()->isPartial())->toBeTrue();
+        ->and($form->querySubmissions()->first()->isPartial())->toBeTrue();
 
     postPage('survey', 'details', ['message' => 'Hello'], ['g-recaptcha-response' => 'token'])
         ->assertOk()
@@ -473,7 +473,7 @@ test('a multi page form posted in a single request only saves its first page', f
         'Content-Type' => 'multipart/form-data',
     ])->assertOk()->assertJson(['success' => true, 'next_page' => 'contact']);
 
-    $submission = $form->submissions()->first();
+    $submission = $form->querySubmissions()->first();
     expect($submission->isPartial())->toBeTrue()
         ->and($submission->get('email'))->toBeNull()
         ->and($submission->get('message'))->toBeNull();

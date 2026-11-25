@@ -197,7 +197,7 @@ class ServiceProvider extends AddonServiceProvider
 
         // Classic fieldtypes, still used by group and grid children and fieldset fields. Until v7, core
         // also copies these onto every form fieldtype wrapping them, so they reuse the handles above
-        // and are hidden on the ones they don't apply to (short answer, email, yes/no, currency...)
+        // and are hidden on the ones they don't apply to (short answer, email, yes/no...)
         Text::appendConfigFields([
             ...$this->withCondition('if', ['input_type' => 'contains_any tel, date, time'], [
                 ...$section,
@@ -231,7 +231,7 @@ class ServiceProvider extends AddonServiceProvider
         Radio::appendConfigFields($this->withCondition('unless', ['type' => 'is yes_no'], $improvedChoices));
         Select::appendConfigFields($improvedSelect);
         Toggle::appendConfigFields($labelOverride);
-        Integer::appendConfigFields($this->withCondition('unless', ['type' => 'is currency'], $integerTemplate));
+        Integer::appendConfigFields($integerTemplate);
     }
 
     /**

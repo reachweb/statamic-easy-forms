@@ -4,6 +4,7 @@ use Reach\StatamicEasyForms\FormFieldtypes\Grid;
 use Reach\StatamicEasyForms\FormFieldtypes\Hidden;
 use Reach\StatamicEasyForms\Tags\EasyForm;
 use Statamic\Fields\Field;
+use Statamic\Fields\Fieldtype;
 use Statamic\Fieldtypes as ClassicFieldtypes;
 use Statamic\Forms\Fields\FormField;
 use Statamic\Forms\Fields\FormFieldtype;
@@ -42,6 +43,11 @@ function visibleEasyFormsOptions(FormFieldtype $fieldtype): array
         ->reject(fn ($field) => ($field->config()['unless']['type'] ?? null) === 'is '.$fieldtype->handle())
         ->keys()
         ->all();
+}
+
+function extraConfigFieldItems(Fieldtype $fieldtype): array
+{
+    return (new ReflectionMethod($fieldtype, 'extraConfigFieldItems'))->invoke($fieldtype);
 }
 
 function processFieldWithEasyForm(Field $field): array
@@ -84,7 +90,7 @@ test('options copied from classic fieldtypes are replaced rather than duplicated
 });
 
 test('classic fieldtypes keep their options for group and grid children', function () {
-    $options = fn (string $fieldtype) => array_keys((new $fieldtype)->extraConfigFieldItems());
+    $options = fn (string $fieldtype) => array_keys(extraConfigFieldItems(new $fieldtype));
 
     expect($options(ClassicFieldtypes\Text::class))->toBe([
         'easy_forms', 'improved_field', 'datepicker_config', 'date_range', 'max_range',
@@ -99,7 +105,7 @@ test('classic fieldtypes keep their options for group and grid children', functi
 });
 
 test('classic text options only show for the input types they apply to', function () {
-    $items = (new ClassicFieldtypes\Text)->extraConfigFieldItems();
+    $items = extraConfigFieldItems(new ClassicFieldtypes\Text);
 
     expect($items['improved_field']['if'])->toBe(['input_type' => 'contains_any tel, date, time'])
         ->and($items['max_range']['if'])->toBe(['input_type' => 'is date', 'date_range' => 'is true'])
