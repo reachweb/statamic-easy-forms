@@ -17,10 +17,9 @@
             return this.options.find(option => option.key === key)?.label ?? key;
         },
         message(name, key, index) {
-            return this.messages[name]
-                .replace(':item', this.label(key))
-                .replace(':position', index + 1)
-                .replace(':total', this.order.length);
+            {{# One pass with a function, so a label containing $& or :position is inserted as it is #}}
+            const values = { item: this.label(key), position: index + 1, total: this.order.length };
+            return this.messages[name].replace(/:(item|position|total)/g, (match, placeholder) => values[placeholder]);
         },
         reorder(from, to) {
             if (from === to || to < 0 || to >= this.order.length) return false;
