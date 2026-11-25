@@ -133,9 +133,9 @@
             x-on:keydown.enter.prevent="openedWithKeyboard = true"
             x-on:keydown.space.prevent="openedWithKeyboard = true"
             x-bind:aria-expanded="isOpen || openedWithKeyboard"
-            x-bind:aria-label="selectedOption ? getSelectedOptionLabel() : '{{ "Select" | trans }}'"
+            x-bind:aria-label="selectedOption ? getSelectedOptionLabel() : {{ "Select" | trans | to_json | entities }}"
         >
-            <span class="font-normal" x-text="selectedOption ? getSelectedOptionLabel() : '{{ "Select" | trans }}'"></span>
+            <span class="font-normal" x-text="selectedOption ? getSelectedOptionLabel() : {{ "Select" | trans | to_json | entities }}"></span>
             <svg class="size-5 text-ef-input-text" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                 <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd"/>
             </svg>
@@ -188,7 +188,7 @@
                             <span x-bind:class="selectedOption == item.value ? 'font-bold' : null">
                                 <span x-text="item.label"></span> (<span class="font-bold" x-text="item.code"></span>)
                             </span>
-                            <span class="sr-only" x-text="selectedOption == item.value ? '{{ 'selected' | trans }}' : null"></span>
+                            <span class="sr-only" x-text="selectedOption == item.value ? {{ 'selected' | trans | to_json | entities }} : null"></span>
                         </div>
                         <svg
                             x-cloak

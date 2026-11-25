@@ -20,7 +20,7 @@
             :disabled="Number(submitFields['{{ field_key ?? handle }}']) <= minVal"
             :class="Number(submitFields['{{ field_key ?? handle }}']) <= minVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-l-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
-            :aria-label="'{{ 'Subtract' | trans }} ' + incrementAmount"
+            :aria-label="{{ 'Subtract' | trans | to_json | entities }} + ' ' + incrementAmount"
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2" class="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 12h-15"/>
@@ -43,7 +43,7 @@
             :disabled="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal"
             :class="maxVal !== null && Number(submitFields['{{ field_key ?? handle }}']) >= maxVal ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-75 active:opacity-100 cursor-pointer'"
             class="flex h-10 items-center justify-center rounded-r-ef border border-ef-border bg-ef-input-bg px-4 py-2 text-ef-input-text focus:outline-none focus:ring-2 focus:ring-ef-focus"
-            :aria-label="'{{ 'Add' | trans }} ' + incrementAmount"
+            :aria-label="{{ 'Add' | trans | to_json | entities }} + ' ' + incrementAmount"
         >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" stroke="currentColor" fill="none" stroke-width="2" class="size-4">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>

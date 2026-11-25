@@ -250,6 +250,30 @@ test('select improved field placeholder is translated', function () {
         ->not->toContain("'forms.country_placeholder'");
 });
 
+test('select improved field placeholder with apostrophe renders valid JavaScript', function () {
+    createTestForm('select_improved_apostrophe', [
+        [
+            'handle' => 'choice',
+            'field' => [
+                'type' => 'select',
+                'display' => 'Choice',
+                'options' => [
+                    'a' => 'Option A',
+                    'b' => 'Option B',
+                ],
+                'improved_field' => true,
+                'placeholder' => "Choisissez l'option",
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('select_improved_apostrophe');
+
+    expect($output)
+        ->toContain('return &quot;Choisissez l&#039;option&quot;;')
+        ->not->toContain("return 'Choisissez l'option';");
+});
+
 test('select improved field includes search when searchable is true', function () {
     createTestForm('select_improved_searchable', [
         [

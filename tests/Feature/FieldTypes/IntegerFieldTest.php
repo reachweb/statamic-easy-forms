@@ -46,6 +46,25 @@ test('integer field with min/max renders correctly', function () {
     expect($output)->toContain('name="age"');
 });
 
+test('integer counter button labels render as encoded JavaScript strings', function () {
+    createTestForm('counter_aria_encoding', [
+        [
+            'handle' => 'quantity',
+            'field' => [
+                'type' => 'integer',
+                'display' => 'Quantity',
+                'integer_template' => 'counter',
+            ],
+        ],
+    ]);
+
+    $output = renderEasyFormTag('counter_aria_encoding');
+
+    expect($output)
+        ->toContain("&quot;Subtract&quot; + ' ' + incrementAmount")
+        ->toContain("&quot;Add&quot; + ' ' + incrementAmount");
+});
+
 test('integer field has Alpine model binding', function () {
     createTestForm('alpine_integer', [
         [

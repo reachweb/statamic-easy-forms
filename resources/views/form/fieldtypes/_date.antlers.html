@@ -40,8 +40,8 @@
         no_of_days: [],
         blankdays: [],
         years: [],
-        DAYS: ['{{ "Sun" | trans }}', '{{ "Mon" | trans }}', '{{ "Tue" | trans }}', '{{ "Wed" | trans }}', '{{ "Thu" | trans }}', '{{ "Fri" | trans }}', '{{ "Sat" | trans }}'],
-        MONTH_NAMES: ['{{ "January" | trans }}', '{{ "February" | trans }}', '{{ "March" | trans }}', '{{ "April" | trans }}', '{{ "May" | trans }}', '{{ "June" | trans }}', '{{ "July" | trans }}', '{{ "August" | trans }}', '{{ "September" | trans }}', '{{ "October" | trans }}', '{{ "November" | trans }}', '{{ "December" | trans }}'],
+        DAYS: [{{ "Sun" | trans | to_json | entities }}, {{ "Mon" | trans | to_json | entities }}, {{ "Tue" | trans | to_json | entities }}, {{ "Wed" | trans | to_json | entities }}, {{ "Thu" | trans | to_json | entities }}, {{ "Fri" | trans | to_json | entities }}, {{ "Sat" | trans | to_json | entities }}],
+        MONTH_NAMES: [{{ "January" | trans | to_json | entities }}, {{ "February" | trans | to_json | entities }}, {{ "March" | trans | to_json | entities }}, {{ "April" | trans | to_json | entities }}, {{ "May" | trans | to_json | entities }}, {{ "June" | trans | to_json | entities }}, {{ "July" | trans | to_json | entities }}, {{ "August" | trans | to_json | entities }}, {{ "September" | trans | to_json | entities }}, {{ "October" | trans | to_json | entities }}, {{ "November" | trans | to_json | entities }}, {{ "December" | trans | to_json | entities }}],
         focusedDate: null,
 
         init() {
