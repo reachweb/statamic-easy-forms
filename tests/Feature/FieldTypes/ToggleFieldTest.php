@@ -119,3 +119,27 @@ test('toggle field displays instructions by default above when position not spec
         ->toContain('By enabling this, you accept our terms of service')
         ->toContain('id="toggle_instructions_default_terms-description"');
 });
+
+test('toggle values are stored as posted by the form', function (string $posted, bool $stored) {
+    createTestForm('toggle_submit', [
+        [
+            'handle' => 'newsletter',
+            'field' => [
+                'type' => 'toggle',
+                'display' => 'Newsletter',
+            ],
+        ],
+    ]);
+
+    $this->postJson('/!/forms/toggle_submit', ['newsletter' => $posted])->assertOk();
+
+    $submissions = Form::find('toggle_submit')->submissions();
+
+    expect($submissions)->toHaveCount(1)
+        ->and($submissions->first()->get('newsletter'))->toBe($stored);
+
+    $submissions->each->delete();
+})->with([
+    'checked' => ['1', true],
+    'unchecked' => ['0', false],
+]);
