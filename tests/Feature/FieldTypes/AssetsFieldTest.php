@@ -278,3 +278,24 @@ test('assets field uses theme colors', function () {
         ->toContain('bg-ef-')
         ->toContain('border-ef-');
 });
+
+test('Forms 2 uploads that are stored as assets render the assets template', function () {
+    createTestForm('stored_upload', [
+        [
+            'handle' => 'photo',
+            'field' => [
+                'type' => 'assets',
+                'display' => 'Photo',
+                'container' => 'assets',
+                'max_files' => 2,
+            ],
+        ],
+    ]);
+
+    expect(Form::find('stored_upload')->blueprint()->field('photo')->type())->toBe('form_upload');
+
+    expect(renderEasyFormTag('stored_upload'))
+        ->toContain('id="stored_upload_photo"')
+        ->toContain('or drag and drop here')
+        ->toContain('maxFiles: 2');
+})->skip(! class_exists('Statamic\Fieldtypes\FormUpload'), 'Requires Statamic Forms 2');

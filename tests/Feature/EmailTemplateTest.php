@@ -481,3 +481,26 @@ test('email template only shows fields with values', function () {
         ->not->toContain('Empty Field')
         ->not->toContain('Null Field');
 });
+
+test('email template links Forms 2 uploads to the control panel only when they are stored', function (bool $store) {
+    $form = createTestForm('upload_email_form');
+
+    $rendered = View::make('statamic-easy-forms::emails.form-submission', [
+        'fields' => [
+            [
+                'display' => 'Photo',
+                'value' => 'uploads/photo.jpg',
+                'fieldtype' => 'form_upload',
+                'config' => ['store' => $store],
+            ],
+        ],
+        'date' => now(),
+        'form' => $form,
+    ])->render();
+
+    if ($store) {
+        expect($rendered)->toContain('Login to view file(s)')->not->toContain('uploads/photo.jpg');
+    } else {
+        expect($rendered)->not->toContain('Login to view file(s)')->toContain('uploads/photo.jpg');
+    }
+})->with(['stored' => true, 'not stored' => false]);

@@ -102,12 +102,12 @@
     {{ /if }}
 
     {{# Assets #}}
-    {{ if type == 'assets' }}
+    {{ if type == 'assets' || (type == 'form_upload' && store) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/assets }}
     {{ /if }}
 
     {{# Files #}}
-    {{ if type == 'files' }}
+    {{ if type == 'files' || (type == 'form_upload' && !store) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/files }}
     {{ /if }}
 

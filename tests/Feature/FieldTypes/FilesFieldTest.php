@@ -296,3 +296,22 @@ test('files field has focus states', function () {
         ->toContain('focus:ring-ef-focus')
         ->toContain('focus:outline-none');
 });
+
+test('Forms 2 uploads that are not stored render the files template', function () {
+    createTestForm('temporary_upload', [
+        [
+            'handle' => 'document',
+            'field' => [
+                'type' => 'files',
+                'display' => 'Document',
+            ],
+        ],
+    ]);
+
+    expect(Form::find('temporary_upload')->blueprint()->field('document')->type())->toBe('form_upload');
+
+    expect(renderEasyFormTag('temporary_upload'))
+        ->toContain('id="temporary_upload_document"')
+        ->toContain('x-ref="fileInput"')
+        ->not->toContain('or drag and drop here');
+})->skip(! class_exists('Statamic\Fieldtypes\FormUpload'), 'Requires Statamic Forms 2');
