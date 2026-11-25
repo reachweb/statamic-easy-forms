@@ -1,25 +1,35 @@
 {{ field_id = field_key ? (field_key | replace:'.':'_') : (parent_handle ? "{parent_handle}_{handle}" : handle) }}
-<div class="flex">
+{{# The step is the currency's smallest amount, e.g. 1 for yen, 0.01 for euros and 0.001 for dinars #}}
+{{ decimals = 2 }}{{ if step == 1 }}{{ decimals = 0 }}{{ elseif step == 0.001 }}{{ decimals = 3 }}{{ /if }}
+{{# A text input, because number inputs only take the decimal separator of the browser's locale and read as empty for the other one #}}
+<div
+    class="flex"
+    x-data="{
+        parseAmount(text) {
+            const amount = text.trim()
+            if (amount === '') return ''
+            if (/^-?\d+{{ if decimals }}([.,]\d{1,{{ decimals }}})?{{ /if }}$/.test(amount)) return Number(amount.replace(',', '.'))
+            {{# Thousands separators are ambiguous, so post something the server rejects instead of another amount #}}
+            return /\d/.test(amount) ? amount.replaceAll('.', ',') + (amount.match(/[.,]/) ? '' : '?') : amount
+        }
+    }"
+>
     <span
         id="{{ form_id }}_{{ field_id }}-currency"
         class="inline-flex items-center px-3 text-ef-text-muted bg-ef-subtle border border-e-0 border-ef-border rounded-s-ef"
         aria-hidden="true"
     >{{ currency_symbol }}</span>
-    {{# The step is the currency's smallest amount (0.01 for euros, 1 for yen). Exponents can't be typed #}}
     <input
         class="form-input bg-ef-input-bg border border-ef-border text-ef-input-text rounded-e-ef rounded-s-none focus:border-ef-focus focus:ring-2 focus:ring-ef-focus focus:outline-none block w-full min-w-0 p-2.5"
         id="{{ form_id }}_{{ field_id }}"
         name="{{ field_name ?? handle }}"
-        type="number"
-        inputmode="{{ if step == 1 }}numeric{{ else }}decimal{{ /if }}"
-        step="{{ step ?? 'any' }}"
-        {{ if min || min === 0 }}min="{{ min }}"{{ /if }}
-        {{ if max || max === 0 }}max="{{ max }}"{{ /if }}
+        type="text"
+        inputmode="{{ if decimals }}decimal{{ else }}numeric{{ /if }}"
         {{ if placeholder }}placeholder="{{ placeholder | trans }}"{{ /if }}
         aria-describedby="{{ form_id }}_{{ field_id }}-currency{{ if has_own_instructions }} {{ form_id }}_{{ field_id }}-description{{ /if }}"
         autocomplete="off"
-        x-model.number="submitFields['{{ field_key ?? handle }}']"
-        x-on:keydown="[{{ if step == 1 }}'.', ',', {{ /if }}'e', 'E', '+'].includes($event.key) && $event.preventDefault()"
+        x-effect="if (parseAmount($el.value) !== (submitFields['{{ field_key ?? handle }}'] ?? '')) $el.value = submitFields['{{ field_key ?? handle }}'] ?? ''"
+        x-on:input="submitFields['{{ field_key ?? handle }}'] = parseAmount($el.value)"
         x-on:blur="$dispatch('validate-field', '{{ field_key ?? handle }}')"
     >
 </div>

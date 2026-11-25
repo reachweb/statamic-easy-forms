@@ -10,7 +10,7 @@ afterEach(function () {
     Form::all()->each->delete();
 });
 
-test('currency renders a number input with the currency symbol beside it', function () {
+test('currency renders an amount input with the currency symbol beside it', function () {
     createTestForm('currency_test', [
         ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR']],
     ]);
@@ -21,13 +21,12 @@ test('currency renders a number input with the currency symbol beside it', funct
         ->toMatch('/<span\s+id="currency_test_budget-currency"[^>]*aria-hidden="true"\s*>€<\/span>/')
         ->toContain('id="currency_test_budget"')
         ->toContain('name="budget"')
-        ->toContain('type="number"')
+        ->toContain('type="text"')
         ->toContain('inputmode="decimal"')
-        ->toContain('step="0.01"')
-        ->toContain("['e', 'E', '+'].includes(")
+        ->toContain('([.,]\d{1,2})?$/')
         ->not->toContain('Easy Forms has no template')
         ->toContain('aria-describedby="currency_test_budget-currency"')
-        ->toContain("x-model.number=\"submitFields['budget']\"")
+        ->toContain("x-on:input=\"submitFields['budget'] = parseAmount(\$el.value)\"")
         ->toContain("\$dispatch('validate-field', 'budget')");
 });
 
@@ -122,19 +121,28 @@ test('currencies without decimals only take whole numbers', function () {
 
     expect(renderEasyFormTag('currency_yen'))
         ->toContain('inputmode="numeric"')
-        ->toContain('step="1"')
-        ->toContain("['.', ',', 'e', 'E', '+'].includes(");
+        ->toContain('/^-?\d+$/');
 });
 
-test('currency limits are passed to the input', function () {
-    createTestForm('currency_limits', [
-        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR', 'min' => 0, 'max' => 99.5]],
+test('currencies with three decimals take three decimals', function () {
+    createTestForm('currency_dinar', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'KWD']],
     ]);
 
-    expect(renderEasyFormTag('currency_limits'))
-        ->toContain('min="0"')
-        ->toContain('max="99.5"');
+    expect(renderEasyFormTag('currency_dinar'))->toContain('([.,]\d{1,3})?$/');
 });
+
+test('ambiguous currency amounts are rejected', function (string $amount) {
+    createTestForm('currency_ambiguous', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR']],
+    ]);
+
+    $this->postJson('/!/forms/currency_ambiguous', ['budget' => $amount])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('budget');
+
+    expect(Form::find('currency_ambiguous')->submissions())->toBeEmpty();
+})->with(['1,234', '1,234,56', '12,', '1e5?']);
 
 test('decimal currency amounts are accepted and stored', function () {
     createTestForm('currency_submit', [
