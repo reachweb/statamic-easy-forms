@@ -41,6 +41,16 @@ Don't use the namespaced view `statamic-easy-forms::emails.form-submission`. Ema
 
 Upgrading? Publish the template again with `php artisan vendor:publish --tag=easy-forms-emails --force`. This overwrites any changes you made to your copy. The Easy Forms 2 template doesn't escape the submitted answers, so don't keep using it. With `email_view_folder` set, the new template is published to that folder, so also set your forms' **HTML view** to it.
 
+## Upgrading from 2.x
+
+If you published the form views, publish them again, then bring back your changes:
+
+```bash
+php artisan vendor:publish --tag=easy-forms-views --force
+```
+
+Views published by Easy Forms 2 render nothing for the new fieldtypes, such as uploads, date pickers and ratings. Until you publish them again, Easy Forms logs a warning.
+
 ## License
 
 ⚠️ **Commercial addon** - License required for production use. Test freely in local development. Purchase at the [Statamic Marketplace](https://statamic.com/addons/reach/easy-forms)

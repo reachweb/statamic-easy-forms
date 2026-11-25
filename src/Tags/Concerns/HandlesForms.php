@@ -3,6 +3,9 @@
 namespace Reach\StatamicEasyForms\Tags\Concerns;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Statamic\Facades\Form;
 use Statamic\Fields\Blueprint;
 use Statamic\Forms\Fields\FormField;
@@ -211,8 +214,28 @@ trait HandlesForms
         $parts[] = $filename;
         $view = implode('/', $parts);
 
-        return view('statamic-easy-forms::'.$view, $data)
+        return $this->outdatedViewsNotice().view('statamic-easy-forms::'.$view, $data)
             ->withoutExtractions()
             ->render();
+    }
+
+    /**
+     * Warn when the published field wrapper is from Easy Forms 2. It renders nothing for
+     * the Forms 2 fieldtypes (uploads, date pickers, ratings...), so they'd go missing.
+     */
+    protected function outdatedViewsNotice(): string
+    {
+        $path = resource_path('views/vendor/statamic-easy-forms/form/_field_wrapper.antlers.html');
+
+        if (! File::exists($path) || str_contains(File::get($path), 'star_rating')) {
+            return '';
+        }
+
+        // Once a day, so busy sites don't fill their logs
+        if (Cache::add('easy-forms.outdated-views-warning', true, now()->addDay())) {
+            Log::warning("Statamic Easy Forms: {$path} was published by Easy Forms 2 and renders nothing for Forms 2 fields such as uploads, date pickers and ratings. Publish the views again with \"php artisan vendor:publish --tag=easy-forms-views --force\" and bring back your changes.");
+        }
+
+        return '<!-- Easy Forms: the published views are from Easy Forms 2, so some fields are missing. Publish them again with "php artisan vendor:publish --tag=easy-forms-views --force". -->';
     }
 }

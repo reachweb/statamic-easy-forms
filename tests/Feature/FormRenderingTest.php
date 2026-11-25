@@ -1,5 +1,7 @@
 <?php
 
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Log;
 use Statamic\Facades\Form;
 
 beforeEach(function () {
@@ -375,6 +377,33 @@ test('submissions with a filled in honeypot are not stored', function (?string $
     'ignored' => [null, []],
     'kept as spam' => ['mark_as_spam', [true]],
 ]);
+
+test('forms warn when the published field wrapper is from Easy Forms 2', function () {
+    $path = resource_path('views/vendor/statamic-easy-forms/form/_field_wrapper.antlers.html');
+    File::ensureDirectoryExists(dirname($path));
+    Log::spy();
+
+    createTestForm('outdated_views', [
+        ['handle' => 'photo', 'field' => ['type' => 'upload', 'display' => 'Photo']],
+    ]);
+
+    try {
+        // Easy Forms 2 wrappers have no branches for the Forms 2 fieldtypes
+        File::put($path, '<div>{{ display }}</div>');
+
+        $first = renderEasyFormTag('outdated_views');
+        renderEasyFormTag('outdated_views');
+
+        File::put($path, File::get(__DIR__.'/../../resources/views/form/_field_wrapper.antlers.html'));
+
+        expect($first)->toContain('<!-- Easy Forms: the published views are from Easy Forms 2')
+            ->and(renderEasyFormTag('outdated_views'))->not->toContain('Easy Forms: the published views');
+
+        Log::shouldHaveReceived('warning')->once()->withArgs(fn (string $message) => str_contains($message, 'vendor:publish --tag=easy-forms-views --force'));
+    } finally {
+        File::deleteDirectory(resource_path('views/vendor/statamic-easy-forms'));
+    }
+});
 
 test('classic section and html fields render as content without an input', function () {
     createTestForm('classic_display', [
