@@ -8,7 +8,8 @@
         parseAmount(text) {
             const amount = text.trim()
             if (amount === '') return ''
-            if (/^-?\d+{{ if decimals }}([.,]\d{1,{{ decimals }}})?{{ /if }}$/.test(amount)) return Number(amount.replace(',', '.'))
+            {{# With three decimals, 1,000 or 1.500 may also be thousands, unless the amount starts with a 0 #}}
+            if (/^-?\d+{{ if decimals }}([.,]\d{1,{{ decimals }}})?{{ /if }}$/.test(amount){{ if decimals == 3 }} && !/^-?[1-9]\d{0,2}[.,]\d{3}$/.test(amount){{ /if }}) return Number(amount.replace(',', '.'))
             {{# Thousands separators are ambiguous, so post something the server rejects instead of another amount #}}
             return /\d/.test(amount) ? amount.replaceAll('.', ',') + (amount.match(/[.,]/) ? '' : '?') : amount
         }

@@ -129,7 +129,10 @@ test('currencies with three decimals take three decimals', function () {
         ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'KWD']],
     ]);
 
-    expect(renderEasyFormTag('currency_dinar'))->toContain('([.,]\d{1,3})?$/');
+    expect(renderEasyFormTag('currency_dinar'))
+        ->toContain('([.,]\d{1,3})?$/')
+        // 1,000 or 1.500 may be thousands too, so they're rejected
+        ->toContain('!/^-?[1-9]\d{0,2}[.,]\d{3}$/.test(amount)');
 });
 
 test('ambiguous currency amounts are rejected', function (string $amount) {
