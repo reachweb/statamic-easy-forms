@@ -8,6 +8,7 @@ use Reach\StatamicEasyForms\EmailTemplate;
 use Reach\StatamicEasyForms\ServiceProvider;
 use Statamic\Contracts\Forms\Submission;
 use Statamic\Facades\AssetContainer;
+use Statamic\Facades\Fieldset;
 use Statamic\Facades\Form;
 use Statamic\Facades\FormConnector;
 use Statamic\Facades\Site;
@@ -894,4 +895,52 @@ test('installer keeps a published email template unless told to overwrite it', f
         ->assertSuccessful();
 
     expect(File::get(EmailTemplate::path()))->toBe('My customized template');
+});
+
+test('email template only shows the decimals a currency amount needs', function (string $currency, float $amount, string $expected) {
+    $form = createTestForm('amounts_form', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => $currency]],
+        ['handle' => 'quote', 'field' => ['type' => 'group', 'display' => 'Quote', 'fields' => [
+            ['handle' => 'deposit', 'field' => ['type' => 'currency', 'display' => 'Deposit', 'currency' => $currency]],
+        ]]],
+    ]);
+
+    $email = renderSubmissionEmail($form->makeSubmission()->data(['budget' => $amount, 'quote' => ['deposit' => $amount]]));
+
+    expect(substr_count($email, "> {$expected} </div>"))->toBe(2);
+})->with([
+    'whole' => ['EUR', 1500, '€1,500'],
+    'decimals' => ['EUR', 1234.5, '€1,234.50'],
+    'three decimals' => ['KWD', 1.125, "د.ك.\u{200F}1.125"],
+]);
+
+test('email template lists group and grid answers of fields imported from a fieldset', function () {
+    Fieldset::make('location')->setContents(['fields' => [
+        ['handle' => 'home_city', 'field' => ['type' => 'text', 'display' => 'Home city']],
+    ]])->save();
+
+    $form = createTestForm('imported_form', [
+        ['handle' => 'place', 'field' => ['type' => 'group', 'display' => 'Place', 'fields' => [
+            ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Place name']],
+            ['import' => 'location'],
+        ]]],
+        ['handle' => 'stops', 'field' => ['type' => 'grid', 'display' => 'Stops', 'fields' => [['import' => 'location']]]],
+    ]);
+
+    try {
+        $email = renderSubmissionEmail($form->makeSubmission()->data([
+            'place' => ['name' => 'Base', 'home_city' => 'Athens & Piraeus'],
+            'stops' => [['home_city' => 'Volos']],
+        ]));
+    } finally {
+        Fieldset::find('location')->delete();
+    }
+
+    expect($email)
+        ->toContain('Place name </p>')
+        ->toContain('Home city </p>')
+        ->toContain('Athens &amp; Piraeus')
+        ->toContain('Home city:</span> Volos');
+
+    expect(substr_count($email, 'Base'))->toBe(1);
 });

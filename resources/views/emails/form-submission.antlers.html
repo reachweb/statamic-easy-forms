@@ -109,6 +109,8 @@
                                                                     <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
                                                                         {{ if field:type == 'toggle' }}
                                                                             Yes
+                                                                        {{ elseif field:currency_symbol }}
+                                                                            {{ field:currency_symbol }}{{ partial:statamic-easy-forms::emails/amount :amount="nested_value" :step="field:step" }}
                                                                         {{ elseif nested_value | is_array }}
                                                                             {{# A single select, radio or button group value is one {key, value, label} array #}}
                                                                             {{ if nested_value:label }}
@@ -126,6 +128,34 @@
                                                             </tr>
                                                         {{ /if }}
                                                     {{ /config:fields }}
+                                                    {{# Fields imported from a fieldset aren't listed in the config #}}
+                                                    {{ ef_listed = config:fields | pluck('handle') }}
+                                                    {{ foreach:value as="ef_handle|nested_value" }}
+                                                        {{ if ! (ef_listed | in_array(ef_handle)) && (nested_value || (nested_value | is_numeric)) }}
+                                                            <tr>
+                                                                <td width="35%" valign="middle" style="padding: 12px 10px 12px 15px; border-bottom: 1px solid #eeeeee;">
+                                                                    <p style="margin: 0; font-size: 12px; font-weight: bold; color: #888888; letter-spacing: 0.5px; line-height: 1.4;">
+                                                                        {{ ef_handle | deslugify | ucfirst }}
+                                                                    </p>
+                                                                </td>
+                                                                <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
+                                                                    <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
+                                                                        {{ if nested_value | is_array }}
+                                                                            {{ if nested_value:label }}
+                                                                                {{ nested_value:label | entities }}
+                                                                            {{ else }}
+                                                                                {{ foreach:nested_value as="ef_item" }}
+                                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
+                                                                                {{ /foreach:nested_value }}
+                                                                            {{ /if }}
+                                                                        {{ else }}
+                                                                            {{ (nested_value:label ?? nested_value) | entities }}
+                                                                        {{ /if }}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        {{ /if }}
+                                                    {{ /foreach:value }}
                                                 {{ /if }}
                                             {{# Grid fields need special handling - array of rows #}}
                                             {{ elseif fieldtype == 'grid' }}
@@ -164,6 +194,15 @@
                                                                         </p>
                                                                     {{ /if }}
                                                                 {{ /config:fields }}
+                                                                {{ ef_listed = config:fields | pluck('handle') }}
+                                                                {{ foreach:ef_row as="ef_handle|nested_value" }}
+                                                                    {{ if ! (ef_listed | in_array(ef_handle)) && ef_handle != 'id' && (nested_value || (nested_value | is_numeric)) }}
+                                                                        <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
+                                                                            <span style="color: #888888;">{{ ef_handle | deslugify | ucfirst }}:</span>
+                                                                            {{ (nested_value:label ?? nested_value) | entities }}
+                                                                        </p>
+                                                                    {{ /if }}
+                                                                {{ /foreach:ef_row }}
                                                             </td>
                                                         </tr>
                                                     {{ /foreach:value }}
@@ -218,8 +257,10 @@
                                                                 {{ value }} / {{ config:max_stars }}
                                                             {{ elseif fieldtype == 'opinion_scale' }}
                                                                 {{ value }} / {{ config:max }}
-                                                            {{ elseif fieldtype == 'integer' && config:currency_symbol }}
-                                                                {{ config:currency_symbol }}{{ value | format_number }}
+                                                            {{ elseif fieldtype == 'float' && config:currency_symbol }}
+                                                                {{ config:currency_symbol }}{{ partial:statamic-easy-forms::emails/amount :amount="value" :step="config:step" }}
+                                                            {{ elseif fieldtype == 'address' }}
+                                                                {{ value:formatted | entities }}
                                                             {{ elseif fieldtype == 'date' }}
                                                                 {{ if config:mode == 'range' }}
                                                                     {{ value:start format="F j, Y" }} – {{ value:end format="F j, Y" }}
