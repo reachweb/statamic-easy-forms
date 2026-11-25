@@ -121,6 +121,11 @@ export default function pageHandler(pages) {
                 this.fatalError = true;
                 // window.console, so the production build (which drops console calls) keeps this message
                 window.console.error(`Easy Forms: the server returned the page "${id}", which the "${this.formHandle}" form does not render. If the form's pages have changed, reload the page (and clear any cached copies of it).`);
+
+                this.$refs.form.dispatchEvent(new CustomEvent('form:error', {
+                    bubbles: true,
+                    detail: { error: 'The server returned a page that the form does not render.', fatalError: true, formHandle: this.formHandle, formId: this.formId }
+                }));
                 return;
             }
 
