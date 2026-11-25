@@ -751,6 +751,41 @@ test('email template renders grid choices, toggles and zero answers readably', f
         ->toContain('Children:</span> 0');
 });
 
+test('email template shows group and grid answers like other answers', function () {
+    $form = createTestForm('nested_answers_form', [
+        ['handle' => 'trip', 'field' => ['type' => 'group', 'display' => 'Trip', 'fields' => [
+            ['handle' => 'arrival', 'field' => ['type' => 'date_picker', 'display' => 'Arrival']],
+            ['handle' => 'seasons', 'field' => ['type' => 'ranking', 'display' => 'Seasons', 'options' => [
+                ['key' => 'winter', 'value' => 'Winter'],
+                ['key' => 'summer', 'value' => 'Summer'],
+            ]]],
+            ['handle' => 'stars', 'field' => ['type' => 'star_rating', 'display' => 'Stars']],
+        ]]],
+        ['handle' => 'extras', 'field' => ['type' => 'group', 'display' => 'Extras', 'fields' => [
+            ['handle' => 'notes', 'field' => ['type' => 'long_answer', 'display' => 'Notes']],
+        ]]],
+        ['handle' => 'legs', 'field' => ['type' => 'grid', 'display' => 'Legs', 'fields' => [
+            ['handle' => 'stay', 'field' => ['type' => 'date', 'display' => 'Stay', 'mode' => 'range']],
+            ['handle' => 'score', 'field' => ['type' => 'opinion_scale', 'display' => 'Score']],
+        ]]],
+    ]);
+    $submission = $form->makeSubmission()->data([
+        'trip' => ['arrival' => '2026-03-14', 'seasons' => ['summer', 'winter'], 'stars' => '4'],
+        // An optional group posts its fields empty
+        'extras' => ['notes' => null],
+        'legs' => [['stay' => ['start' => '2026-03-14', 'end' => '2026-03-18'], 'score' => '0']],
+    ]);
+
+    expect(renderSubmissionEmail($submission))
+        ->toContain('> March 14, 2026 </div>')
+        ->toContain('1. Summer<br /> 2. Winter')
+        ->toContain('4 / 5')
+        ->toContain('Stay:</span> March 14, 2026 – March 18, 2026 </p>')
+        ->toContain('Score:</span> 0 / 10 </p>')
+        ->not->toContain('00:00:00')
+        ->not->toContain('Extras');
+});
+
 test('email template renders section headings for sections with answers', function () {
     $form = createFormWithSections('sections_form', [
         ['display' => 'About you', 'fields' => [
@@ -758,12 +793,15 @@ test('email template renders section headings for sections with answers', functi
         ]],
         ['display' => 'Optional extras', 'fields' => [
             ['handle' => 'notes', 'field' => ['type' => 'long_answer', 'display' => 'Notes']],
+            ['handle' => 'diet', 'field' => ['type' => 'group', 'display' => 'Diet', 'fields' => [
+                ['handle' => 'allergies', 'field' => ['type' => 'short_answer', 'display' => 'Allergies']],
+            ]]],
         ]],
         ['fields' => [
             ['handle' => 'company', 'field' => ['type' => 'short_answer', 'display' => 'Company']],
         ]],
     ]);
-    $submission = $form->makeSubmission()->data(['name' => 'Jane Doe', 'company' => 'Acme']);
+    $submission = $form->makeSubmission()->data(['name' => 'Jane Doe', 'company' => 'Acme', 'diet' => ['allergies' => null]]);
 
     $html = renderSubmissionEmail($submission);
 

@@ -72,7 +72,11 @@
                                     {{# Only show a section heading when the section has answers #}}
                                     {{ ef_section_has_values = false }}
                                     {{ fields }}
-                                        {{ if value || (value | is_numeric) }}{{ ef_section_has_values = true }}{{ /if }}
+                                        {{ if fieldtype == 'group' }}
+                                            {{ foreach:value as="ef_handle|ef_nested_value" }}
+                                                {{ if ef_nested_value || (ef_nested_value | is_numeric) }}{{ ef_section_has_values = true }}{{ /if }}
+                                            {{ /foreach:value }}
+                                        {{ elseif value || (value | is_numeric) }}{{ ef_section_has_values = true }}{{ /if }}
                                     {{ /fields }}
                                     {{ if display && ef_section_has_values }}
                                         <tr>
@@ -88,7 +92,11 @@
                                         {{ unless fieldtype == 'section' }}
                                             {{# Group fields need special handling #}}
                                             {{ if fieldtype == 'group' }}
-                                                {{ if value }}
+                                                {{ ef_group_has_values = false }}
+                                                {{ foreach:value as="ef_handle|ef_nested_value" }}
+                                                    {{ if ef_nested_value || (ef_nested_value | is_numeric) }}{{ ef_group_has_values = true }}{{ /if }}
+                                                {{ /foreach:value }}
+                                                {{ if ef_group_has_values }}
                                                     {{# Group header #}}
                                                     <tr>
                                                         <td colspan="2" style="padding: 16px 0 8px 0;">
@@ -109,22 +117,7 @@
                                                                 </td>
                                                                 <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                                                     <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                                        {{ if field:type == 'toggle' }}
-                                                                            Yes
-                                                                        {{ elseif field:currency_symbol }}
-                                                                            {{ field:currency_symbol }}{{ partial:statamic-easy-forms::emails/amount :amount="nested_value" :step="field:step" }}
-                                                                        {{ elseif nested_value | is_array }}
-                                                                            {{# A single select, radio or button group value is one {key, value, label} array #}}
-                                                                            {{ if nested_value:label }}
-                                                                                {{ nested_value:label | entities }}
-                                                                            {{ else }}
-                                                                                {{ foreach:nested_value as="ef_item" }}
-                                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
-                                                                                {{ /foreach:nested_value }}
-                                                                            {{ /if }}
-                                                                        {{ else }}
-                                                                            {{ (nested_value:label ?? nested_value) | entities }}
-                                                                        {{ /if }}
+                                                                        {{ partial:statamic-easy-forms::emails/answer :value="nested_value" :fieldtype="field:type" :config="field" }}
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -142,17 +135,7 @@
                                                                 </td>
                                                                 <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                                                     <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                                        {{ if nested_value | is_array }}
-                                                                            {{ if nested_value:label }}
-                                                                                {{ nested_value:label | entities }}
-                                                                            {{ else }}
-                                                                                {{ foreach:nested_value as="ef_item" }}
-                                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
-                                                                                {{ /foreach:nested_value }}
-                                                                            {{ /if }}
-                                                                        {{ else }}
-                                                                            {{ (nested_value:label ?? nested_value) | entities }}
-                                                                        {{ /if }}
+                                                                        {{ partial:statamic-easy-forms::emails/answer :value="nested_value" fieldtype="" :config="arr()" }}
                                                                     </div>
                                                                 </td>
                                                             </tr>
@@ -179,20 +162,7 @@
                                                                     {{ if nested_value || (nested_value | is_numeric) }}
                                                                         <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
                                                                             <span style="color: #888888;">{{ field:display ?? handle | deslugify | ucfirst }}:</span>
-                                                                            {{ if field:type == 'toggle' }}
-                                                                                Yes
-                                                                            {{ elseif nested_value | is_array }}
-                                                                                {{# A single select, radio or button group value is one {key, value, label} array #}}
-                                                                                {{ if nested_value:label }}
-                                                                                    {{ nested_value:label | entities }}
-                                                                                {{ else }}
-                                                                                    {{ foreach:nested_value as="ef_item" }}
-                                                                                        {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
-                                                                                    {{ /foreach:nested_value }}
-                                                                                {{ /if }}
-                                                                            {{ else }}
-                                                                                {{ (nested_value:label ?? nested_value) | entities }}
-                                                                            {{ /if }}
+                                                                            {{ partial:statamic-easy-forms::emails/answer :value="nested_value" :fieldtype="field:type" :config="field" }}
                                                                         </p>
                                                                     {{ /if }}
                                                                 {{ /config:fields }}
@@ -201,7 +171,7 @@
                                                                     {{ if ! (ef_listed | in_array(ef_handle)) && ef_handle != 'id' && (nested_value || (nested_value | is_numeric)) }}
                                                                         <p style="margin: 4px 0; font-size: 13px; color: #222222; line-height: 1.4;">
                                                                             <span style="color: #888888;">{{ ef_handle | deslugify | ucfirst }}:</span>
-                                                                            {{ (nested_value:label ?? nested_value) | entities }}
+                                                                            {{ partial:statamic-easy-forms::emails/answer :value="nested_value" fieldtype="" :config="arr()" }}
                                                                         </p>
                                                                     {{ /if }}
                                                                 {{ /foreach:ef_row }}
@@ -220,68 +190,7 @@
 
                                                     <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                                         <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                            {{ if fieldtype == 'form_upload' }}
-                                                                {{ if config:store }}
-                                                                    {{ if config:max_files == 1 }}
-                                                                        {{ value:basename | entities }}
-                                                                    {{ else }}
-                                                                        {{ value | pluck('basename') | join(', ') | entities }}
-                                                                    {{ /if }}
-                                                                    {{# With a Message, the email may go to the visitor, who can't use the control panel #}}
-                                                                    {{ if ef_cp_enabled && ! email_config:body }}
-                                                                        <br />
-                                                                        <a href="{{ route name="statamic.cp.forms.submissions.show" :form="form:handle" :submission="id" }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
-                                                                            Login to view file(s) →
-                                                                        </a>
-                                                                    {{ /if }}
-                                                                {{# Files that aren't stored are deleted once the emails are sent #}}
-                                                                {{ elseif value | is_array }}
-                                                                    {{ foreach:value as="ef_file" }}
-                                                                        {{ ef_file | pathinfo('basename') | entities }}{{ unless last }}, {{ /unless }}
-                                                                    {{ /foreach:value }}
-                                                                {{ else }}
-                                                                    {{ value | pathinfo('basename') | entities }}
-                                                                {{ /if }}
-                                                            {{ elseif fieldtype == 'ranking' }}
-                                                                {{# Number the choices with the loop count, since the array keys come from the visitor #}}
-                                                                {{ if value | is_array }}
-                                                                    {{ foreach:value as="ef_choice" }}
-                                                                        {{ count }}. {{ (config:options[ef_choice] ?? ef_choice) | entities }}{{ unless last }}<br />{{ /unless }}
-                                                                    {{ /foreach:value }}
-                                                                {{ /if }}
-                                                            {{ elseif fieldtype == 'image_choice' }}
-                                                                {{ if value | is_array }}
-                                                                    {{ foreach:value as="ef_choice" }}
-                                                                        {{ (config:options | where('key', ef_choice) | pluck('label') | join ?: ef_choice) | entities }}{{ unless last }}, {{ /unless }}
-                                                                    {{ /foreach:value }}
-                                                                {{ else }}
-                                                                    {{ (config:options | where('key', value) | pluck('label') | join ?: value) | entities }}
-                                                                {{ /if }}
-                                                            {{ elseif fieldtype == 'star_rating' }}
-                                                                {{ value | entities }} / {{ config:max_stars }}
-                                                            {{ elseif fieldtype == 'opinion_scale' }}
-                                                                {{ value | entities }} / {{ config:max }}
-                                                            {{ elseif fieldtype == 'float' && config:currency_symbol }}
-                                                                {{ config:currency_symbol }}{{ partial:statamic-easy-forms::emails/amount :amount="value" :step="config:step" }}
-                                                            {{ elseif fieldtype == 'address' }}
-                                                                {{ value:formatted | entities }}
-                                                            {{ elseif fieldtype == 'date' }}
-                                                                {{ if config:mode == 'range' }}
-                                                                    {{ value:start format="F j, Y" }} – {{ value:end format="F j, Y" }}
-                                                                {{ elseif config:time_enabled }}
-                                                                    {{ value format="F j, Y g:i A" }}
-                                                                {{ else }}
-                                                                    {{ value format="F j, Y" }}
-                                                                {{ /if }}
-                                                            {{ elseif fieldtype == 'toggle' }}
-                                                                Yes
-                                                            {{ elseif value | is_array }}
-                                                                {{ foreach:value as="ef_item" }}
-                                                                    {{ (ef_item:label ?? ef_item:value ?? ef_item:key ?? ef_item) | entities }}{{ unless last }}, {{ /unless }}
-                                                                {{ /foreach:value }}
-                                                            {{ else }}
-                                                                {{ (value:label ?? value) | entities | nl2br }}
-                                                            {{ /if }}
+                                                            {{ partial:statamic-easy-forms::emails/answer :value="value" :fieldtype="fieldtype" :config="config" }}
                                                         </div>
                                                     </td>
                                                 </tr>
