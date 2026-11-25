@@ -174,6 +174,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                     formData.append(formKey, value)
                 } else if (Array.isArray(value)) {
                     value.forEach(item => formData.append(`${formKey}[]`, item))
+                } else if (typeof value === 'boolean') {
+                    // FormData would send "false", which Statamic's Toggle casts to true
+                    formData.append(formKey, value ? '1' : '0')
                 } else if (value !== null && value !== undefined) {
                     formData.append(formKey, value)
                 }
