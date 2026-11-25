@@ -172,8 +172,9 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
         isFieldSubmittable(fields, handle, key) {
             if (!fields?.shouldShowField) return true
 
-            // Fields hidden with the hide_fields parameter still post their (prepopulated) values
-            if (fields.hideFields.includes(handle) || fields.fieldsMap[handle]?.always_save) return true
+            // Fields hidden with the hide_fields parameter still post their (prepopulated) values,
+            // whether the parameter names the field or one of its group fields ("address.postcode")
+            if ([handle, key].some(name => fields.hideFields.includes(name) || fields.fieldsMap[name]?.always_save)) return true
 
             return fields.shouldShowField(handle) && (key === handle || fields.shouldShowField(key))
         },
