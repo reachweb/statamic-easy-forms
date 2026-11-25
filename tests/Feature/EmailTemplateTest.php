@@ -842,6 +842,14 @@ test('email template lists stored uploads with a link to the submission in the c
         ->toContain('photo.jpg, cv.pdf')
         ->not->toContain('Login to view file(s)')
         ->not->toContain($url);
+
+    // The control panel can't show a submission that wasn't stored
+    $form->store(false)->save();
+
+    expect(renderSubmissionEmail($submission))
+        ->toContain('photo.jpg, cv.pdf')
+        ->not->toContain('Login to view file(s)')
+        ->not->toContain($url);
 });
 
 test('email template lists uploads that are not stored by file name only', function () {

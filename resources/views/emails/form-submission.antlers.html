@@ -1,5 +1,7 @@
 {{# Inside the fields loop, "config" is the field's config, so read the app config first #}}
 {{ ef_cp_enabled = config:statamic:cp:enabled }}
+{{# Only a stored submission can be opened in the control panel #}}
+{{ ef_stores_submissions = form:handle | easy_forms_stores_submissions }}
 {{# A submitted field named "sections" replaces Statamic's sections, so fall back to the fields, which it can't replace #}}
 {{ ef_sections = (sections:0:fields | is_array) ? sections : arr(arr('fields' => fields)) }}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">

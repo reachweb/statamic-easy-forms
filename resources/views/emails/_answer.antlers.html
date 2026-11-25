@@ -10,7 +10,7 @@
             {{ value | pluck('basename') | join(', ') | entities }}
         {{ /if }}
         {{# With a Message, the email may go to the visitor, who can't use the control panel #}}
-        {{ if ef_cp_enabled && ! email_config:body }}
+        {{ if ef_cp_enabled && ef_stores_submissions && ! email_config:body }}
             <br />
             <a href="{{ route name="statamic.cp.forms.submissions.show" :form="form:handle" :submission="id" }}" style="color: #2d7a7d; text-decoration: none; font-weight: 500;">
                 Login to view file(s) →
