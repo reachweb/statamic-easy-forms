@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+# Prepares an Amp orb for this addon: PHP 8.4 with the CI extensions, Composer,
+# and the Composer and npm dependencies. Safe to rerun on a warm snapshot.
+set -euo pipefail
+
+cd "$(dirname "${BASH_SOURCE[0]}")/.."
+
+step() {
+  local label=$1
+  shift
+  echo "==> $label"
+  local start=$SECONDS
+  "$@"
+  echo "    $label took $((SECONDS - start))s"
+}
+
+# The extensions CI installs with setup-php; exif, fileinfo, iconv, and pcntl ship with php8.4-cli.
+apt_packages=(
+  php8.4-cli php8.4-bcmath php8.4-curl php8.4-gd php8.4-imagick php8.4-intl
+  php8.4-mbstring php8.4-soap php8.4-sqlite3 php8.4-xml php8.4-zip unzip
+)
+
+install_apt_packages() {
+  local missing=()
+  local pkg
+  for pkg in "${apt_packages[@]}"; do
+    dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q 'install ok installed' || missing+=("$pkg")
+  done
+  if ((${#missing[@]} == 0)); then
+    echo "    already installed"
+    return
+  fi
+  sudo apt-get update -qq
+  sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq --no-install-recommends "${missing[@]}"
+}
+
+install_composer() {
+  if command -v composer >/dev/null; then
+    composer --version
+    return
+  fi
+  local tmp
+  tmp=$(mktemp -d)
+  curl -fsSL https://getcomposer.org/download/latest-stable/composer.phar -o "$tmp/composer.phar"
+  curl -fsSL https://getcomposer.org/download/latest-stable/composer.phar.sha256 -o "$tmp/composer.phar.sha256"
+  echo "$(cat "$tmp/composer.phar.sha256")  $tmp/composer.phar" | sha256sum -c --quiet
+  sudo install -m 0755 "$tmp/composer.phar" /usr/local/bin/composer
+  rm -rf "$tmp"
+  composer --version
+}
+
+step "apt packages" install_apt_packages
+step "composer" install_composer
+# composer.lock is not committed, so resolve like CI does instead of trusting a lock from an older checkout.
+step "composer update" composer update --no-interaction --prefer-dist --no-progress
+step "npm ci" npm ci --no-audit --no-fund
+
+echo "==> setup finished in ${SECONDS}s"
