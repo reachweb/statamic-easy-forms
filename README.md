@@ -33,7 +33,7 @@ Easy Forms includes an HTML email template for form submissions. It lists the an
 1. Publish the template with `php artisan easy-forms:install` (or `php artisan vendor:publish --tag=easy-forms-emails`).
 2. In the control panel, open your form, go to **Connect → Email**, and add or edit an email.
 3. Set **HTML view** to `vendor/statamic-easy-forms/emails/form-submission`. Leave **Text view** empty and keep **Markdown** off.
-4. Optionally, write a **Message**. It's shown above the answers, so the same template also works for a confirmation email to the visitor. With **Attachments** on, the uploaded files are attached and listed at the end.
+4. Optionally, write a **Message**. It's shown above the answers, so the same template also works for a confirmation email to the visitor. Emails with a Message leave out the control panel link. With **Attachments** on, the uploaded files are attached and listed at the end.
 
 If your site sets `email_view_folder` in `config/statamic/forms.php`, the control panel only offers views from that folder, so the template is published there as `easy-forms-submission` (for example `emails/easy-forms-submission`). Pick that as the **HTML view** instead.
 

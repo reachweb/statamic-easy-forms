@@ -797,6 +797,12 @@ test('email template lists stored uploads with a link to the submission in the c
         ->toContain('Login to view file(s)')
         ->not->toContain('Portfolio')
         ->and($url)->toEndWith('/cp/forms/stored_upload_form/submissions/'.$submission->id());
+
+    // With a Message, the email may be a confirmation to the visitor
+    expect(renderSubmissionEmail($submission, ['body' => 'Thanks for your photos.']))
+        ->toContain('photo.jpg, cv.pdf')
+        ->not->toContain('Login to view file(s)')
+        ->not->toContain($url);
 });
 
 test('email template lists uploads that are not stored by file name only', function () {
