@@ -124,14 +124,17 @@ export default function pageHandler(pages) {
                 return;
             }
 
-            if (index < this.currentStep) {
+            const currentIndex = this.currentStep - 1;
+
+            if (index < currentIndex) {
                 // Statamic sends the visitor back to an earlier page when answers from it are missing,
                 // e.g. when the session holding the partial submission expired
                 this.pageHistory = this.pageHistory.slice(0, Math.max(this.pageHistory.indexOf(id), 0));
                 this.pagesIncomplete = true;
-            } else {
+            } else if (index > currentIndex) {
                 this.pageHistory.push(this.currentPage);
             }
+            // A page rule that leads to its own page shows the same page again, keeping the history
 
             this.showPage(id);
         },
