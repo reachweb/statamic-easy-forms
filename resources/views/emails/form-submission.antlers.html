@@ -240,9 +240,10 @@
                                                                     {{ value | pathinfo('basename') | entities }}
                                                                 {{ /if }}
                                                             {{ elseif fieldtype == 'ranking' }}
+                                                                {{# Number the choices with the loop count, since the array keys come from the visitor #}}
                                                                 {{ if value | is_array }}
-                                                                    {{ foreach:value as="ef_index|ef_choice" }}
-                                                                        {{ ef_index + 1 }}. {{ (config:options[ef_choice] ?? ef_choice) | entities }}{{ unless last }}<br />{{ /unless }}
+                                                                    {{ foreach:value as="ef_choice" }}
+                                                                        {{ count }}. {{ (config:options[ef_choice] ?? ef_choice) | entities }}{{ unless last }}<br />{{ /unless }}
                                                                     {{ /foreach:value }}
                                                                 {{ /if }}
                                                             {{ elseif fieldtype == 'image_choice' }}
@@ -254,9 +255,9 @@
                                                                     {{ (config:options | where('key', value) | pluck('label') | join ?: value) | entities }}
                                                                 {{ /if }}
                                                             {{ elseif fieldtype == 'star_rating' }}
-                                                                {{ value }} / {{ config:max_stars }}
+                                                                {{ value | entities }} / {{ config:max_stars }}
                                                             {{ elseif fieldtype == 'opinion_scale' }}
-                                                                {{ value }} / {{ config:max }}
+                                                                {{ value | entities }} / {{ config:max }}
                                                             {{ elseif fieldtype == 'float' && config:currency_symbol }}
                                                                 {{ config:currency_symbol }}{{ partial:statamic-easy-forms::emails/amount :amount="value" :step="config:step" }}
                                                             {{ elseif fieldtype == 'address' }}

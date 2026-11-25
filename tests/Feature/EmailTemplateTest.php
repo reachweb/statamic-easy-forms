@@ -578,6 +578,31 @@ test('email template escapes submitted values', function () {
         ->toContain('First line<br /> Second line');
 });
 
+test('email template escapes rating and ranking answers, which Statamic stores as posted', function () {
+    $form = createTestForm('escape_scales_form', [
+        ['handle' => 'stars', 'field' => ['type' => 'star_rating', 'display' => 'Rating']],
+        ['handle' => 'nps', 'field' => ['type' => 'opinion_scale', 'display' => 'How likely', 'min' => 0, 'max' => 10]],
+        ['handle' => 'seasons', 'field' => ['type' => 'ranking', 'display' => 'Rank the seasons', 'options' => [
+            ['key' => 'winter', 'value' => 'Winter'],
+            ['key' => 'spring', 'value' => 'Spring'],
+        ]]],
+    ]);
+    $submission = $form->makeSubmission()->data([
+        'stars' => '<a href="https://evil.example/login">Verify</a>',
+        'nps' => '<img src="https://evil.example/pixel.gif">',
+        // The keys of a posted array are kept too
+        'seasons' => ['<a href="https://evil.example/claim">Claim</a>' => 'winter', 'x' => 'spring'],
+    ]);
+
+    expect(renderSubmissionEmail($submission))
+        ->not->toContain('<a href="https://evil.example')
+        ->not->toContain('<img src="https://evil.example')
+        ->not->toContain('Claim')
+        ->toContain('&lt;a href=&quot;https://evil.example/login&quot;&gt;Verify&lt;/a&gt; / 5')
+        ->toContain('&lt;img src=&quot;https://evil.example/pixel.gif&quot;&gt; / 10')
+        ->toContain('1. Winter<br /> 2. Spring');
+});
+
 test('email template shows human friendly values for choice fields', function () {
     $form = createTestForm('choices_form', [
         ['handle' => 'recommend', 'field' => ['type' => 'yes_no', 'display' => 'Would you recommend us?']],
