@@ -1,5 +1,7 @@
 {{# Inside the fields loop, "config" is the field's config, so read the app config first #}}
 {{ ef_cp_enabled = config:statamic:cp:enabled }}
+{{# A submitted field named "sections" replaces Statamic's sections, so fall back to the fields, which it can't replace #}}
+{{ ef_sections = (sections:0:fields | is_array) ? sections : arr(arr('fields' => fields)) }}
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en">
 <head>
@@ -66,7 +68,7 @@
                         <td style="padding: 10px 30px 30px 30px;">
                             <table border="0" cellpadding="0" cellspacing="0" width="100%">
 
-                                {{ sections }}
+                                {{ ef_sections }}
                                     {{# Only show a section heading when the section has answers #}}
                                     {{ ef_section_has_values = false }}
                                     {{ fields }}
@@ -285,7 +287,7 @@
                                             {{ /if }}
                                         {{ /unless }}
                                     {{ /fields }}
-                                {{ /sections }}
+                                {{ /ef_sections }}
 
                                 {{# With Attachments on, Statamic attaches the uploads and leaves them out of the fields above #}}
                                 {{ if email_config:attachments }}

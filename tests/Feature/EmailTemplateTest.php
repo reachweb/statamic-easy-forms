@@ -603,6 +603,19 @@ test('email template escapes rating and ranking answers, which Statamic stores a
         ->toContain('1. Winter<br /> 2. Spring');
 });
 
+test('email template lists the answers when a field is named sections', function () {
+    $form = createTestForm('sections_handle_form', [
+        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+        ['handle' => 'sections', 'field' => ['type' => 'short_answer', 'display' => 'Sections']],
+    ]);
+    $submission = $form->makeSubmission()->data(['name' => 'Jane Doe', 'sections' => 'Kitchen']);
+
+    expect(renderSubmissionEmail($submission))
+        ->toContain('Jane Doe')
+        ->toContain('Sections </p>')
+        ->toContain('Kitchen');
+});
+
 test('email template shows human friendly values for choice fields', function () {
     $form = createTestForm('choices_form', [
         ['handle' => 'recommend', 'field' => ['type' => 'yes_no', 'display' => 'Would you recommend us?']],
