@@ -200,10 +200,8 @@ export default function pageHandler(pages) {
             if (!page) return;
 
             for (const key of Object.keys(this.errors)) {
-                // Errors for single files of an upload field ("photos.0") belong to the field
-                const handle = key.replace(/\.\d+$/, '');
-                const id = `${this.formId}_${handle.replace(/\./g, '_')}`;
-                const name = handle.replace(/\.([^.]+)/g, '[$1]');
+                const id = `${this.formId}_${key.replace(/\./g, '_')}`;
+                const name = key.replace(/\.([^.]+)/g, '[$1]');
                 const field = page.querySelector(`#${CSS.escape(id)}, [name="${name}"], [name="${name}[]"]`);
 
                 if (field) {

@@ -39,7 +39,7 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
 
             // Sync precognition errors to our errors object for template display
             this.$watch('precogForm.errors', (newErrors) => {
-                this.errors = { ...newErrors };
+                this.errors = this.fieldErrors(newErrors);
             });
         },
 
@@ -283,15 +283,8 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 } else {
                     const errorData = await response.json()
                     const rawErrors = errorData?.error ?? errorData?.errors ?? {}
-                    // Normalize errors: Laravel returns arrays like {"email": ["Invalid email"]}
-                    // Templates use x-text which needs strings, not arrays
                     if (rawErrors && typeof rawErrors === 'object' && !Array.isArray(rawErrors)) {
-                        this.errors = Object.fromEntries(
-                            Object.entries(rawErrors).map(([key, value]) => [
-                                key,
-                                Array.isArray(value) ? value[0] : value
-                            ])
-                        )
+                        this.errors = this.fieldErrors(rawErrors)
                     } else if (rawErrors) {
                         this.errors = { form: String(rawErrors) }
                     } else {
@@ -324,6 +317,25 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                     detail: { errors: {}, fatalError: true, sessionExpired: false, formHandle: this.formHandle, formId: this.formId }
                 }))
             }
+        },
+
+        /**
+         * Key errors by the field that shows them, with one message each (templates use x-text).
+         * Laravel returns arrays like {"email": ["Invalid email"]}, and keys errors for single files
+         * or options by their index ("photos.0"), which belong to their field ("photos").
+         */
+        fieldErrors(rawErrors) {
+            const errors = {}
+
+            Object.entries(rawErrors).forEach(([key, value]) => {
+                const fieldKey = key.replace(/\.\d+$/, '')
+
+                if (!(fieldKey in errors)) {
+                    errors[fieldKey] = Array.isArray(value) ? value[0] : value
+                }
+            })
+
+            return errors
         },
 
         scrollToFirstError() {
