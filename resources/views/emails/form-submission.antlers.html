@@ -201,8 +201,8 @@
                                     {{ /fields }}
                                 {{ /ef_sections }}
 
-                                {{# With Attachments on, Statamic attaches the uploads and leaves them out of the fields above #}}
-                                {{ if email_config:attachments }}
+                                {{# With the Attachments setting, Statamic leaves the uploads out of the fields above, even when it's off (false in older email configs). It only attaches them when it's on #}}
+                                {{ if email_config:attachments !== null }}
                                     {{ scope:ef_submission }}
                                         {{ ef_form_fields = form:fields }}
                                         {{ foreach:ef_form_fields as="ef_handle|ef_field" }}
@@ -217,21 +217,11 @@
                                                         </td>
                                                         <td width="65%" valign="middle" style="padding: 12px 0 12px 0; border-bottom: 1px solid #eeeeee;">
                                                             <div style="margin: 0; font-size: 14px; color: #222222; line-height: 1.5; word-break: break-word;">
-                                                                {{ if ef_field:store }}
-                                                                    {{ if ef_field:max_files == 1 }}
-                                                                        {{ ef_files:basename | entities }}
-                                                                    {{ else }}
-                                                                        {{ ef_files | pluck('basename') | join(', ') | entities }}
-                                                                    {{ /if }}
-                                                                {{ elseif ef_files | is_array }}
-                                                                    {{ foreach:ef_files as="ef_file" }}
-                                                                        {{ ef_file | pathinfo('basename') | entities }}{{ unless last }}, {{ /unless }}
-                                                                    {{ /foreach:ef_files }}
-                                                                {{ else }}
-                                                                    {{ ef_files | pathinfo('basename') | entities }}
+                                                                {{ partial:statamic-easy-forms::emails/answer :value="ef_files" fieldtype="form_upload" :config="ef_field" }}
+                                                                {{ if email_config:attachments }}
+                                                                    <br />
+                                                                    <span style="font-size: 12px; color: #888888;">Attached to this email</span>
                                                                 {{ /if }}
-                                                                <br />
-                                                                <span style="font-size: 12px; color: #888888;">Attached to this email</span>
                                                             </div>
                                                         </td>
                                                     </tr>

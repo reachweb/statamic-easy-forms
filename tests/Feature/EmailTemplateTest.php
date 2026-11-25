@@ -896,6 +896,13 @@ test('email template lists attached uploads when attachments are enabled', funct
         ->not->toContain('Portfolio')
         ->not->toContain('Login to view file(s)')
         ->and(substr_count($html, 'Attached to this email'))->toBe(2);
+
+    // Older email configs can have "attachments: false", which Statamic also takes as a reason to leave uploads out of the fields
+    expect(renderSubmissionEmail($submission, ['attachments' => false]))
+        ->toContain('photo.jpg')
+        ->toContain('Login to view file(s)')
+        ->toContain('resume.pdf')
+        ->not->toContain('Attached to this email');
 });
 
 test('email connections accept the email view that the installer recommends', function () {
