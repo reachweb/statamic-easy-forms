@@ -39,7 +39,7 @@ If your site sets `email_view_folder` in `config/statamic/forms.php`, the contro
 
 Don't use the namespaced view `statamic-easy-forms::emails.form-submission`. Emails still send with it, but the control panel can't save or preview the email connection.
 
-Upgrading? Publish the template again with `php artisan vendor:publish --tag=easy-forms-emails --force`. This overwrites any changes you made to your copy.
+Upgrading? Publish the template again with `php artisan vendor:publish --tag=easy-forms-emails --force`. This overwrites any changes you made to your copy. The Easy Forms 2 template doesn't escape the submitted answers, so don't keep using it. With `email_view_folder` set, the new template is published to that folder, so also set your forms' **HTML view** to it.
 
 ## License
 

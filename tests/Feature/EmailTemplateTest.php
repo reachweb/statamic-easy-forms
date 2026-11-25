@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -939,6 +940,38 @@ test('installer keeps a published email template unless told to overwrite it', f
         ->assertSuccessful();
 
     expect(File::get(EmailTemplate::path()))->toBe('My customized template');
+});
+
+test('installer replaces an Easy Forms 2 email template, which does not escape answers, unless told to keep it', function () {
+    File::ensureDirectoryExists(dirname(EmailTemplate::path()));
+    File::put(EmailTemplate::path(), '{{ real_url = config:app:url }} The Easy Forms 2 template');
+
+    // Without interaction, every question takes its default
+    $this->withoutMockingConsoleOutput();
+    $status = Artisan::call('easy-forms:install', ['--no-interaction' => true]);
+
+    File::delete(resource_path('css/easy-forms-theme.css'));
+
+    expect($status)->toBe(0)
+        ->and(Artisan::output())->toContain('is from Easy Forms 2, which doesn\'t escape the submitted answers')
+        ->and(File::get(EmailTemplate::path()))->not->toContain('The Easy Forms 2 template');
+});
+
+test('installer warns when forms may still send with the Easy Forms 2 email template', function () {
+    config(['statamic.forms.email_view_folder' => 'emails']);
+
+    $legacy = resource_path('views/vendor/statamic-easy-forms/emails/form-submission.antlers.html');
+    File::ensureDirectoryExists(dirname($legacy));
+    File::put($legacy, '{{ real_url = config:app:url }} The Easy Forms 2 template');
+
+    $this->artisan('easy-forms:install')
+        ->expectsConfirmation('Do you want to publish the form views? (recommended)', 'no')
+        ->expectsConfirmation('Do you want to publish the default theme? (recommended)', 'no')
+        ->expectsConfirmation('Do you want to publish the email template? (recommended)', 'yes')
+        ->expectsOutputToContain('still use the Easy Forms 2 template, which doesn\'t escape the submitted answers. Set their HTML view to emails/easy-forms-submission')
+        ->assertSuccessful();
+
+    File::delete(EmailTemplate::path());
 });
 
 test('email template only shows the decimals a currency amount needs', function (string $currency, float $amount, string $expected) {

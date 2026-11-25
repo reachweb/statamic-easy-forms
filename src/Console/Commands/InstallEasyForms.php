@@ -91,7 +91,22 @@ class InstallEasyForms extends Command
 
         $path = 'resources/views/'.EmailTemplate::view().'.antlers.html';
 
-        if (File::exists(EmailTemplate::path()) && ! $this->confirm('The email template is already published. Do you want to overwrite it?', false)) {
+        // Easy Forms 2 published the template to the vendor folder. With an email view folder, it's now
+        // published elsewhere, so forms may still send with the old one.
+        $legacyPath = resource_path('views/vendor/statamic-easy-forms/emails/form-submission.antlers.html');
+
+        if ($legacyPath !== EmailTemplate::path() && $this->isVersion2EmailTemplate($legacyPath)) {
+            $this->warn('  Forms that send with vendor/statamic-easy-forms/emails/form-submission still use the Easy Forms 2 template, which doesn\'t escape the submitted answers. Set their HTML view to '.EmailTemplate::view().' and delete the old template.');
+        }
+
+        // Replace an Easy Forms 2 template unless told otherwise, since it doesn't escape the answers
+        $isVersion2 = $this->isVersion2EmailTemplate(EmailTemplate::path());
+
+        if ($isVersion2) {
+            $this->warn("  The email template at {$path} is from Easy Forms 2, which doesn't escape the submitted answers.");
+        }
+
+        if (File::exists(EmailTemplate::path()) && ! $this->confirm('The email template is already published. Do you want to overwrite it?', $isVersion2)) {
             $this->line("  • Kept the existing email template at {$path}");
         } else {
             $this->callSilent('vendor:publish', [
@@ -109,5 +124,13 @@ class InstallEasyForms extends Command
         $this->line('  • Message (optional): shown above the submitted answers');
 
         return $this;
+    }
+
+    /**
+     * Check whether the file is the email template published by Easy Forms 2.
+     */
+    protected function isVersion2EmailTemplate(string $path): bool
+    {
+        return File::exists($path) && str_contains(File::get($path), 'real_url = config:app:url');
     }
 }
