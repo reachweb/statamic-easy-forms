@@ -5,7 +5,7 @@
 >
     {{ unless type == 'toggle' || type == 'spacer' || type == 'info' || type == 'form_heading' || type == 'form_paragraph' }}
     <div class="flex items-center mb-2" {{ if type == 'integer' && integer_template == 'counter' }}id="{{ form_id }}_{{ field_id }}-label"{{ /if }}>
-        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating' && ! currency_symbol) || type == 'star_rating' || type == 'opinion_scale' || type == 'ranking' || type == 'image_choice' || type == 'group' || type == 'grid' }}
+        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating') || type == 'star_rating' || type == 'opinion_scale' || type == 'ranking' || type == 'image_choice' || type == 'group' || type == 'grid' }}
         <span class="block font-semibold text-ef text-ef-label">
         {{ else }}
         <label class="block font-semibold text-ef text-ef-label" for="{{ form_id }}_{{ field_id }}">
@@ -17,7 +17,7 @@
             {{ if append }}
             <span class="text-ef-text-muted">{{ append | trans }}</span>
             {{ /if }}
-        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating' && ! currency_symbol) || type == 'star_rating' || type == 'opinion_scale' || type == 'ranking' || type == 'image_choice' || type == 'group' || type == 'grid' }}
+        {{ if type == 'checkboxes' || type == 'radio' || type == 'yes_no' || (type == 'integer' && integer_template == 'rating') || type == 'star_rating' || type == 'opinion_scale' || type == 'ranking' || type == 'image_choice' || type == 'group' || type == 'grid' }}
         </span>
         {{ else }}
         </label>
@@ -62,22 +62,22 @@
     {{ /if }}
 
     {{# Integer #}}
-    {{ if type == 'integer' && ! currency_symbol && (integer_template == 'simple' || !integer_template) }}
+    {{ if type == 'integer' && (integer_template == 'simple' || !integer_template) }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer }}
     {{ /if }}
 
     {{# Integer Counter #}}
-    {{ if type == 'integer' && ! currency_symbol && integer_template == 'counter' }}
+    {{ if type == 'integer' && integer_template == 'counter' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer_counter }}
     {{ /if }}
 
     {{# Integer Rating #}}
-    {{ if type == 'integer' && ! currency_symbol && integer_template == 'rating' }}
+    {{ if type == 'integer' && integer_template == 'rating' }}
         {{ partial:statamic-easy-forms::form/fieldtypes/integer_rating }}
     {{ /if }}
 
-    {{# Currency (Forms 2 integer with a currency symbol) #}}
-    {{ if type == 'integer' && currency_symbol }}
+    {{# Currency (Forms 2 float with a currency symbol) #}}
+    {{ if type == 'float' && currency_symbol }}
         {{ partial:statamic-easy-forms::form/fieldtypes/currency }}
     {{ /if }}
 
@@ -177,7 +177,7 @@
     {{ /if }}
 
     {{# Fieldtypes without a template (e.g. from other addons) get a text input, like Statamic's default field view. Keep this list in sync with the branches above; hidden fields never get a visible input #}}
-    {{ unless arr('text', 'date', 'time', 'integer', 'radio', 'yes_no', 'checkboxes', 'select', 'textarea', 'form_upload', 'dictionary', 'toggle', 'spacer', 'info', 'form_heading', 'form_paragraph', 'group', 'grid', 'star_rating', 'opinion_scale', 'ranking', 'image_choice', 'hidden') | in_array(type) }}
+    {{ unless (type == 'float' && currency_symbol) || (arr('text', 'date', 'time', 'integer', 'radio', 'yes_no', 'checkboxes', 'select', 'textarea', 'form_upload', 'dictionary', 'toggle', 'spacer', 'info', 'form_heading', 'form_paragraph', 'group', 'grid', 'star_rating', 'opinion_scale', 'ranking', 'image_choice', 'hidden') | in_array(type)) }}
         <!-- Easy Forms has no template for the "{{ type }}" fieldtype, so it renders a text input -->
         {{ partial:statamic-easy-forms::form/fieldtypes/text }}
     {{ /unless }}

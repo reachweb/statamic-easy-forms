@@ -10,7 +10,7 @@ afterEach(function () {
     Form::all()->each->delete();
 });
 
-test('currency renders a whole number input with the currency symbol beside it', function () {
+test('currency renders a number input with the currency symbol beside it', function () {
     createTestForm('currency_test', [
         ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR']],
     ]);
@@ -22,8 +22,10 @@ test('currency renders a whole number input with the currency symbol beside it',
         ->toContain('id="currency_test_budget"')
         ->toContain('name="budget"')
         ->toContain('type="number"')
-        ->toContain('inputmode="numeric"')
-        ->toContain('step="1"')
+        ->toContain('inputmode="decimal"')
+        ->toContain('step="0.01"')
+        ->toContain("['e', 'E', '+'].includes(")
+        ->not->toContain('Easy Forms has no template')
         ->toContain('aria-describedby="currency_test_budget-currency"')
         ->toContain("x-model.number=\"submitFields['budget']\"")
         ->toContain("\$dispatch('validate-field', 'budget')");
@@ -41,7 +43,7 @@ test('currency symbol is not printed in the label', function () {
 
 test('currency adds its symbol to the instructions description', function () {
     createTestForm('currency_instructions', [
-        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'GBP', 'instructions' => 'Whole pounds only']],
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'GBP', 'instructions' => 'Including VAT']],
     ]);
 
     $output = renderEasyFormTag('currency_instructions');
@@ -98,7 +100,7 @@ test('currency inside a group uses the nested name and key', function () {
                 'type' => 'group',
                 'display' => 'Quote',
                 'fields' => [
-                    ['handle' => 'amount', 'field' => ['type' => 'integer', 'display' => 'Amount', 'currency_symbol' => '$', 'prepend' => '$']],
+                    ['handle' => 'amount', 'field' => ['type' => 'currency', 'display' => 'Amount', 'currency' => 'USD']],
                 ],
             ],
         ],
@@ -111,4 +113,39 @@ test('currency inside a group uses the nested name and key', function () {
         ->toContain('id="currency_in_group_inline_quote_amount-currency"')
         ->toContain('name="quote[amount]"')
         ->toContain("submitFields['quote.amount']");
+});
+
+test('currencies without decimals only take whole numbers', function () {
+    createTestForm('currency_yen', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'JPY']],
+    ]);
+
+    expect(renderEasyFormTag('currency_yen'))
+        ->toContain('inputmode="numeric"')
+        ->toContain('step="1"')
+        ->toContain("['.', ',', 'e', 'E', '+'].includes(");
+});
+
+test('currency limits are passed to the input', function () {
+    createTestForm('currency_limits', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR', 'min' => 0, 'max' => 99.5]],
+    ]);
+
+    expect(renderEasyFormTag('currency_limits'))
+        ->toContain('min="0"')
+        ->toContain('max="99.5"');
+});
+
+test('decimal currency amounts are accepted and stored', function () {
+    createTestForm('currency_submit', [
+        ['handle' => 'budget', 'field' => ['type' => 'currency', 'display' => 'Budget', 'currency' => 'EUR']],
+    ]);
+
+    $this->postJson('/!/forms/currency_submit', ['budget' => '12.50'])->assertOk();
+
+    $submissions = Form::find('currency_submit')->submissions();
+
+    expect($submissions->first()->get('budget'))->toBe(12.5);
+
+    $submissions->each->delete();
 });
