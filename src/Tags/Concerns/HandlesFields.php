@@ -76,6 +76,8 @@ trait HandlesFields
                 'optional' => $this->isFieldOptional($field),
                 'value' => $field->value() ?? $field->defaultValue(),
                 'has_own_instructions' => ! empty($field->get('instructions')),
+                // Statamic's conditions prefix the fields they refer to, e.g. in a fieldset imported with a prefix
+                'prefix' => $field->prefix(),
             ],
             $field->fieldtype()->extraRenderableFieldData()
         );

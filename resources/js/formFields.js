@@ -86,11 +86,29 @@ export default function formFields(fields, honeypot, hideFields, prepopulatedDat
                 if (typeof window.Statamic === 'undefined' || !window.Statamic?.$conditions?.showField) {
                     return true
                 }
-                return window.Statamic.$conditions.showField(field, this.submitFields, fieldHandle)
+                return window.Statamic.$conditions.showField(field, this.getConditionValues(), fieldHandle)
             } catch (error) {
                 // If Statamic conditions fail, show the field
                 return true
             }
+        },
+
+        /**
+         * Get the values as nested objects ("address.city" becomes address: { city }), since Statamic's
+         * conditions read dotted paths and scope group and grid fields to their own group or row.
+         */
+        getConditionValues() {
+            const values = {}
+
+            Object.entries(this.submitFields).forEach(([key, value]) => {
+                if (key.startsWith('_grid_count_')) return
+
+                const path = key.split('.')
+                const handle = path.pop()
+                path.reduce((parent, part) => (parent[part] ??= {}), values)[handle] = value
+            })
+
+            return values
         },
 
         initializeFields(fields) {
