@@ -326,3 +326,52 @@ test('conditional field visibility attributes are present', function () {
 
     expect($output)->toContain('shouldShowField');
 });
+
+test('translations with an apostrophe render valid JavaScript', function (string $type, array $config, array $strings) {
+    app('translator')->addLines(collect($strings)->mapWithKeys(fn (string $string) => ["*.{$string}" => "l'{$string}"])->all(), 'en');
+
+    createTestForm('apostrophes', [
+        ['handle' => 'choice', 'field' => ['type' => $type, 'display' => 'Choice', ...$config]],
+    ]);
+
+    $output = renderEasyFormTag('apostrophes');
+
+    foreach ($strings as $string) {
+        expect($output)
+            ->toContain("&quot;l&#039;{$string}&quot;")
+            ->not->toContain("'l'{$string}");
+    }
+})->with([
+    'dictionary' => ['dictionary', ['dictionary' => ['type' => 'countries'], 'max_items' => 1], ['Please select', 'selected']],
+    'phone' => ['phone', ['improved_field' => true], ['Select', 'selected']],
+    'counter' => ['number', ['integer_template' => 'counter'], ['Subtract', 'Add']],
+    'rating' => ['number', ['integer_template' => 'rating', 'min' => 1, 'max' => 5], ['stars']],
+    'date' => ['date_picker', [], ['Sun', 'January']],
+]);
+
+test('the honeypot input is available to the form handler', function () {
+    createTestForm('honeypot_ref');
+
+    expect(renderEasyFormTag('honeypot_ref'))
+        ->toMatch('/<input[^>]*name="honeypot"[^>]*x-ref="honeypot"/');
+});
+
+test('submissions with a filled in honeypot are not stored', function (?string $behavior, array $statuses) {
+    $form = createTestForm('honeypot_submit', [
+        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+    ]);
+    $form->merge(array_filter(['honeypot_behavior' => $behavior]))->save();
+
+    $this->postJson('/!/forms/honeypot_submit', ['name' => 'Bot', 'honeypot' => 'spam'])->assertOk();
+
+    $form = Form::find('honeypot_submit');
+    $submissions = $form->querySubmissions()->get();
+
+    expect($form->submissions())->toBeEmpty()
+        ->and($submissions->map->isSpam()->all())->toBe($statuses);
+
+    $submissions->each->delete();
+})->with([
+    'ignored' => [null, []],
+    'kept as spam' => ['mark_as_spam', [true]],
+]);

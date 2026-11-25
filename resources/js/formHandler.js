@@ -223,6 +223,10 @@ export default function formHandler(formHandle = 'formSubmitted', formId = null,
                 }
             })
 
+            // The honeypot isn't one of the form's fields, so it's only posted when a bot filled it in
+            const honeypot = this.$refs.honeypot
+            if (honeypot?.value) formData.append(honeypot.name, honeypot.value)
+
             formData.append('_token', this.$refs.form.dataset.csrfToken)
             if (token) formData.append('g-recaptcha-response', token)
 
