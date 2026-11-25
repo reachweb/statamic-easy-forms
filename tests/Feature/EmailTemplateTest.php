@@ -604,6 +604,40 @@ test('email template escapes rating and ranking answers, which Statamic stores a
         ->toContain('1. Winter<br /> 2. Spring');
 });
 
+test('email template leaves out answers that a visitor posted as nested arrays', function () {
+    $form = createTestForm('nested_arrays_form', [
+        ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
+        ['handle' => 'stars', 'field' => ['type' => 'star_rating', 'display' => 'Rating']],
+        ['handle' => 'seasons', 'field' => ['type' => 'ranking', 'display' => 'Rank the seasons', 'options' => [
+            ['key' => 'winter', 'value' => 'Winter'],
+        ]]],
+        ['handle' => 'pets', 'field' => ['type' => 'image_choice', 'display' => 'All pets', 'multiple' => true, 'options' => [
+            ['key' => 'cat', 'label' => 'Cat'],
+        ]]],
+        ['handle' => 'interests', 'field' => ['type' => 'checkboxes', 'display' => 'Interests', 'options' => [
+            ['key' => 'music', 'value' => 'Music'],
+        ]]],
+        ['handle' => 'place', 'field' => ['type' => 'group', 'display' => 'Place', 'fields' => [
+            ['handle' => 'city', 'field' => ['type' => 'short_answer', 'display' => 'City']],
+        ]]],
+    ]);
+    // Statamic stores these fields as posted, so a crafted request can nest arrays in them
+    $submission = $form->makeSubmission()->data([
+        'name' => ['a' => ['b' => 'Nested name']],
+        'stars' => ['x' => ['y' => 'Nested rating']],
+        'seasons' => [['x' => 'Nested season'], 'winter'],
+        'pets' => [['x' => 'Nested pet'], 'cat'],
+        'interests' => [['label' => ['x' => 'Nested label']], 'music'],
+        'place' => ['city' => ['a' => ['b' => 'Nested city']]],
+    ]);
+
+    expect(renderSubmissionEmail($submission))
+        ->toContain('Winter')
+        ->toContain('Cat')
+        ->toContain('Music')
+        ->not->toContain('Nested');
+});
+
 test('email template lists the answers when a field is named sections', function () {
     $form = createTestForm('sections_handle_form', [
         ['handle' => 'name', 'field' => ['type' => 'short_answer', 'display' => 'Name']],
