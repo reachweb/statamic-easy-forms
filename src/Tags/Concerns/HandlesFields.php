@@ -152,6 +152,7 @@ trait HandlesFields
         ]);
 
         return $group->fieldtype()->fields()->all()
+            ->reject(fn (Field $field) => $this->isUploadField($field))
             ->map(fn (Field $field, string $handle) => [
                 ...$this->processField($field, formField: $formFields->field($handle)),
                 ...$this->nestedGroupKeys($group->handle(), $handle),
@@ -212,6 +213,7 @@ trait HandlesFields
     protected function processGridFields(Field $grid): array
     {
         return $grid->fieldtype()->fields()->all()
+            ->reject(fn (Field $field) => $this->isUploadField($field))
             ->map(fn (Field $field, string $handle) => [
                 ...$this->processField($field),
                 'parent_handle' => $grid->handle(),
@@ -220,6 +222,15 @@ trait HandlesFields
             ])
             ->values()
             ->all();
+    }
+
+    /**
+     * Check if a field is an upload. Statamic only accepts uploads in top-level fields and
+     * drops the files posted to group and grid fields, so those aren't rendered.
+     */
+    private function isUploadField(Field $field): bool
+    {
+        return in_array($field->type(), ['assets', 'files', 'form_upload']);
     }
 
     /**

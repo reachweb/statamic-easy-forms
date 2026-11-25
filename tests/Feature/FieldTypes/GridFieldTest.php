@@ -832,3 +832,23 @@ test('grid row errors use dot notation', function () {
         ->assertJsonValidationErrors('passengers.1.name')
         ->assertJsonMissingValidationErrors('passengers.0.name');
 });
+
+test('uploads inside grids and groups are left out, since Statamic drops their files', function () {
+    createTestForm('nested_uploads', [
+        ['handle' => 'people', 'field' => ['type' => 'grid', 'display' => 'People', 'fields' => [
+            ['handle' => 'name', 'field' => ['type' => 'text', 'display' => 'Name']],
+            ['handle' => 'cv', 'field' => ['type' => 'files', 'display' => 'CV']],
+        ]]],
+        ['handle' => 'company', 'field' => ['type' => 'group', 'display' => 'Company', 'fields' => [
+            ['handle' => 'title', 'field' => ['type' => 'text', 'display' => 'Title']],
+            ['handle' => 'logo', 'field' => ['type' => 'assets', 'display' => 'Logo']],
+        ]]],
+    ]);
+
+    expect(renderEasyFormTag('nested_uploads'))
+        ->toContain('name="people[__INDEX__][name]"')
+        ->toContain('name="company[title]"')
+        ->not->toContain('people[__INDEX__][cv]')
+        ->not->toContain('company[logo]')
+        ->not->toContain('Easy Forms has no template');
+});
